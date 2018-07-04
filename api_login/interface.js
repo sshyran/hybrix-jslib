@@ -62,12 +62,12 @@ var IoC = function () {
 
   this.yChanRequest = function (path) {
     var encrypted_path;// TODO;
-    return '/ychan/' + initial_session_data.session_hexkey + '/' + nonce + '/' + encrypted_path;
+    return '/y/' + initial_session_data.session_hexkey + '/' + nonce + '/' + encrypted_path;
   };
 
   this.zChanRequest = function (path) {
     var encrypted_path;// TODO;
-    return '/zchan/' + initial_session_data.session_hexkey + '/' + nonce + '/' + encrypted_path;
+    return '/z/' + initial_session_data.session_hexkey + '/' + nonce + '/' + encrypted_path;
   };
 
   this.yChanDecode = function (response) {};// TODO

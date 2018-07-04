@@ -1,9 +1,9 @@
 function go () {
-  function hybriddCall (host, query, callback) {
+  function hybriddCall (host, query, callback) { // TODO een socket object meegeven
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = e => {
-      if (xhr.readyState == 4 && xhr.status == 200) {
+      if (xhr.readyState === 4 && xhr.status === 200) {
         var responseObject = JSON.parse(xhr.responseText);// JSON.parse
         if (responseObject.hasOwnProperty('id') && responseObject.id === 'id') {
           setTimeout(() => {
