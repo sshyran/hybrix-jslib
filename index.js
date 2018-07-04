@@ -1,4 +1,3 @@
-
 // returns array of double public/secret keypairs
 // one for encrypting (boxPk/boxSk) and one for signing (signPk/signSk)
 function generateKeys (secret, salt, position) {
@@ -39,6 +38,34 @@ function clean (dirty) {
   } else { clean_str = ''; }
   return clean_str;
 }
+
+function seedGenerator (user_keys,asset) {
+  // this salt need not be too long (if changed: adjust slice according to tests)
+  var salt = '1nT3rN3t0Fc01NsB1nD5tH3cRyPt05Ph3R3t093Th3Rf0Rp30Pl3L1k3M34nDy0U';
+  // slightly increases entropy by XOR obfuscating and mixing data with a key
+  function xorEntropyMix (key, str) {
+    var c = '';
+    var k = 0;
+    for (i = 0; i < str.length; i++) {
+      c += String.fromCharCode(str[i].charCodeAt(0).toString(10) ^ key[k].charCodeAt(0).toString(10)); // XORing with key
+      k++;
+      if (k >= key.length) { k = 0; }
+    }
+    return c;
+  }
+  // return deterministic seed  GL.usercrypto.
+  return UrlBase64.Encode(xorEntropyMix(nacl.to_hex(user_keys.boxPk), xorEntropyMix(asset.split('.')[0], xorEntropyMix(salt, nacl.to_hex(user_keys.boxSk))))).slice(0, -2);
+}
+
+function activate(code) {
+  if (typeof code === 'string') {
+    eval('var deterministic = (function(){})(); ' + code); // interpret deterministic library into an object
+    return deterministic;
+  } else {
+    console.log('Cannot activate deterministic code!');
+    return function () {};
+  }
+};
 
 function sessionStep1Reply (data, sessionData, cb) {
   // PROCESS REPLY TO SESSION_STEP 1 REQUEST
@@ -153,6 +180,8 @@ function generateInitialSessionData (nonce) {
 }
 
 function generateSecondarySessionData (nonce1, sessionHexKey, signSk) {
+
+
   var nonce2 = nacl.crypto_box_random_nonce();
   var nonce2_hex = nacl.to_hex(nonce2);
   // change first character to 0-7 if it is 8,9,a-f to keep sum nonce within 32 bytes
@@ -164,15 +193,16 @@ function generateSecondarySessionData (nonce1, sessionHexKey, signSk) {
     'nonce2': nonce2_hex,
     'client_session_pubkey': sessionHexKey
   };
+
   var session_secrets = JSON.stringify(secrets_json);
 
   // using signing method to prevent in transport changes
   var crypt_bin = nacl.encode_utf8(session_secrets);
+
   var crypt_response = nacl.crypto_sign(crypt_bin, signSk);
   var crypt_hex = nacl.to_hex(crypt_response);
 
   if ( DEBUG ) { console.log('CR:'+crypt_hex); }
-
   return {
     nonce1_hex,
     nonce2_hex,
@@ -222,15 +252,17 @@ commonUtils = {
   validateUserIDLength
 }
 
-module.exports = {
-  clean,
-  continueSession,
-  generateKeys,
-  generateInitialSessionData,
-  generateSecondarySessionData,
-  nextStep,
-  readSession,
-  sessionStep1Reply,
-  validatePasswordLength,
-  validateUserIDLength
+if(typeof module!=='undefined'){
+  module.exports = {
+    clean,
+    continueSession,
+    generateKeys,
+    generateInitialSessionData,
+    generateSecondarySessionData,
+    nextStep,
+    readSession,
+    sessionStep1Reply,
+    validatePasswordLength,
+    validateUserIDLength
+  }
 }

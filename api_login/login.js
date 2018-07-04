@@ -23,7 +23,11 @@ function go(){
         }else{
 
           ioc.initAsset(assetDetails,responseObject.data);
-          console.log(ioc.getAddress(assetDetails.symbol));
+          //        console.log(ioc.getAddress(assetDetails.symbol));
+          //          console.log(ioc.xAuthStep0());
+          console.log("appeltaart1");
+          console.log(JSON.stringify(ioc.xAuthStep1('5cb2db60e83ec43d0a8390a5332ea49f84c35289f11dc4eb')));
+          console.log("appeltaart2");
         }
       }
     }
