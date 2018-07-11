@@ -39,7 +39,7 @@ function clean (dirty) {
   return clean_str;
 }
 
-function seedGenerator (user_keys,asset) {
+function seedGenerator (user_keys, asset) {
   // this salt need not be too long (if changed: adjust slice according to tests)
   var salt = '1nT3rN3t0Fc01NsB1nD5tH3cRyPt05Ph3R3t093Th3Rf0Rp30Pl3L1k3M34nDy0U';
   // slightly increases entropy by XOR obfuscating and mixing data with a key
@@ -57,7 +57,7 @@ function seedGenerator (user_keys,asset) {
   return UrlBase64.Encode(xorEntropyMix(nacl.to_hex(user_keys.boxPk), xorEntropyMix(asset.split('.')[0], xorEntropyMix(salt, nacl.to_hex(user_keys.boxSk))))).slice(0, -2);
 }
 
-function activate(code) {
+function activate (code) {
   if (typeof code === 'string') {
     eval('var deterministic = (function(){})(); ' + code); // interpret deterministic library into an object
     return deterministic;
@@ -65,7 +65,7 @@ function activate(code) {
     console.log('Cannot activate deterministic code!');
     return function () {};
   }
-};
+}
 
 function sessionStep1Reply (data, sessionData, cb) {
   // PROCESS REPLY TO SESSION_STEP 1 REQUEST
@@ -74,73 +74,79 @@ function sessionStep1Reply (data, sessionData, cb) {
   //    var sign_hex = {server_sign_pubkey:server_sign_pubkey,server_session_pubkey:server_session_pubkey,current_nonce:current_nonce};
   //    var crypt_hex = nacl.to_hex( nacl.crypto_box(sign_hex,current_nonce,client_session_pubkey,server_session_seckey) );
   //    xresponse = {error:0,server_sign_pubkey:server_sign_pubkey,server_session_pubkey:server_session_pubkey,current_nonce:current_nonce,crhex:crypt_hex};
-  if ( DEBUG ) { console.log("Hello JSON:"+JSON.stringify(data)); }
+  if (DEBUG) { console.log('Hello JSON:' + JSON.stringify(data)); }
 
   var server_sign_binkey = nacl.from_hex(clean(data.server_sign_pubkey));
   var server_session_binkey = nacl.from_hex(clean(data.server_session_pubkey));
   var current_nonce = nacl.from_hex(clean(data.current_nonce));
 
-  if ( DEBUG ) { console.log("nonce:"+data.current_nonce); }
+  if (DEBUG) { console.log('nonce:' + data.current_nonce); }
 
   var crypt_bin = nacl.from_hex(clean(data.crhex));
-  var crypt_pack = nacl.crypto_box_open(crypt_bin, current_nonce, server_session_binkey, sessionData.session_keypair.boxSk);
-  if ( DEBUG ) { console.log("Cryptstr:"+JSON.stringify(crypt_pack)); }
+  try {
+    var crypt_pack = nacl.crypto_box_open(crypt_bin, current_nonce, server_session_binkey, sessionData.session_keypair.boxSk);
+    if (DEBUG) { console.log('Cryptstr:' + JSON.stringify(crypt_pack)); }
 
-  var crypt_str = nacl.to_hex(crypt_pack);
-  if ( DEBUG ) { console.log("Crypt hexstr:"+JSON.stringify(crypt_str)); }
+    var crypt_str = nacl.to_hex(crypt_pack);
+    if (DEBUG) { console.log('Crypt hexstr:' + JSON.stringify(crypt_str)); }
 
-  // perform sign check here!
-  var sign_bin = nacl.from_hex(clean(crypt_str));
-  var sign_pack = nacl.crypto_sign_open(sign_bin,server_sign_binkey);
-  var sign_str = nacl.decode_utf8(sign_pack);
+    // perform sign check here!
+    var sign_bin = nacl.from_hex(clean(crypt_str));
+    var sign_pack = nacl.crypto_sign_open(sign_bin, server_sign_binkey);
+    var sign_str = nacl.decode_utf8(sign_pack);
 
-  var sign_vars = JSON.parse(sign_str);
+    var sign_vars = JSON.parse(sign_str);
 
-  if ( DEBUG ) { console.log('PAYLOAD:'+JSON.stringify(crypt_str)); console.log('SIGNLOAD:'+JSON.stringify(sign_str)); }
+    if (DEBUG) { console.log('PAYLOAD:' + JSON.stringify(crypt_str)); console.log('SIGNLOAD:' + JSON.stringify(sign_str)); }
+    // check for server sign, session and nonce values within and without of crypt packet so as to associate the two public keys without a shadow of doubt
+    if (
+      sign_vars.server_sign_pubkey === data.server_sign_pubkey &&
+        sign_vars.server_session_pubkey === data.server_session_pubkey &&
+        sign_vars.current_nonce === data.current_nonce
+    ) {
+      // if we are here, signed internal datapacket crhex checks out with open values
 
-  // check for server sign, session and nonce values within and without of crypt packet so as to associate the two public keys without a shadow of doubt
-  if (
-    sign_vars.server_sign_pubkey === data.server_sign_pubkey &&
-      sign_vars.server_session_pubkey === data.server_session_pubkey &&
-      sign_vars.current_nonce === data.current_nonce
-  ) {
-    // if we are here, signed internal datapacket crhex checks out with open values
+      var key_array = {
+        'nonce': sessionData.session_nonce,
+        'nonce1': sessionData.nonce1_hex,
+        'nonce2': sessionData.nonce2_hex,
+        'nonce_combi': sign_vars.current_nonce,
+        'session_secsign': sessionData.session_secsign,
+        'session_seckey': sessionData.session_seckey,
+        'session_pubsign': sessionData.session_hexsign,
+        'session_pubkey': sessionData.session_hexkey,
+        'server_pubsign': sign_vars.server_sign_pubkey,
+        'server_pubkey': sign_vars.server_session_pubkey
+      };
 
-    var key_array = {
-      'nonce': sessionData.session_nonce,
-      'nonce1': sessionData.nonce1_hex,
-      'nonce2': sessionData.nonce2_hex,
-      'nonce_combi': sign_vars.current_nonce,
-      'session_secsign':sessionData.session_secsign,
-      'session_seckey':sessionData.session_seckey,
-      'session_pubsign':sessionData.session_hexsign,
-      'session_pubkey':sessionData.session_hexkey,
-      'server_pubsign':sign_vars.server_sign_pubkey,
-      'server_pubkey':sign_vars.server_session_pubkey
-    };
+      var sess_bin = nacl.encode_utf8(JSON.stringify(key_array));
 
-    var sess_bin = nacl.encode_utf8(JSON.stringify(key_array));
+      if (DEBUG) { console.log('Raw session_data: ' + JSON.stringify(key_array)); }
 
-    if ( DEBUG ) { console.log('Raw session_data: '+JSON.stringify(key_array)); }
+      var sess_response = nacl.crypto_box(sess_bin, current_nonce, sessionData.userKeys.boxPk, sessionData.userKeys.boxSk);
+      var sess_hex = nacl.to_hex(sess_response);
 
-    var sess_response = nacl.crypto_box(sess_bin, current_nonce, sessionData.userKeys.boxPk, sessionData.userKeys.boxSk);
-    var sess_hex = nacl.to_hex(sess_response);
+      if (typeof cb === 'function') { cb(sess_hex); }
+      return {
+        sess_hex,
+        current_nonce
+      };
+    }
+  } catch (e) {
+    console.error(JSON.stringify(e));
+  }
+}
 
-    cb(sess_hex)
-    return {
-      sess_hex,
-      current_nonce
-    };
-  }}
-
-function readSession(userKeys, nonce, sessionData, onError) {
+function readSession (userKeys, nonce, sessionData, onError) {
   if (sessionData === null) {
     onError();
   }
   // decrypt session data (so that it does not lie around but is only 'known' upon decrypt)
   var sess_bin = nacl.from_hex(sessionData);
+
   // user's session nonce is used for session_data
   var session_data = nacl.crypto_box_open(sess_bin, nonce, userKeys.boxPk, userKeys.boxSk);
+
   var session_string = nacl.decode_utf8(session_data);
   return JSON.parse(session_string);
 }
@@ -176,18 +182,16 @@ function generateInitialSessionData (nonce) {
     session_seckey,
     session_secsign,
     session_signpair
-  }
+  };
 }
 
 function generateSecondarySessionData (nonce1, sessionHexKey, signSk) {
-
-
   var nonce2 = nacl.crypto_box_random_nonce();
   var nonce2_hex = nacl.to_hex(nonce2);
   // change first character to 0-7 if it is 8,9,a-f to keep sum nonce within 32 bytes
-  var nonce2_hex = nonce2_hex.replace(/^[8-9a-f]/,function(match){var range=['8','9','a','b','c','d','e','f']; return range.indexOf(match);});
+  var nonce2_hex = nonce2_hex.replace(/^[8-9a-f]/, function (match) { var range = ['8', '9', 'a', 'b', 'c', 'd', 'e', 'f']; return range.indexOf(match); });
   var nonce1_hex = clean(nonce1);
-  var nonce1_hex = nonce1_hex.replace(/^[8-9a-f]/,function(match){var range=['8','9','a','b','c','d','e','f']; return range.indexOf(match);});
+  var nonce1_hex = nonce1_hex.replace(/^[8-9a-f]/, function (match) { var range = ['8', '9', 'a', 'b', 'c', 'd', 'e', 'f']; return range.indexOf(match); });
   var secrets_json = {
     'nonce1': nonce1_hex,
     'nonce2': nonce2_hex,
@@ -202,12 +206,13 @@ function generateSecondarySessionData (nonce1, sessionHexKey, signSk) {
   var crypt_response = nacl.crypto_sign(crypt_bin, signSk);
   var crypt_hex = nacl.to_hex(crypt_response);
 
-  if ( DEBUG ) { console.log('CR:'+crypt_hex); }
+  if (DEBUG) { console.log('CR:' + crypt_hex); }
+
   return {
     nonce1_hex,
     nonce2_hex,
     crypt_hex
-  }
+  };
 }
 
 // THIS KEEPS ON CHECKING UNTIL ALL CALLS AND SESSION STEPS ARE BEING PROCESSED AND SESSIONWATCH IS NOT EMPTY.
@@ -221,7 +226,7 @@ function continueSession (user_keys, nonce, userid, getSessionWatch, cb) {
   }
 }
 
-function nextStep() {
+function nextStep () {
   // function to prevent mis-stepping by concurrent step calls
   var current_session = session_step;
   session_step++;
@@ -233,11 +238,11 @@ function increaseSessionStep (step) {
 }
 
 function validatePasswordLength (pass) {
-  return typeof pass !== 'undefined' && (pass.length == 16 || pass.length == 48);
+  return typeof pass !== 'undefined' && (pass.length === 16 || pass.length === 48);
 }
 
 function validateUserIDLength (userid) {
-  return typeof userid !== 'undefined' && userid.length === 16
+  return typeof userid !== 'undefined' && userid.length === 16;
 }
 
 commonUtils = {
@@ -250,9 +255,9 @@ commonUtils = {
   sessionStep1Reply,
   validatePasswordLength,
   validateUserIDLength
-}
+};
 
-if(typeof module!=='undefined'){
+if (typeof module !== 'undefined') {
   module.exports = {
     clean,
     continueSession,
@@ -264,8 +269,298 @@ if(typeof module!=='undefined'){
     sessionStep1Reply,
     validatePasswordLength,
     validateUserIDLength
-  }
+  };
 }
+// ychan encrypts an API query before sending it to the router
+ychan = function (usercrypto, step, txtdata) {
+  // decodes only from UrlBase64 for now, must be real usercrypto!
+  var encdata = ychan_encode(usercrypto, step, txtdata);
+  return 'y/' + encdata;
+};
+
+ychan_obj = function (usercrypto, step, encdata) {
+  return JSON.parse(ychan_decode(usercrypto, step, encdata));
+};
+
+/*
+  data = {
+  sessionID
+  sessionNonce
+  serverSessionPubKey
+  clientSessionSecKey
+  step,
+  txtdata
+  }
+*/
+ychan_encode_sub = function (data) {
+  var cryptUtf8 = nacl.encode_utf8(data.txtdata);
+  // use nacl to create a crypto box containing the data
+  var cryptBin = nacl.crypto_box(
+    cryptUtf8,
+    data.sessionNonce,
+    data.serverSessionPubKey,
+    data.clientSessionSecKey
+  );
+  var encdata = nacl.to_hex(cryptBin);
+  // DEBUG: console.log(sessionid+'/'+step+'/'+encdata); // this seems to work properly
+  return data.sessionID + '/' + data.step + '/' + UrlBase64.safeCompress(encdata);
+};
+
+// sessionData = sessionHex
+ychan_encode = function (usercrypto, step, txtdata) {
+  var sessionData = document.querySelector('#session_data').textContent; // fetch relevant info from #session_data
+  var sessionSecData = getGeneralSessionData(usercrypto, step, sessionData);
+
+  return ychan_encode_sub({
+    sessionID: sessionSecData.sessionID,
+    sessionNonce: sessionSecData.sessionNonce,
+    serverSessionPubKey: sessionSecData.serverSessionPubKey,
+    clientSessionSecKey: sessionSecData.clientSessionSecKey,
+    step,
+    txtdata
+  });
+};
+
+/*
+data = {
+encdata
+sessionNonce
+serverSessionPubKey
+clientSessionSecKey
+}
+*/
+ychan_decode_sub = function (data) {
+  // TODO: add check for encdata.error:0?
+  var txtdata;
+  var hexdata = UrlBase64.safeDecompress(data.encdata);
+  // DEBUG: alert('Ychan decode nonce conhex: '+nonce_conhex+' Hex data: '+hexdata);
+  if (hexdata != null) {
+    var cryptHex = nacl.from_hex(hexdata);
+    // use nacl to create a crypto box containing the data
+    var cryptBin = nacl.crypto_box_open(
+      cryptHex,
+      data.sessionNonce,
+      data.serverSessionPubKey,
+      data.clientSessionSecKey
+    );
+    txtdata = nacl.decode_utf8(cryptBin);
+  } else { txtdata = null; }
+  return txtdata;
+};
+
+ychan_decode = function (usercrypto, step, encdata) {
+  var sessionData = document.querySelector('#session_data').textContent;
+  var txtdata = null;
+  if (encdata !== null) {
+    // decompress the data into a hex string
+    var sessionSecData = getGeneralSessionData(usercrypto, step, sessionData);
+    txtdata = ychan_decode_sub({
+      encdata,
+      sessionNonce: sessionSecData.sessionNonce,
+      serverSessionPubKey: sessionSecData.serverSessionPubKey,
+      clientSessionSecKey: sessionSecData.clientSessionSecKey
+    });
+  }
+  return txtdata;
+};
+
+function getGeneralSessionData (usercrypto, step, sessionData) {
+  var sessionObject = readSession(
+    usercrypto.user_keys,
+    usercrypto.nonce,
+    sessionData,
+    couldNotRetrieveSessionDataAlert// TODO global callback, should be removed!!
+  );
+  // TODO dit netjes doen
+  Decimal.set({
+    precision: 100,
+    rounding: Decimal.ROUND_HALF_UP,
+    toExpNeg: 0,
+    toExpPos: 100
+  });
+  var sessionID = sessionObject.session_pubsign;
+  // TODO: check server public signing of incoming object
+  // DEBUG: alert('Incoming object: '+JSON.stringify(session_object)); // works!
+  var serverSessionPubKey = nacl.from_hex(sessionObject.server_pubkey);
+  var clientSessionSecKey = nacl.from_hex(sessionObject.session_seckey);
+  // calculate current session nonce from nonce1 + nonce2 + step
+  var nonce1Dec = new Decimal(hex2dec.toDec(sessionObject.nonce1));
+  var nonce2Dec = new Decimal(hex2dec.toDec(sessionObject.nonce2));
+  var stepDec = new Decimal(step);
+  // added using decimal-light plus function for looooong decimals
+  var nonceConstr = nonce1Dec.plus(nonce2Dec).plus(stepDec).toDecimalPlaces(64);
+  // convert nonce_construct integer string back into hex
+  var nonceConvert = hex2dec.toHex(nonceConstr.toFixed(0).toString());
+  var nonceConhex = nonceConvert.substr(2, nonceConvert.length);
+  var sessionNonce = nacl.from_hex(nonceConhex);
+
+  return {
+    sessionID,
+    clientSessionSecKey,
+    serverSessionPubKey,
+    sessionNonce
+  };
+}
+
+function couldNotRetrieveSessionDataAlert () {
+  console.log('Error: Could not retrieve session data.');
+}
+// zchan
+// zchan compresses an API query before sending it to the router
+// usercryptography is handled by ychan, and keys are passed
+zchan = function (usercrypto, step, txtdata) {
+  var encdata = ychan_encode(usercrypto, step, zchan_encode(usercrypto, step, txtdata));
+  return 'z/' + encdata;
+};
+zchan_obj = function (usercrypto, step, encdata) {
+  try {
+    return JSON.parse(zchan_decode(usercrypto, step, encdata));
+  } catch (err) {
+    return false;
+  }
+};
+zchan_encode = function (usercrypto, step, txtdata) {
+  return LZString.compressToEncodedURIComponent(txtdata);
+};
+zchan_decode = function (usercrypto, step, encdata) {
+  return LZString.decompressFromEncodedURIComponent(ychan_decode(usercrypto, step, encdata));
+};
+// very large Hexadecimal to Decimal number converter
+
+var hex2dec = (function() {
+
+  /**
+   * A function for converting hex <-> dec w/o loss of precision.
+   *
+   * The problem is that parseInt("0x12345...") isn't precise enough to convert
+   * 64-bit integers correctly.
+   *
+   * Internally, this uses arrays to encode decimal digits starting with the least
+   * significant:
+   * 8 = [8]
+   * 16 = [6, 1]
+   * 1024 = [4, 2, 0, 1]
+   */
+
+  // Adds two arrays for the given base (10 or 16), returning the result.
+  // This turns out to be the only "primitive" operation we need.
+  function add(x, y, base) {
+    var z = [];
+    var n = Math.max(x.length, y.length);
+    var carry = 0;
+    var i = 0;
+    while (i < n || carry) {
+      var xi = i < x.length ? x[i] : 0;
+      var yi = i < y.length ? y[i] : 0;
+      var zi = carry + xi + yi;
+      z.push(zi % base);
+      carry = Math.floor(zi / base);
+      i++;
+    }
+    return z;
+  }
+
+  // Returns a*x, where x is an array of decimal digits and a is an ordinary
+  // JavaScript number. base is the number base of the array x.
+  function multiplyByNumber(num, x, base) {
+    if (num < 0) return null;
+    if (num == 0) return [];
+
+    var result = [];
+    var power = x;
+    while (true) {
+      if (num & 1) {
+        result = add(result, power, base);
+      }
+      num = num >> 1;
+      if (num === 0) break;
+      power = add(power, power, base);
+    }
+
+    return result;
+  }
+
+  function parseToDigitsArray(str, base) {
+    var digits = str.split('');
+    var ary = [];
+    for (var i = digits.length - 1; i >= 0; i--) {
+      var n = parseInt(digits[i], base);
+      if (isNaN(n)) return null;
+      ary.push(n);
+    }
+    return ary;
+  }
+
+  function convertBase(str, fromBase, toBase) {
+    var digits = parseToDigitsArray(str, fromBase);
+    if (digits === null) return null;
+
+    var outArray = [];
+    var power = [1];
+    for (var i = 0; i < digits.length; i++) {
+      // invariant: at this point, fromBase^i = power
+      if (digits[i]) {
+        outArray = add(outArray, multiplyByNumber(digits[i], power, toBase), toBase);
+      }
+      power = multiplyByNumber(fromBase, power, toBase);
+    }
+
+    var out = '';
+    for (var i = outArray.length - 1; i >= 0; i--) {
+      out += outArray[i].toString(toBase);
+    }
+    return out;
+  }
+
+	var hex2dec = {	
+
+    /*lHexToDec : function (s) {   // DEPRECATED
+      dec = new Decimal(0);    
+      s.split('').forEach(function(chr) {
+          var n = parseInt(chr, 16);
+          for(var t = 8; t; t >>= 1) {
+              dec = dec.plus(dec);
+              if(n & t) dec = dec.plus(1);
+          }
+      });
+      return dec;
+    },*/
+
+    toHex : function (decStr) {
+      var hex = convertBase(String(decStr), 10, 16);
+      return hex ? '0x' + hex : null;
+    },
+
+    toDec : function(hexStr) {
+      if(!hexStr) {
+        var result = 0;
+      } else {
+        if (hexStr.substring(0, 2) === '0x') hexStr = hexStr.substring(2);
+        hexStr = hexStr.toLowerCase();
+        var result = convertBase(hexStr, 16, 10);
+      }
+      return new Decimal((result?result:0));
+    }
+
+  }
+
+  return hex2dec;
+
+})();
+
+if (typeof define === 'function' && define.amd) {
+  define(function () { return hex2dec; });
+} else if( typeof module !== 'undefined' && module != null ) {
+  module.exports = hex2dec;
+} else if( typeof angular !== 'undefined' && angular != null ) {
+  angular.module('hex2dec', [])
+  .factory('hex2dec', function () {
+    return hex2dec;
+  });
+}
+/* decimal.js-light v2.2.3 https://github.com/MikeMcl/decimal.js-light/LICENCE */
+!function(r){"use strict";function e(r,e){var t,n,i,o,s,u,f,c,l=r.constructor,d=l.precision;if(!r.s||!e.s)return e.s||(e=new l(r)),E?h(e,d):e;if(f=r.d,c=e.d,s=r.e,i=e.e,f=f.slice(),o=s-i){for(0>o?(n=f,o=-o,u=c.length):(n=c,i=s,u=f.length),s=Math.ceil(d/y),u=s>u?s+1:u+1,o>u&&(o=u,n.length=1),n.reverse();o--;)n.push(0);n.reverse()}for(u=f.length,o=c.length,0>u-o&&(o=u,n=c,c=f,f=n),t=0;o;)t=(f[--o]=f[o]+c[o]+t)/q|0,f[o]%=q;for(t&&(f.unshift(t),++i),u=f.length;0==f[--u];)f.pop();return e.d=f,e.e=i,E?h(e,d):e}function t(r,e,t){if(r!==~~r||e>r||r>t)throw Error(x+r)}function n(r){var e,t,n,i=r.length-1,o="",s=r[0];if(i>0){for(o+=s,e=1;i>e;e++)n=r[e]+"",t=y-n.length,t&&(o+=u(t)),o+=n;s=r[e],n=s+"",t=y-n.length,t&&(o+=u(t))}else if(0===s)return"0";for(;s%10===0;)s/=10;return o+s}function i(r,e){var t,i,s,u,f,c,l=0,d=0,a=r.constructor,g=a.precision;if(o(r)>16)throw Error(O+o(r));if(!r.s)return new a(v);for(null==e?(E=!1,c=g):c=e,f=new a(.03125);r.abs().gte(.1);)r=r.times(f),d+=5;for(i=Math.log(L(2,d))/Math.LN10*2+5|0,c+=i,t=s=u=new a(v),a.precision=c;;){if(s=h(s.times(r),c),t=t.times(++l),f=u.plus(P(s,t,c)),n(f.d).slice(0,c)===n(u.d).slice(0,c)){for(;d--;)u=h(u.times(u),c);return a.precision=g,null==e?(E=!0,h(u,g)):u}u=f}}function o(r){for(var e=r.e*y,t=r.d[0];t>=10;t/=10)e++;return e}function s(r,e,t){if(e>r.LN10.sd())throw E=!0,t&&(r.precision=t),Error(N+"LN10 precision limit exceeded");return h(new r(r.LN10),e)}function u(r){for(var e="";r--;)e+="0";return e}function f(r,e){var t,i,u,c,l,d,a,g,p,w=1,m=10,x=r,O=x.d,b=x.constructor,L=b.precision;if(x.s<1)throw Error(N+(x.s?"NaN":"-Infinity"));if(x.eq(v))return new b(0);if(null==e?(E=!1,g=L):g=e,x.eq(10))return null==e&&(E=!0),s(b,g);if(g+=m,b.precision=g,t=n(O),i=t.charAt(0),c=o(x),!(Math.abs(c)<15e14))return a=s(b,g+2,L).times(c+""),x=f(new b(i+"."+t.slice(1)),g-m).plus(a),b.precision=L,null==e?(E=!0,h(x,L)):x;for(;7>i&&1!=i||1==i&&t.charAt(1)>3;)x=x.times(r),t=n(x.d),i=t.charAt(0),w++;for(c=o(x),i>1?(x=new b("0."+t),c++):x=new b(i+"."+t.slice(1)),d=l=x=P(x.minus(v),x.plus(v),g),p=h(x.times(x),g),u=3;;){if(l=h(l.times(p),g),a=d.plus(P(l,new b(u),g)),n(a.d).slice(0,g)===n(d.d).slice(0,g))return d=d.times(2),0!==c&&(d=d.plus(s(b,g+2,L).times(c+""))),d=P(d,new b(w),g),b.precision=L,null==e?(E=!0,h(d,L)):d;d=a,u+=2}}function c(r,e){var t,n,i;for((t=e.indexOf("."))>-1&&(e=e.replace(".","")),(n=e.search(/e/i))>0?(0>t&&(t=n),t+=+e.slice(n+1),e=e.substring(0,n)):0>t&&(t=e.length),n=0;48===e.charCodeAt(n);)++n;for(i=e.length;48===e.charCodeAt(i-1);)--i;if(e=e.slice(n,i)){if(i-=n,t=t-n-1,r.e=b(t/y),r.d=[],n=(t+1)%y,0>t&&(n+=y),i>n){for(n&&r.d.push(+e.slice(0,n)),i-=y;i>n;)r.d.push(+e.slice(n,n+=y));e=e.slice(n),n=y-e.length}else n-=i;for(;n--;)e+="0";if(r.d.push(+e),E&&(r.e>_||r.e<-_))throw Error(O+t)}else r.s=0,r.e=0,r.d=[0];return r}function h(r,e,t){var n,i,s,u,f,c,h,l,d=r.d;for(u=1,s=d[0];s>=10;s/=10)u++;if(n=e-u,0>n)n+=y,i=e,h=d[l=0];else{if(l=Math.ceil((n+1)/y),s=d.length,l>=s)return r;for(h=s=d[l],u=1;s>=10;s/=10)u++;n%=y,i=n-y+u}if(void 0!==t&&(s=L(10,u-i-1),f=h/s%10|0,c=0>e||void 0!==d[l+1]||h%s,c=4>t?(f||c)&&(0==t||t==(r.s<0?3:2)):f>5||5==f&&(4==t||c||6==t&&(n>0?i>0?h/L(10,u-i):0:d[l-1])%10&1||t==(r.s<0?8:7))),1>e||!d[0])return c?(s=o(r),d.length=1,e=e-s-1,d[0]=L(10,(y-e%y)%y),r.e=b(-e/y)||0):(d.length=1,d[0]=r.e=r.s=0),r;if(0==n?(d.length=l,s=1,l--):(d.length=l+1,s=L(10,y-n),d[l]=i>0?(h/L(10,u-i)%L(10,i)|0)*s:0),c)for(;;){if(0==l){(d[0]+=s)==q&&(d[0]=1,++r.e);break}if(d[l]+=s,d[l]!=q)break;d[l--]=0,s=1}for(n=d.length;0===d[--n];)d.pop();if(E&&(r.e>_||r.e<-_))throw Error(O+o(r));return r}function l(r,e){var t,n,i,o,s,u,f,c,l,d,a=r.constructor,g=a.precision;if(!r.s||!e.s)return e.s?e.s=-e.s:e=new a(r),E?h(e,g):e;if(f=r.d,d=e.d,n=e.e,c=r.e,f=f.slice(),s=c-n){for(l=0>s,l?(t=f,s=-s,u=d.length):(t=d,n=c,u=f.length),i=Math.max(Math.ceil(g/y),u)+2,s>i&&(s=i,t.length=1),t.reverse(),i=s;i--;)t.push(0);t.reverse()}else{for(i=f.length,u=d.length,l=u>i,l&&(u=i),i=0;u>i;i++)if(f[i]!=d[i]){l=f[i]<d[i];break}s=0}for(l&&(t=f,f=d,d=t,e.s=-e.s),u=f.length,i=d.length-u;i>0;--i)f[u++]=0;for(i=d.length;i>s;){if(f[--i]<d[i]){for(o=i;o&&0===f[--o];)f[o]=q-1;--f[o],f[i]+=q}f[i]-=d[i]}for(;0===f[--u];)f.pop();for(;0===f[0];f.shift())--n;return f[0]?(e.d=f,e.e=n,E?h(e,g):e):new a(0)}function d(r,e,t){var i,s=o(r),f=n(r.d),c=f.length;return e?(t&&(i=t-c)>0?f=f.charAt(0)+"."+f.slice(1)+u(i):c>1&&(f=f.charAt(0)+"."+f.slice(1)),f=f+(0>s?"e":"e+")+s):0>s?(f="0."+u(-s-1)+f,t&&(i=t-c)>0&&(f+=u(i))):s>=c?(f+=u(s+1-c),t&&(i=t-s-1)>0&&(f=f+"."+u(i))):((i=s+1)<c&&(f=f.slice(0,i)+"."+f.slice(i)),t&&(i=t-c)>0&&(s+1===c&&(f+="."),f+=u(i))),r.s<0?"-"+f:f}function a(r,e){return r.length>e?(r.length=e,!0):void 0}function g(r){function e(r){var t=this;if(!(t instanceof e))return new e(r);if(t.constructor=e,r instanceof e)return t.s=r.s,t.e=r.e,void(t.d=(r=r.d)?r.slice():r);if("number"==typeof r){if(0*r!==0)throw Error(x+r);if(r>0)t.s=1;else{if(!(0>r))return t.s=0,t.e=0,void(t.d=[0]);r=-r,t.s=-1}return r===~~r&&1e7>r?(t.e=0,void(t.d=[r])):c(t,r.toString())}if("string"!=typeof r)throw Error(x+r);if(45===r.charCodeAt(0)?(r=r.slice(1),t.s=-1):t.s=1,!D.test(r))throw Error(x+r);c(t,r)}var t,n,i;if(e.prototype=A,e.ROUND_UP=0,e.ROUND_DOWN=1,e.ROUND_CEIL=2,e.ROUND_FLOOR=3,e.ROUND_HALF_UP=4,e.ROUND_HALF_DOWN=5,e.ROUND_HALF_EVEN=6,e.ROUND_HALF_CEIL=7,e.ROUND_HALF_FLOOR=8,e.clone=g,e.config=e.set=p,void 0===r&&(r={}),r)for(i=["precision","rounding","toExpNeg","toExpPos","LN10"],t=0;t<i.length;)r.hasOwnProperty(n=i[t++])||(r[n]=this[n]);return e.config(r),e}function p(r){if(!r||"object"!=typeof r)throw Error(N+"Object expected");var e,t,n,i=["precision",1,w,"rounding",0,8,"toExpNeg",-1/0,0,"toExpPos",0,1/0];for(e=0;e<i.length;e+=3)if(void 0!==(n=r[t=i[e]])){if(!(b(n)===n&&n>=i[e+1]&&n<=i[e+2]))throw Error(x+t+": "+n);this[t]=n}if(void 0!==(n=r[t="LN10"])){if(n!=Math.LN10)throw Error(x+t+": "+n);this[t]=new this(n)}return this}var v,w=1e9,m={precision:20,rounding:4,toExpNeg:-7,toExpPos:21,LN10:"2.302585092994045684017991454684364207601101488628772976033327900967572609677352480235997205089598298341967784042286"},E=!0,N="[DecimalError] ",x=N+"Invalid argument: ",O=N+"Exponent out of range: ",b=Math.floor,L=Math.pow,D=/^(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?$/i,q=1e7,y=7,M=9007199254740991,_=b(M/y),A={};A.absoluteValue=A.abs=function(){var r=new this.constructor(this);return r.s&&(r.s=1),r},A.comparedTo=A.cmp=function(r){var e,t,n,i,o=this;if(r=new o.constructor(r),o.s!==r.s)return o.s||-r.s;if(o.e!==r.e)return o.e>r.e^o.s<0?1:-1;for(n=o.d.length,i=r.d.length,e=0,t=i>n?n:i;t>e;++e)if(o.d[e]!==r.d[e])return o.d[e]>r.d[e]^o.s<0?1:-1;return n===i?0:n>i^o.s<0?1:-1},A.decimalPlaces=A.dp=function(){var r=this,e=r.d.length-1,t=(e-r.e)*y;if(e=r.d[e])for(;e%10==0;e/=10)t--;return 0>t?0:t},A.dividedBy=A.div=function(r){return P(this,new this.constructor(r))},A.dividedToIntegerBy=A.idiv=function(r){var e=this,t=e.constructor;return h(P(e,new t(r),0,1),t.precision)},A.equals=A.eq=function(r){return!this.cmp(r)},A.exponent=function(){return o(this)},A.greaterThan=A.gt=function(r){return this.cmp(r)>0},A.greaterThanOrEqualTo=A.gte=function(r){return this.cmp(r)>=0},A.isInteger=A.isint=function(){return this.e>this.d.length-2},A.isNegative=A.isneg=function(){return this.s<0},A.isPositive=A.ispos=function(){return this.s>0},A.isZero=function(){return 0===this.s},A.lessThan=A.lt=function(r){return this.cmp(r)<0},A.lessThanOrEqualTo=A.lte=function(r){return this.cmp(r)<1},A.logarithm=A.log=function(r){var e,t=this,n=t.constructor,i=n.precision,o=i+5;if(void 0===r)r=new n(10);else if(r=new n(r),r.s<1||r.eq(v))throw Error(N+"NaN");if(t.s<1)throw Error(N+(t.s?"NaN":"-Infinity"));return t.eq(v)?new n(0):(E=!1,e=P(f(t,o),f(r,o),o),E=!0,h(e,i))},A.minus=A.sub=function(r){var t=this;return r=new t.constructor(r),t.s==r.s?l(t,r):e(t,(r.s=-r.s,r))},A.modulo=A.mod=function(r){var e,t=this,n=t.constructor,i=n.precision;if(r=new n(r),!r.s)throw Error(N+"NaN");return t.s?(E=!1,e=P(t,r,0,1).times(r),E=!0,t.minus(e)):h(new n(t),i)},A.naturalExponential=A.exp=function(){return i(this)},A.naturalLogarithm=A.ln=function(){return f(this)},A.negated=A.neg=function(){var r=new this.constructor(this);return r.s=-r.s||0,r},A.plus=A.add=function(r){var t=this;return r=new t.constructor(r),t.s==r.s?e(t,r):l(t,(r.s=-r.s,r))},A.precision=A.sd=function(r){var e,t,n,i=this;if(void 0!==r&&r!==!!r&&1!==r&&0!==r)throw Error(x+r);if(e=o(i)+1,n=i.d.length-1,t=n*y+1,n=i.d[n]){for(;n%10==0;n/=10)t--;for(n=i.d[0];n>=10;n/=10)t++}return r&&e>t?e:t},A.squareRoot=A.sqrt=function(){var r,e,t,i,s,u,f,c=this,l=c.constructor;if(c.s<1){if(!c.s)return new l(0);throw Error(N+"NaN")}for(r=o(c),E=!1,s=Math.sqrt(+c),0==s||s==1/0?(e=n(c.d),(e.length+r)%2==0&&(e+="0"),s=Math.sqrt(e),r=b((r+1)/2)-(0>r||r%2),s==1/0?e="1e"+r:(e=s.toExponential(),e=e.slice(0,e.indexOf("e")+1)+r),i=new l(e)):i=new l(s.toString()),t=l.precision,s=f=t+3;;)if(u=i,i=u.plus(P(c,u,f+2)).times(.5),n(u.d).slice(0,f)===(e=n(i.d)).slice(0,f)){if(e=e.slice(f-3,f+1),s==f&&"4999"==e){if(h(u,t+1,0),u.times(u).eq(c)){i=u;break}}else if("9999"!=e)break;f+=4}return E=!0,h(i,t)},A.times=A.mul=function(r){var e,t,n,i,o,s,u,f,c,l=this,d=l.constructor,a=l.d,g=(r=new d(r)).d;if(!l.s||!r.s)return new d(0);for(r.s*=l.s,t=l.e+r.e,f=a.length,c=g.length,c>f&&(o=a,a=g,g=o,s=f,f=c,c=s),o=[],s=f+c,n=s;n--;)o.push(0);for(n=c;--n>=0;){for(e=0,i=f+n;i>n;)u=o[i]+g[n]*a[i-n-1]+e,o[i--]=u%q|0,e=u/q|0;o[i]=(o[i]+e)%q|0}for(;!o[--s];)o.pop();return e?++t:o.shift(),r.d=o,r.e=t,E?h(r,d.precision):r},A.toDecimalPlaces=A.todp=function(r,e){var n=this,i=n.constructor;return n=new i(n),void 0===r?n:(t(r,0,w),void 0===e?e=i.rounding:t(e,0,8),h(n,r+o(n)+1,e))},A.toExponential=function(r,e){var n,i=this,o=i.constructor;return void 0===r?n=d(i,!0):(t(r,0,w),void 0===e?e=o.rounding:t(e,0,8),i=h(new o(i),r+1,e),n=d(i,!0,r+1)),n},A.toFixed=function(r,e){var n,i,s=this,u=s.constructor;return void 0===r?d(s):(t(r,0,w),void 0===e?e=u.rounding:t(e,0,8),i=h(new u(s),r+o(s)+1,e),n=d(i.abs(),!1,r+o(i)+1),s.isneg()&&!s.isZero()?"-"+n:n)},A.toInteger=A.toint=function(){var r=this,e=r.constructor;return h(new e(r),o(r)+1,e.rounding)},A.toNumber=function(){return+this},A.toPower=A.pow=function(r){var e,t,n,o,s,u,c=this,l=c.constructor,d=12,g=+(r=new l(r));if(!r.s)return new l(v);if(c=new l(c),!c.s){if(r.s<1)throw Error(N+"Infinity");return c}if(c.eq(v))return c;if(n=l.precision,r.eq(v))return h(c,n);if(e=r.e,t=r.d.length-1,u=e>=t,s=c.s,u){if((t=0>g?-g:g)<=M){for(o=new l(v),e=Math.ceil(n/y+4),E=!1;t%2&&(o=o.times(c),a(o.d,e)),t=b(t/2),0!==t;)c=c.times(c),a(c.d,e);return E=!0,r.s<0?new l(v).div(o):h(o,n)}}else if(0>s)throw Error(N+"NaN");return s=0>s&&1&r.d[Math.max(e,t)]?-1:1,c.s=1,E=!1,o=r.times(f(c,n+d)),E=!0,o=i(o),o.s=s,o},A.toPrecision=function(r,e){var n,i,s=this,u=s.constructor;return void 0===r?(n=o(s),i=d(s,n<=u.toExpNeg||n>=u.toExpPos)):(t(r,1,w),void 0===e?e=u.rounding:t(e,0,8),s=h(new u(s),r,e),n=o(s),i=d(s,n>=r||n<=u.toExpNeg,r)),i},A.toSignificantDigits=A.tosd=function(r,e){var n=this,i=n.constructor;return void 0===r?(r=i.precision,e=i.rounding):(t(r,1,w),void 0===e?e=i.rounding:t(e,0,8)),h(new i(n),r,e)},A.toString=A.valueOf=A.val=A.toJSON=function(){var r=this,e=o(r),t=r.constructor;return d(r,e<=t.toExpNeg||e>=t.toExpPos)};var P=function(){function r(r,e){var t,n=0,i=r.length;for(r=r.slice();i--;)t=r[i]*e+n,r[i]=t%q|0,n=t/q|0;return n&&r.unshift(n),r}function e(r,e,t,n){var i,o;if(t!=n)o=t>n?1:-1;else for(i=o=0;t>i;i++)if(r[i]!=e[i]){o=r[i]>e[i]?1:-1;break}return o}function t(r,e,t){for(var n=0;t--;)r[t]-=n,n=r[t]<e[t]?1:0,r[t]=n*q+r[t]-e[t];for(;!r[0]&&r.length>1;)r.shift()}return function(n,i,s,u){var f,c,l,d,a,g,p,v,w,m,E,x,O,b,L,D,M,_,A=n.constructor,P=n.s==i.s?1:-1,R=n.d,U=i.d;if(!n.s)return new A(n);if(!i.s)throw Error(N+"Division by zero");for(c=n.e-i.e,M=U.length,L=R.length,p=new A(P),v=p.d=[],l=0;U[l]==(R[l]||0);)++l;if(U[l]>(R[l]||0)&&--c,x=null==s?s=A.precision:u?s+(o(n)-o(i))+1:s,0>x)return new A(0);if(x=x/y+2|0,l=0,1==M)for(d=0,U=U[0],x++;(L>l||d)&&x--;l++)O=d*q+(R[l]||0),v[l]=O/U|0,d=O%U|0;else{for(d=q/(U[0]+1)|0,d>1&&(U=r(U,d),R=r(R,d),M=U.length,L=R.length),b=M,w=R.slice(0,M),m=w.length;M>m;)w[m++]=0;_=U.slice(),_.unshift(0),D=U[0],U[1]>=q/2&&++D;do d=0,f=e(U,w,M,m),0>f?(E=w[0],M!=m&&(E=E*q+(w[1]||0)),d=E/D|0,d>1?(d>=q&&(d=q-1),a=r(U,d),g=a.length,m=w.length,f=e(a,w,g,m),1==f&&(d--,t(a,g>M?_:U,g))):(0==d&&(f=d=1),a=U.slice()),g=a.length,m>g&&a.unshift(0),t(w,a,m),-1==f&&(m=w.length,f=e(U,w,M,m),1>f&&(d++,t(w,m>M?_:U,m))),m=w.length):0===f&&(d++,w=[0]),v[l++]=d,f&&w[0]?w[m++]=R[b]||0:(w=[R[b]],m=1);while((b++<L||void 0!==w[0])&&x--)}return v[0]||v.shift(),p.e=c,h(p,u?s+o(p)+1:s)}}();m=g(m),v=new m(1),"function"==typeof define&&define.amd?define(function(){return m}):"undefined"!=typeof module&&module.exports?module.exports=m["default"]=m.Decimal=m:(r||(r="undefined"!=typeof self&&self&&self.self==self?self:Function("return this")()),r.Decimal=m)}(this);
+//# sourceMappingURL=doc/decimal.js.map
 var nacl_factory = {
   instantiate: function (on_ready, optionsOpt) {
     var options = optionsOpt || {};
@@ -1619,13 +1914,190 @@ if (typeof define === 'function' && define.amd) {
 var nacl;
 var DEBUG = false;
 
+var HybriddNode = function (host_) {
+  var step; // Incremental step. Steps 0 and 2 used for x-authentication, subsequent steps used for y and z chan
+  var nonce; // Random value
+
+  var initial_session_data;
+  /* generateInitialSessionData(...) => {
+    = {
+    session_hexkey,
+    session_hexsign,
+    session_keypair,
+    session_nonce,
+    session_seckey,
+    session_secsign,
+    session_signpair
+    }
+  */
+  var secondary_session_data;
+  /* generateSecondarySessionData(...) => {
+    nonce1_hex,
+    nonce2_hex,
+    crypt_hex
+    }
+  */
+
+  var ternary_session_data;
+  /* sessionStep1Reply(...) => {
+    sess_hex,
+    current_nonce
+    }
+  */
+
+  var server_session_data;
+  /*  xAuthFinalize xauth response on step 1 =>
+    server_sign_pubkey
+    server_session_pubkey
+    current_nonce
+    crhex
+  */
+  var host = host_;
+
+  this.xAuthStep0Request = function () {
+    step = 0; // TODO error if not x ===undefined
+    return '/x/' + initial_session_data.session_hexsign + '/0';
+  };
+
+  this.xAuthStep1Request = function (nonce1) {
+    step = 1; // TODO error if not x === 0
+    try {
+      secondary_session_data = generateSecondarySessionData(nonce1, initial_session_data.session_hexkey, initial_session_data.session_signpair.signSk);
+    } catch (e) {
+      console.log('Error: ' + JSON.stringify(e));
+    }
+    return '/x/' + initial_session_data.session_hexsign + '/1/' + secondary_session_data.crypt_hex;
+  };
+
+  this.xAuthFinalize = function (data, userKeys) {
+    server_session_data = data;
+    var combined_session_data = {userKeys: userKeys, nonce: nonce};
+    Object.assign(combined_session_data, server_session_data, initial_session_data, secondary_session_data);
+
+    ternary_session_data = sessionStep1Reply(data, combined_session_data, () => {});
+  };
+
+  this.yCall = function (query, dataCallback, errorCallback, userKeys, options) {
+    step++;
+
+    var generalSessionData = getGeneralSessionData({user_keys: userKeys, nonce: ternary_session_data.current_nonce}, step, ternary_session_data.sess_hex);
+    /*
+      generalSessionData = {
+      sessionID,
+      clientSessionSecKey,
+      serverSessionPubKey,
+      sessionNonce
+      };
+    */
+
+    //    ternary_session_data.current_nonce[23]++;
+    var y = ychan_encode_sub({
+      sessionID: generalSessionData.sessionID,
+      sessionNonce: generalSessionData.sessionNonce,
+      serverSessionPubKey: generalSessionData.serverSessionPubKey,
+      clientSessionSecKey: generalSessionData.clientSessionSecKey,
+      step: step,
+      txtdata: query
+    });
+    this.call('y/' + y, (encdata) => {
+      // decode encoded data into text data
+      var txtdata = ychan_decode_sub({
+        encdata: encdata,
+        sessionNonce: generalSessionData.sessionNonce,
+        serverSessionPubKey: generalSessionData.serverSessionPubKey,
+        clientSessionSecKey: generalSessionData.clientSessionSecKey
+      });
+      dataCallback(txtdata);
+    }, errorCallback, options);
+  };
+
+  this.call = function (query, dataCallback, errorCallback, options) { // todo options: {socket,interval, channel}
+    var defaultSocket = (host, query, dataCallback, errorCallback) => {
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = e => {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            dataCallback(xhr.responseText);
+          } else if (errorCallback) {
+            errorCallback(xhr.responseText);
+          }
+        }
+      };
+      xhr.open('GET', host + query, true);
+      xhr.send();
+    };
+
+    var socket = defaultSocket; // TODO ook dmv options
+
+    socket(host, query, (response) => {
+      var data;
+      try {
+        data = JSON.parse(response);
+      } catch (error) {
+        errorCallback(error);
+      }
+      if (data.hasOwnProperty('id') && data.id === 'id') {
+        setTimeout(() => {
+          socket(host, '/p/' + data.data, (response) => {
+            var data;
+            try {
+              data = JSON.parse(response);
+            } catch (error) {
+              errorCallback(error);
+            } dataCallback(data);
+          });
+        }, 1000); // TODO fix ugly timeout, do a frequent recheck
+
+        // TODO errorCallback gebruiken bij timeout?
+      } else if (dataCallback) { // TODO first check if error = 1
+        dataCallback(data);
+      } else if (errorCallback) {
+        errorCallback(response);
+      }
+    },
+    errorCallback
+    );
+  };
+
+  this.init = function (successCallback, errorCallback, userKeys, options) {
+    nonce = nacl.crypto_box_random_nonce();
+    initial_session_data = generateInitialSessionData(nonce);
+    this.call(this.xAuthStep0Request(), (response) => {
+      this.call(this.xAuthStep1Request(response.nonce1), (response) => {
+        this.xAuthFinalize(response, userKeys);
+        if (successCallback) { successCallback(); }
+      }, errorCallback, {}); // TODO  options
+    }, errorCallback, {}); // TODO options
+  };
+};
+
 var IoC = function () {
   var user_keys;
+  /*
+    boxPk
+    boxSk
+  */
   var assets = {};
+  /* per symbol:
+   {$SYMBOL:
+     {
+     seed
+     keys
+     address
+     }
+     }
+    */
   var deterministic = {};
-  var initial_session_data;
-  var secondary_session_data;
-  var server_session_data;
+  /*  per keygen-base:
+      {$KEYGEN-BASE :
+        {
+          keys()
+          sign()
+          ..TODO
+        }
+      }
+  */
+  var hybriddNodes = {};
 
   this.init = function (callback) {
     nacl_factory.instantiate(function (naclinstance) {
@@ -1635,16 +2107,14 @@ var IoC = function () {
   };
 
   this.login = function (username, password) {
+    // TODO validate password+username
+    this.logout(); // clear current data
     user_keys = generateKeys(password, username, 0);
-    initial_session_data = generateInitialSessionData(0);
   };
 
   this.logout = function () {
-    deterministic = {};
     assets = {};
-    user_key = undefined;
-    initial_session_data = undefined;
-    secondary_session_data = undefined;
+    user_keys = undefined;
   };
 
   this.initAsset = function (assetDetails, deterministicCodeBlob) {
@@ -1657,41 +2127,51 @@ var IoC = function () {
     assets[assetDetails.symbol].data.address = deterministic[assetDetails['keygen-base']].address(assets[assetDetails.symbol].data.keys);
   };
 
+  this.addAsset = function (symbol, successCallback, errorCallback, options) {
+    var host = Object.keys(hybriddNodes)[0]; // TODO choose random?? or pick from options
+    // TODO check if valid host
+    this.call(host, 'a/' + symbol + '/details', (asset) => {
+      var mode = asset.data.mode.split('.')[0];
+      this.call(host, 's/deterministic/code/' + mode, (blob) => {
+        this.initAsset(asset.data, blob.data);
+        if (successCallback) { successCallback(); }
+      }, errorCallback, options);
+    }, errorCallback, options);
+  };
+  // TODO addAssets([])
+
   this.getAddress = function (symbol) {
-    return assets[symbol].data.address;
-  };
-
-  this.xAuthStep0Request = function () {
-    return '/x/' + initial_session_data.session_hexsign + '/0';
-  };
-
-  this.xAuthStep1Request = function (nonce1) {
-    try {
-      secondary_session_data = generateSecondarySessionData(nonce1, initial_session_data.session_hexkey, initial_session_data.session_signpair.signSk);
-    } catch (e) {
-      console.log(JSON.stringify(e));
+    if (assets.hasOwnProperty(symbol)) {
+      return assets[symbol].data.address;
+    } else {
+      return undefined;
     }
-    return '/x/' + initial_session_data.session_hexsign + '/1/' + secondary_session_data.crypt_hex;
   };
 
-  this.xAuthFinalize = function (data) {
-    server_session_data = data;
+  this.signTransaction = function (symbol, amount, bla) {
+    // TODO return a signed transaction in that can be pushed
   };
 
-  this.yChanRequest = function (path) {
-    var encrypted_path;// TODO;
-    return '/ychan/' + initial_session_data.session_hexkey + '/' + nonce + '/' + encrypted_path;
+  this.addHost = function (host, successCallback, errorCallback, options) {
+    var hybriddNode = new HybriddNode(host);
+    hybriddNodes[host] = hybriddNode;
+    hybriddNode.init(successCallback, errorCallback, user_keys, options);
   };
 
-  this.zChanRequest = function (path) {
-    var encrypted_path;// TODO;
-    return '/zchan/' + initial_session_data.session_hexkey + '/' + nonce + '/' + encrypted_path;
+  // TODO addHosts([])
+
+  // TODO dCall decentralized
+
+  // TODO add xyz chan options error when no session is created
+  this.call = function (host, query, dataCallback, errorCallback, options) {
+    if (hybriddNodes.hasOwnProperty(host)) {
+      hybriddNodes[host].call(query, dataCallback, errorCallback, options);
+    }
   };
 
-  this.yChanDecode = function (response) {};// TODO
-  this.zChanDecode = function (response) {};// TODO
-
-  this.signedTransaction = function (symbol, amount, bla) {
-    // return a signed transaction in that can be pushed
+  this.yCall = function (host, query, dataCallback, errorCallback, options) {
+    if (hybriddNodes.hasOwnProperty(host)) {
+      hybriddNodes[host].yCall(query, dataCallback, errorCallback, user_keys, options);
+    }
   };
 };

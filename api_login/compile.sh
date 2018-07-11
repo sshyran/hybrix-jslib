@@ -4,11 +4,8 @@ WHEREAMI=`pwd`
 export PATH=$WHEREAMI/../../../node/bin:"$PATH"
 NODEINST=`which node`
 
-cat ../index.js nacl.js sjcl.js lz-string.js urlbase64.js interface.js  > compiled.js
+cat  ../index.js ../ychan.js ../zchan.js ../crypto/hex2dec.js ../crypto/decimal-light.js ../crypto/nacl.js ../crypto/sjcl.js ../crypto/lz-string.js ../crypto/urlbase64.js interface.js  > compiled.js
 
-#| ../../../node_modules/uglify-js/bin/uglifyjs
-#./lzmapack.js compiled.js
-#rm compiled.js
-#mv compiled.js.lzma iocconnector.js.lzma
+#TODO minify uglify
 
 PATH=$OLDPATH
