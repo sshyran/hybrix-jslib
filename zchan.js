@@ -5,6 +5,7 @@ zchan = function (usercrypto, step, txtdata) {
   var encdata = ychan_encode(usercrypto, step, zchan_encode(usercrypto, step, txtdata));
   return 'z/' + encdata;
 };
+
 zchan_obj = function (usercrypto, step, encdata) {
   try {
     return JSON.parse(zchan_decode(usercrypto, step, encdata));
@@ -12,9 +13,15 @@ zchan_obj = function (usercrypto, step, encdata) {
     return false;
   }
 };
+
 zchan_encode = function (usercrypto, step, txtdata) {
   return LZString.compressToEncodedURIComponent(txtdata);
 };
+
+zchan_code_sub = function (encdata) {
+  return LZString.decompressFromEncodedURIComponent(encdata);
+};
+
 zchan_decode = function (usercrypto, step, encdata) {
-  return LZString.decompressFromEncodedURIComponent(ychan_decode(usercrypto, step, encdata));
+  return ychan_decode(usercrypto, step, encdata);
 };

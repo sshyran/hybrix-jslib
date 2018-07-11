@@ -412,6 +412,7 @@ zchan = function (usercrypto, step, txtdata) {
   var encdata = ychan_encode(usercrypto, step, zchan_encode(usercrypto, step, txtdata));
   return 'z/' + encdata;
 };
+
 zchan_obj = function (usercrypto, step, encdata) {
   try {
     return JSON.parse(zchan_decode(usercrypto, step, encdata));
@@ -419,11 +420,17 @@ zchan_obj = function (usercrypto, step, encdata) {
     return false;
   }
 };
+
 zchan_encode = function (usercrypto, step, txtdata) {
   return LZString.compressToEncodedURIComponent(txtdata);
 };
+
+zchan_code_sub = function (encdata) {
+  return LZString.decompressFromEncodedURIComponent(encdata);
+};
+
 zchan_decode = function (usercrypto, step, encdata) {
-  return LZString.decompressFromEncodedURIComponent(ychan_decode(usercrypto, step, encdata));
+  return ychan_decode(usercrypto, step, encdata);
 };
 // very large Hexadecimal to Decimal number converter
 
@@ -1989,7 +1996,6 @@ var HybriddNode = function (host_) {
       sessionNonce
       };
     */
-
     //    ternary_session_data.current_nonce[23]++;
     var y = ychan_encode_sub({
       sessionID: generalSessionData.sessionID,
@@ -1999,7 +2005,7 @@ var HybriddNode = function (host_) {
       step: step,
       txtdata: query
     });
-    this.call('y/' + y, (encdata) => {
+    this.call(options.channel + '/' + y, (encdata) => {
       // decode encoded data into text data
       var txtdata = ychan_decode_sub({
         encdata: encdata,
@@ -2009,6 +2015,15 @@ var HybriddNode = function (host_) {
       });
       dataCallback(txtdata);
     }, errorCallback, options);
+  };
+
+  this.zCall = function (query, dataCallback, errorCallback, userKeys, options) {
+    var encodedQuery = zchan_encode({user_keys: userKeys, nonce: ternary_session_data.current_nonce}, step, query);
+    //   options.channel = 'z';
+    this.yCall(encodedQuery, encodedData => {
+      var data = zchan_code_sub(encodedData);
+      dataCallback(data);
+    }, errorCallback, userKeys, options);
   };
 
   this.call = function (query, dataCallback, errorCallback, options) { // todo options: {socket,interval, channel}
@@ -2162,16 +2177,15 @@ var IoC = function () {
 
   // TODO dCall decentralized
 
-  // TODO add xyz chan options error when no session is created
+  // TODO add for y,z chan: error when no session is created
   this.call = function (host, query, dataCallback, errorCallback, options) {
     if (hybriddNodes.hasOwnProperty(host)) {
-      hybriddNodes[host].call(query, dataCallback, errorCallback, options);
-    }
-  };
-
-  this.yCall = function (host, query, dataCallback, errorCallback, options) {
-    if (hybriddNodes.hasOwnProperty(host)) {
-      hybriddNodes[host].yCall(query, dataCallback, errorCallback, user_keys, options);
+      if (typeof options === 'undefined') { options = {}; }
+      switch (options.channel) {
+        case 'y' : hybriddNodes[host].yCall(query, dataCallback, errorCallback, user_keys, options); break;
+        case 'z' : hybriddNodes[host].zCall(query, dataCallback, errorCallback, user_keys, options); break;
+        default : hybriddNodes[host].call(query, dataCallback, errorCallback, options); break;
+      }
     }
   };
 };

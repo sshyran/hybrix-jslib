@@ -76,7 +76,6 @@ var HybriddNode = function (host_) {
       sessionNonce
       };
     */
-
     //    ternary_session_data.current_nonce[23]++;
     var y = ychan_encode_sub({
       sessionID: generalSessionData.sessionID,
@@ -86,7 +85,7 @@ var HybriddNode = function (host_) {
       step: step,
       txtdata: query
     });
-    this.call('y/' + y, (encdata) => {
+    this.call(options.channel + '/' + y, (encdata) => {
       // decode encoded data into text data
       var txtdata = ychan_decode_sub({
         encdata: encdata,
@@ -98,6 +97,15 @@ var HybriddNode = function (host_) {
     }, errorCallback, options);
   };
 
+  this.zCall = function (query, dataCallback, errorCallback, userKeys, options) {
+    var encodedQuery = zchan_encode({user_keys: userKeys, nonce: ternary_session_data.current_nonce}, step, query);
+    //   options.channel = 'z';
+    this.yCall(encodedQuery, encodedData => {
+      var data = zchan_code_sub(encodedData);
+      dataCallback(data);
+    }, errorCallback, userKeys, options);
+  };
+
   this.call = function (query, dataCallback, errorCallback, options) { // todo options: {socket,interval, channel}
     var defaultSocket = (host, query, dataCallback, errorCallback) => {
       var xhr = new XMLHttpRequest();
@@ -105,7 +113,7 @@ var HybriddNode = function (host_) {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
             dataCallback(xhr.responseText);
-          } else if (errorCallback) {
+          } else if (typeof errorCallback === 'function') {
             errorCallback(xhr.responseText);
           }
         }
@@ -121,7 +129,9 @@ var HybriddNode = function (host_) {
       try {
         data = JSON.parse(response);
       } catch (error) {
-        errorCallback(error);
+        if (typeof errorCallback === 'function') {
+          errorCallback(error);
+        }
       }
       if (data.hasOwnProperty('id') && data.id === 'id') {
         setTimeout(() => {
@@ -130,7 +140,9 @@ var HybriddNode = function (host_) {
             try {
               data = JSON.parse(response);
             } catch (error) {
-              errorCallback(error);
+              if (typeof errorCallback === 'function') {
+                errorCallback(error);
+              }
             } dataCallback(data);
           });
         }, 1000); // TODO fix ugly timeout, do a frequent recheck
@@ -138,7 +150,7 @@ var HybriddNode = function (host_) {
         // TODO errorCallback gebruiken bij timeout?
       } else if (dataCallback) { // TODO first check if error = 1
         dataCallback(data);
-      } else if (errorCallback) {
+      } else if (typeof errorCallback === 'function') {
         errorCallback(response);
       }
     },
@@ -249,16 +261,15 @@ var IoC = function () {
 
   // TODO dCall decentralized
 
-  // TODO add xyz chan options error when no session is created
+  // TODO add for y,z chan: error when no session (user_keys) have been created
   this.call = function (host, query, dataCallback, errorCallback, options) {
     if (hybriddNodes.hasOwnProperty(host)) {
-      hybriddNodes[host].call(query, dataCallback, errorCallback, options);
-    }
-  };
-
-  this.yCall = function (host, query, dataCallback, errorCallback, options) {
-    if (hybriddNodes.hasOwnProperty(host)) {
-      hybriddNodes[host].yCall(query, dataCallback, errorCallback, user_keys, options);
+      if (typeof options === 'undefined') { options = {}; }
+      switch (options.channel) {
+        case 'y' : hybriddNodes[host].yCall(query, dataCallback, errorCallback, user_keys, options); break;
+        case 'z' : hybriddNodes[host].zCall(query, dataCallback, errorCallback, user_keys, options); break;
+        default : hybriddNodes[host].call(query, dataCallback, errorCallback, options); break;
+      }
     }
   };
 };
