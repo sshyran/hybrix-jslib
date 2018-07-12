@@ -2140,6 +2140,39 @@ var HybriddNode = function (host_) {
     }, errorCallback, data.options);
   };
 };
+/**
+ * Internet of Coins main API interface object
+ * @example
+ * var ioc = new IoC();
+ *
+ * function onSucces(){
+ *  console.error("Done.")
+ * }
+ *
+ * function onError(){
+ *   console.error("Oops, something went wrong! ")
+ * }
+ *
+ * ioc.init(null, onSucces, onError);
+ * @example
+ * var ioc = new IoC();
+ *
+ * ioc.sequential([
+ *   'init', // Initialize ioc
+ *   {username: '****************', password: '****************'}, // Define credentials
+ *   'login', // Do the login
+ *   {host: 'http://localhost:1111/'}, // Define the host
+ *   'addHost', // Add and initialize the host
+ *   {symbol: 'dummy'}, // Define the asset
+ *   'addAsset', // Add and initialize the asset
+ *   {symbol: 'dummy', amount: 100}, // Define the transaction
+ *   'transaction' // Execute the transaction
+ * ],
+ *  onSucces,
+ *  onError
+ * );
+ * @constructor
+ */
 var IoC = function () {
   var user_keys;
   /*
@@ -2167,26 +2200,44 @@ var IoC = function () {
       }
   */
   var hybriddNodes = {};
-
+  /**
+ * Initialize the NACL factory if nacl has not been defined yet.
+ * @param {Object} data - Not used
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
   this.init = function (data, dataCallback, errorCallback) {
-    nacl_factory.instantiate(function (naclinstance) {
-      nacl = naclinstance; // nacl is a global that is initialized here.
+    if (typeof nacl === 'undefined') {
+      nacl_factory.instantiate(function (naclinstance) {
+        nacl = naclinstance; // nacl is a global that is initialized here.
+        if (typeof dataCallback === 'function') { dataCallback(); }
+      });
+    } else {
       if (typeof dataCallback === 'function') { dataCallback(); }
-    });
+    }
   };
 
+  /**
+ * Log out of current session.
+ * @param {Object} data - Not used
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
   this.logout = function (data, dataCallback, errorCallback) {
     assets = {};
     user_keys = undefined;
     if (typeof dataCallback === 'function') { dataCallback(); }
   };
 
+  /**
+ * Create a new session and - if required - log out of current session.
+ * @param {Object} data
+ * @param {string} data.username - TODO
+ * @param {string} data.password - TODO
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
   this.login = function (data, dataCallback, errorCallback) {
-    /* data = {
-       username,
-       password
-       }
-    */
     if (!validateUserIDLength(data.username)) {
       if (typeof errorCallback === 'function') {
         errorCallback('Invalid username.');
@@ -2199,18 +2250,24 @@ var IoC = function () {
       }
       return;
     }
+    console.log('0', this, this.logout);
     this.logout({}, () => { // first logout clear current data
+      console.log('aap');
       user_keys = generateKeys(data.password, data.username, 0);
-      if (dataCallback) { dataCallback(); }
+      console.log('noot');
+      if (typeof dataCallback === 'function') { dataCallback(); }
     });
   };
 
+  /**
+ * TODO
+ * @param {Object} data
+ * @param {Object} data.assetDetails - TODO
+ * @param {string} data.deterministicCodeBlob - TODO
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
   this.initAsset = function (data, dataCallback, errorCallback) {
-    /* data = {
-       assetDetails,
-       deterministicCodeBlob
-       }
-    */
     deterministic[data.assetDetails['keygen-base']] = activate(LZString.decompressFromEncodedURIComponent(data.deterministicCodeBlob));
     assets[data.assetDetails.symbol] = data.assetDetails;
     assets[data.assetDetails.symbol].data = {};
@@ -2221,14 +2278,17 @@ var IoC = function () {
     if (dataCallback) { dataCallback(data.assetDetails.symbol); }
   };
 
+  /**
+ * TODO
+ * @param {Object} data
+ * @param {string} data.symbol - TODO multiple in array?
+ * @param {string} [data.channel] - TODO
+ * @param {Object} [data.options] - TODO
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
   this.addAsset = function (data, dataCallback, errorCallback) {
-    if (typeof data === 'string') { data = {symbol: data}; }
-    /* data = {
-       symbol,
-       channel,
-       options // for call
-       }
-    */
+    // TODO symbol as array of strings to load multiple?
     this.call({host: data.host, query: 'a/' + data.symbol + '/details', options: data.options, channel: data.channel}, (asset) => {
       var mode = asset.data.mode.split('.')[0];
       // TODO alleen blob ophalen als die nog niet opgehaald is
@@ -2237,11 +2297,15 @@ var IoC = function () {
       }, errorCallback);
     }, errorCallback);
   };
-  // TODO addAssets([])
 
+  /**
+ * TODO
+ * @param {Object} data
+ * @param {string} data.symbol - TODO  multiple in array?
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
   this.getAddress = function (data, dataCallback, errorCallback) {
-    if (typeof data === 'string') { data = {symbol: data}; }
-    // data = symbol
     if (assets.hasOwnProperty(data.symbol) && typeof dataCallback === 'function') {
       dataCallback(assets[data.symbol].data.address);
     } else if (typeof errorCallback === 'function') {
@@ -2249,20 +2313,21 @@ var IoC = function () {
     }
   };
 
+  /**
+ * TODO
+ * @param {Object} data
+ * @param {string} data.symbol - TODO
+ * @param {string} data.target - TODO
+ * @param {Number} data.amount - TODO
+ * @param {Number} data.fee - TODO
+ * @param {Object} data.unspent - TODO
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
   this.signTransaction = function (data, dataCallback, errorCallback) {
-    /* data =
-       {
-       symbol
-       target
-       amount
-       fee
-       unspent
-       }
-    */
     // TODO check symbol
     // TODO check amount
     // TODO check target
-
     if (!assets.hasOwnProperty(data.symbol)) {
       if (typeof errorCallback === 'function') {
         errorCallback('Asset not added.');// TODO error message
@@ -2291,10 +2356,20 @@ var IoC = function () {
       seed: asset.data.seed,
       unspent: data.unspent
     };
-    var checkTransaction = deterministic[asset['keygen-base']].transaction(transactionData, dataCallback);
-    // TODO
+    var checkTransaction = deterministic[asset['keygen-base']].transaction(transactionData, dataCallback);// TODO errorCallback
+    // TODO dataCallback??
   };
 
+  /**
+ * TODO
+ * @param {Object} data
+ * @param {string} data.symbol - TODO
+ * @param {string} data.target - TODO
+ * @param {Number} data.amount - TODO
+ * @param {Number} data.fee - TODO
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
   this.transaction = function (data, dataCallback, errorCallback) {
     /* data =
        {
@@ -2302,7 +2377,6 @@ var IoC = function () {
        target
        amount
        fee
-       unspent
        }
     */
     this.sequential({steps: [
@@ -2317,32 +2391,33 @@ var IoC = function () {
     ]}, dataCallback, errorCallback);
   };
 
+  /**
+ * TODO
+ * @param {Object} data
+ * @param {string} data.host - TODO  multiple in array?
+ * @param {Object} [data.options] - TODO
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
   this.addHost = function (data, dataCallback, errorCallback) {
     if (typeof data === 'string') { data = {host: data}; }
-    /* data =
-       {
-       host
-       options
-       }
-    */
     // TODO check if valid hostname
     var hybriddNode = new HybriddNode(data.host);
     hybriddNodes[data.host] = hybriddNode;
     hybriddNode.init({userKeys: user_keys, options: data.options}, dataCallback, errorCallback);
   };
 
-  // TODO addHosts([])
-
+  /**
+ * TODO   [API Reference]{@link https://wallet1.internetofcoins.org:1111/help}
+ * @param {Object} data
+ * @param {string} data.query - TODO
+ * @param {string} data.channel - TODO
+ * @param {string} [data.host] - TODO
+ * @param {Object} [data.options] - TODO
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
   this.call = function (data, dataCallback, errorCallback) {
-    /* data =
-       {
-       host [optional]
-       query
-       options  [optional]
-       channel undefined|'y'|'z'
-       }
-
-    */
     var host;
     if (typeof data.host === 'undefined') {
       host = Object.keys(hybriddNodes)[0]; // todo select random
@@ -2362,7 +2437,17 @@ var IoC = function () {
     }
   };
 
+  /**
+   * TODO
+   * @param {Array.<string|Object|Function>} - Sequential steps to be processed. An object indicates data that is supplied to the next step. A function is a transformation of the data of the previous step and given to the next step. A string is a IoC object method that used the data from the last step and supplies to the next step.
+   * @param {Function} dataCallback - Called when the method is succesful.
+   * @param {Function} errorCallback - Called when an error occurs.
+   */
   this.sequential = (data, successCallback, errorCallback) => {
+    if (data.constructor.name === 'Array') {
+      data = {steps: data};
+    }
+
     if (data.steps.length === 0) {
       successCallback(data);
     } else {
