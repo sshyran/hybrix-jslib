@@ -2146,11 +2146,11 @@ var HybriddNode = function (host_) {
  * var ioc = new IoC();
  *
  * function onSucces(){
- *  console.error("Done.")
+ *  console.error('Done.');
  * }
  *
  * function onError(){
- *   console.error("Oops, something went wrong! ")
+ *   console.error('Oops, something went wrong!');
  * }
  *
  * ioc.init(null, onSucces, onError);
@@ -2357,7 +2357,9 @@ var IoC = function () {
       unspent: data.unspent
     };
     var checkTransaction = deterministic[asset['keygen-base']].transaction(transactionData, dataCallback);// TODO errorCallback
-    // TODO dataCallback??
+    if (typeof checkTransaction === 'undefined' && typeof dataCallback === 'function') {
+      dataCallback(checkTransaction);
+    }
   };
 
   /**
@@ -2408,7 +2410,7 @@ var IoC = function () {
   };
 
   /**
- * TODO   [API Reference]{@link https://wallet1.internetofcoins.org:1111/help}
+ * TODO   [API Reference]{@link https://wallet1.internetofcoins.org/api/help}
  * @param {Object} data
  * @param {string} data.query - TODO
  * @param {string} data.channel - TODO
@@ -2453,10 +2455,14 @@ var IoC = function () {
     } else {
       var step = data.steps[0];
       if (typeof step === 'string') {
-        console.log('this.' + step + '(' + JSON.stringify(data.data) + ')');
-        this[step](data.data, resultData => {
-          this.sequential({data: resultData, steps: data.steps.slice(1)}, successCallback, errorCallback);
-        }, errorCallback);
+        if (this.hasOwnProperty(step)) {
+          console.log('this.' + step + '(' + JSON.stringify(data.data) + ')');
+          this[step](data.data, resultData => {
+            this.sequential({data: resultData, steps: data.steps.slice(1)}, successCallback, errorCallback);
+          }, errorCallback);
+        } else if (typeof errorCallback === 'function') {
+          errorCallback('Method "' + step + '" does not exist for IoC class.');
+        }
       } else if (typeof step === 'object') {
         console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(step));
         this.sequential({data: step, steps: data.steps.slice(1)}, successCallback, errorCallback);
