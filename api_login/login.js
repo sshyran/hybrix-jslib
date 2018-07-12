@@ -1,18 +1,22 @@
-function go () {
-  function init (callback) {
-    ioc.login('POMEW4B5XACN3ZCX', 'TVZS7LODA5CSGP6U');
-    ioc.addHost('http://localhost:1111/', () => {
-      // ioc.addAsset('btc', () => { console.log('b'); });
-      ioc.call('http://localhost:1111/', '/asset', (a) => {
-        console.log('test', a);
-        ioc.call('http://localhost:1111/', '/asset', (a) => {
-          console.log('test', a);
-        }, null, {channel: 'z'});
-      }, null, {channel: 'y'});
-    });
-  }
+/* TODO
 
+*/
+
+function go () {
   var ioc = new IoC();
 
-  ioc.init(init);
+  ioc.sequential({
+    steps: [
+      'init',
+      {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'login',
+      {host: 'http://localhost:1111/'}, 'addHost',
+      {query: '/asset', channel: 'z'}, 'call',
+      {symbol: 'dummy'}, 'addAsset',
+      {symbol: 'dummy', amount: 100}, 'transaction'
+    ]
+
+  }
+    , () => { console.log('Succes'); }
+    , (error) => { console.log('Error:' + error); }
+  );
 }

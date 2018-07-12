@@ -1984,10 +1984,18 @@ var HybriddNode = function (host_) {
     ternary_session_data = sessionStep1Reply(data, combined_session_data, () => {});
   };
 
-  this.yCall = function (query, dataCallback, errorCallback, userKeys, options) {
+  this.yCall = function (data, dataCallback, errorCallback) {
+    /* data = {
+       query,
+       channel: 'y'|'z'
+       options
+       userKeys
+       }
+    */
+
     step++;
 
-    var generalSessionData = getGeneralSessionData({user_keys: userKeys, nonce: ternary_session_data.current_nonce}, step, ternary_session_data.sess_hex);
+    var generalSessionData = getGeneralSessionData({user_keys: data.userKeys, nonce: ternary_session_data.current_nonce}, step, ternary_session_data.sess_hex);
     /*
       generalSessionData = {
       sessionID,
@@ -2003,9 +2011,9 @@ var HybriddNode = function (host_) {
       serverSessionPubKey: generalSessionData.serverSessionPubKey,
       clientSessionSecKey: generalSessionData.clientSessionSecKey,
       step: step,
-      txtdata: query
+      txtdata: data.query
     });
-    this.call(options.channel + '/' + y, (encdata) => {
+    this.call(data.channel + '/' + y, (encdata) => {
       // decode encoded data into text data
       var txtdata = ychan_decode_sub({
         encdata: encdata,
@@ -2013,17 +2021,44 @@ var HybriddNode = function (host_) {
         serverSessionPubKey: generalSessionData.serverSessionPubKey,
         clientSessionSecKey: generalSessionData.clientSessionSecKey
       });
-      dataCallback(txtdata);
-    }, errorCallback, options);
+      if (data.channel === 'y') {
+        try {
+          data = JSON.parse(txtdata);
+        } catch (error) {
+          if (typeof errorCallback === 'function') {
+            errorCallback(error);
+          }
+          return;
+        }
+        dataCallback(data);
+      } else {
+        dataCallback(txtdata);
+      }
+    }, errorCallback, data.options);
   };
 
-  this.zCall = function (query, dataCallback, errorCallback, userKeys, options) {
-    var encodedQuery = zchan_encode({user_keys: userKeys, nonce: ternary_session_data.current_nonce}, step, query);
-    //   options.channel = 'z';
-    this.yCall(encodedQuery, encodedData => {
-      var data = zchan_code_sub(encodedData);
+  this.zCall = function (data, dataCallback, errorCallback) {
+    /* data = {
+       query,
+       channel: 'z'
+       options
+       userKeys
+       }
+    */
+    var encodedQuery = zchan_encode({user_keys: data.userKeys, nonce: ternary_session_data.current_nonce}, step, data.query);
+    this.yCall({query: encodedQuery, channel: 'z', options: data.options, userKeys: data.userKeys}, encodedData => {
+      var txtdata = zchan_code_sub(encodedData);
+      var data;
+      try {
+        data = JSON.parse(txtdata);
+      } catch (error) {
+        if (typeof errorCallback === 'function') {
+          errorCallback(error);
+        }
+        return;
+      }
       dataCallback(data);
-    }, errorCallback, userKeys, options);
+    }, errorCallback);
   };
 
   this.call = function (query, dataCallback, errorCallback, options) { // todo options: {socket,interval, channel}
@@ -2033,7 +2068,7 @@ var HybriddNode = function (host_) {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
             dataCallback(xhr.responseText);
-          } else if (errorCallback) {
+          } else if (typeof errorCallback === 'function') {
             errorCallback(xhr.responseText);
           }
         }
@@ -2049,24 +2084,38 @@ var HybriddNode = function (host_) {
       try {
         data = JSON.parse(response);
       } catch (error) {
-        errorCallback(error);
+        if (typeof errorCallback === 'function') {
+          errorCallback(error);
+        }
+        return;
       }
       if (data.hasOwnProperty('id') && data.id === 'id') {
-        setTimeout(() => {
+        var interval = setInterval(() => {
           socket(host, '/p/' + data.data, (response) => {
             var data;
             try {
               data = JSON.parse(response);
             } catch (error) {
-              errorCallback(error);
-            } dataCallback(data);
+              if (typeof errorCallback === 'function') {
+                errorCallback(error);
+              }
+              return;
+            }
+            if (data.error !== 0) {
+              if (typeof errorCallback === 'function') {
+                errorCallback(data.info);
+              }
+            } else if (data.stopped !== null) {
+              clearInterval(interval);
+              dataCallback(data);
+            }
           });
-        }, 1000); // TODO fix ugly timeout, do a frequent recheck
+        }, 100); // TODO fix ugly timeout, do a frequent recheck
 
         // TODO errorCallback gebruiken bij timeout?
       } else if (dataCallback) { // TODO first check if error = 1
         dataCallback(data);
-      } else if (errorCallback) {
+      } else if (typeof errorCallback === 'function') {
         errorCallback(response);
       }
     },
@@ -2074,18 +2123,23 @@ var HybriddNode = function (host_) {
     );
   };
 
-  this.init = function (successCallback, errorCallback, userKeys, options) {
+  this.init = function (data, successCallback, errorCallback) {
+    /* data =
+    {
+    userKeys
+    options
+    }
+  */
     nonce = nacl.crypto_box_random_nonce();
     initial_session_data = generateInitialSessionData(nonce);
     this.call(this.xAuthStep0Request(), (response) => {
       this.call(this.xAuthStep1Request(response.nonce1), (response) => {
-        this.xAuthFinalize(response, userKeys);
+        this.xAuthFinalize(response, data.userKeys);
         if (successCallback) { successCallback(); }
-      }, errorCallback, {}); // TODO  options
-    }, errorCallback, {}); // TODO options
+      }, errorCallback, data.option);
+    }, errorCallback, data.options);
   };
 };
-
 var IoC = function () {
   var user_keys;
   /*
@@ -2094,97 +2148,237 @@ var IoC = function () {
   */
   var assets = {};
   /* per symbol:
-   {$SYMBOL:
+     {$SYMBOL:
      {
      seed
      keys
      address
      }
      }
-    */
+  */
   var deterministic = {};
   /*  per keygen-base:
       {$KEYGEN-BASE :
-        {
-          keys()
-          sign()
-          ..TODO
-        }
+      {
+      keys()
+      sign()
+      ..TODO
+      }
       }
   */
   var hybriddNodes = {};
 
-  this.init = function (callback) {
+  this.init = function (data, dataCallback, errorCallback) {
     nacl_factory.instantiate(function (naclinstance) {
       nacl = naclinstance; // nacl is a global that is initialized here.
-      if (typeof callback === 'function') { callback(); }
+      if (typeof dataCallback === 'function') { dataCallback(); }
     });
   };
 
-  this.login = function (username, password) {
-    // TODO validate password+username
-    this.logout(); // clear current data
-    user_keys = generateKeys(password, username, 0);
-  };
-
-  this.logout = function () {
+  this.logout = function (data, dataCallback, errorCallback) {
     assets = {};
     user_keys = undefined;
+    if (typeof dataCallback === 'function') { dataCallback(); }
   };
 
-  this.initAsset = function (assetDetails, deterministicCodeBlob) {
-    deterministic[assetDetails['keygen-base']] = activate(LZString.decompressFromEncodedURIComponent(deterministicCodeBlob));
-    assets[assetDetails.symbol] = assetDetails;
-    assets[assetDetails.symbol].data = {};
-    assets[assetDetails.symbol].data.seed = seedGenerator(user_keys, assetDetails['keygen-base']);
-    assets[assetDetails.symbol].data.keys = deterministic[assetDetails['keygen-base']].keys(assets[assetDetails.symbol].data);
-    assets[assetDetails.symbol].data.keys.mode = assetDetails.mode.split('.')[1]; // (here submode is named mode confusingly enough)
-    assets[assetDetails.symbol].data.address = deterministic[assetDetails['keygen-base']].address(assets[assetDetails.symbol].data.keys);
+  this.login = function (data, dataCallback, errorCallback) {
+    /* data = {
+       username,
+       password
+       }
+    */
+    if (!validateUserIDLength(data.username)) {
+      if (typeof errorCallback === 'function') {
+        errorCallback('Invalid username.');
+      }
+      return;
+    }
+    if (!validatePasswordLength(data.password)) {
+      if (typeof errorCallback === 'function') {
+        errorCallback('Invalid password.');
+      }
+      return;
+    }
+    this.logout({}, () => { // first logout clear current data
+      user_keys = generateKeys(data.password, data.username, 0);
+      if (dataCallback) { dataCallback(); }
+    });
   };
 
-  this.addAsset = function (symbol, successCallback, errorCallback, options) {
-    var host = Object.keys(hybriddNodes)[0]; // TODO choose random?? or pick from options
-    // TODO check if valid host
-    this.call(host, 'a/' + symbol + '/details', (asset) => {
+  this.initAsset = function (data, dataCallback, errorCallback) {
+    /* data = {
+       assetDetails,
+       deterministicCodeBlob
+       }
+    */
+    deterministic[data.assetDetails['keygen-base']] = activate(LZString.decompressFromEncodedURIComponent(data.deterministicCodeBlob));
+    assets[data.assetDetails.symbol] = data.assetDetails;
+    assets[data.assetDetails.symbol].data = {};
+    assets[data.assetDetails.symbol].data.seed = seedGenerator(user_keys, data.assetDetails['keygen-base']);
+    assets[data.assetDetails.symbol].data.keys = deterministic[data.assetDetails['keygen-base']].keys(assets[data.assetDetails.symbol].data);
+    assets[data.assetDetails.symbol].data.keys.mode = data.assetDetails.mode.split('.')[1]; // (here submode is named mode confusingly enough)
+    assets[data.assetDetails.symbol].data.address = deterministic[data.assetDetails['keygen-base']].address(assets[data.assetDetails.symbol].data.keys);
+    if (dataCallback) { dataCallback(data.assetDetails.symbol); }
+  };
+
+  this.addAsset = function (data, dataCallback, errorCallback) {
+    if (typeof data === 'string') { data = {symbol: data}; }
+    /* data = {
+       symbol,
+       channel,
+       options // for call
+       }
+    */
+    this.call({host: data.host, query: 'a/' + data.symbol + '/details', options: data.options, channel: data.channel}, (asset) => {
       var mode = asset.data.mode.split('.')[0];
-      this.call(host, 's/deterministic/code/' + mode, (blob) => {
-        this.initAsset(asset.data, blob.data);
-        if (successCallback) { successCallback(); }
-      }, errorCallback, options);
-    }, errorCallback, options);
+      // TODO alleen blob ophalen als die nog niet opgehaald is
+      this.call({host: data.host, query: 's/deterministic/code/' + mode, options: data.options, channel: data.channel}, (blob) => {
+        this.initAsset({assetDetails: asset.data, deterministicCodeBlob: blob.data}, dataCallback, errorCallback);
+      }, errorCallback);
+    }, errorCallback);
   };
   // TODO addAssets([])
 
-  this.getAddress = function (symbol) {
-    if (assets.hasOwnProperty(symbol)) {
-      return assets[symbol].data.address;
-    } else {
-      return undefined;
+  this.getAddress = function (data, dataCallback, errorCallback) {
+    if (typeof data === 'string') { data = {symbol: data}; }
+    // data = symbol
+    if (assets.hasOwnProperty(data.symbol) && typeof dataCallback === 'function') {
+      dataCallback(assets[data.symbol].data.address);
+    } else if (typeof errorCallback === 'function') {
+      errorCallback('Asset not initialized');
     }
   };
 
-  this.signTransaction = function (symbol, amount, bla) {
-    // TODO return a signed transaction in that can be pushed
+  this.signTransaction = function (data, dataCallback, errorCallback) {
+    /* data =
+       {
+       symbol
+       target
+       amount
+       fee
+       unspent
+       }
+    */
+    // TODO check symbol
+    // TODO check amount
+    // TODO check target
+
+    if (!assets.hasOwnProperty(data.symbol)) {
+      if (typeof errorCallback === 'function') {
+        errorCallback('Asset not added.');// TODO error message
+      }
+      return;
+    }
+    var asset = assets[data.symbol];
+    if (!deterministic.hasOwnProperty(asset['keygen-base'])) {
+      if (typeof errorCallback === 'function') {
+        errorCallback('Asset not initialized.');// TODO error message
+      }
+      return;
+    }
+
+    // deterministic[assetDetails['keygen-base']]
+    var transactionData = {
+      mode: asset.data.keys.mode,
+      symbol: asset.symbol,
+      source: asset.data.address,
+      target: data.target,
+      amount: data.amount,
+      fee: data.fee || asset.fee,
+      factor: asset.factor,
+      contract: asset.contract,
+      keys: asset.data.keys,
+      seed: asset.data.seed,
+      unspent: data.unspent
+    };
+    var checkTransaction = deterministic[asset['keygen-base']].transaction(transactionData, dataCallback);
+    // TODO
   };
 
-  this.addHost = function (host, successCallback, errorCallback, options) {
-    var hybriddNode = new HybriddNode(host);
-    hybriddNodes[host] = hybriddNode;
-    hybriddNode.init(successCallback, errorCallback, user_keys, options);
+  this.transaction = function (data, dataCallback, errorCallback) {
+    /* data =
+       {
+       symbol
+       target
+       amount
+       fee
+       unspent
+       }
+    */
+    this.sequential({steps: [
+      {symbol: data.symbol},
+      'getAddress',
+      address => { return {query: '/a/' + data.symbol + '/unspent/' + address + '/' + data.target + '/' + data.amount + '/public_key'}; },
+      'call',
+      unspent => { return {symbol: data.symbol, target: data.target, amount: data.amount, fee: data.fee, unspent: unspent.data}; },
+      'signTransaction',
+      tx => { return { query: '/a/' + data.symbol + '/push/' + tx }; },
+      'call'
+    ]}, dataCallback, errorCallback);
+  };
+
+  this.addHost = function (data, dataCallback, errorCallback) {
+    if (typeof data === 'string') { data = {host: data}; }
+    /* data =
+       {
+       host
+       options
+       }
+    */
+    // TODO check if valid hostname
+    var hybriddNode = new HybriddNode(data.host);
+    hybriddNodes[data.host] = hybriddNode;
+    hybriddNode.init({userKeys: user_keys, options: data.options}, dataCallback, errorCallback);
   };
 
   // TODO addHosts([])
 
-  // TODO dCall decentralized
+  this.call = function (data, dataCallback, errorCallback) {
+    /* data =
+       {
+       host [optional]
+       query
+       options  [optional]
+       channel undefined|'y'|'z'
+       }
 
-  // TODO add for y,z chan: error when no session is created
-  this.call = function (host, query, dataCallback, errorCallback, options) {
+    */
+    var host;
+    if (typeof data.host === 'undefined') {
+      host = Object.keys(hybriddNodes)[0]; // todo select random
+    } else {
+      host = data.host;
+    }
+
+    // TODO add for y,z chan: error when no session (user_keys) have been created
     if (hybriddNodes.hasOwnProperty(host)) {
-      if (typeof options === 'undefined') { options = {}; }
-      switch (options.channel) {
-        case 'y' : hybriddNodes[host].yCall(query, dataCallback, errorCallback, user_keys, options); break;
-        case 'z' : hybriddNodes[host].zCall(query, dataCallback, errorCallback, user_keys, options); break;
-        default : hybriddNodes[host].call(query, dataCallback, errorCallback, options); break;
+      switch (data.channel) {
+        case 'y' : hybriddNodes[host].yCall({query: data.query, channel: data.channel, userKeys: user_keys}, dataCallback, errorCallback); break;
+        case 'z' : hybriddNodes[host].zCall({query: data.query, channel: data.channel, userKeys: user_keys}, dataCallback, errorCallback); break;
+        default : hybriddNodes[host].call(data.query, dataCallback, errorCallback, data.options); break;
+      }
+    } else if (typeof errorCallback === 'function') {
+      errorCallback('Host not initialized');
+    }
+  };
+
+  this.sequential = (data, successCallback, errorCallback) => {
+    if (data.steps.length === 0) {
+      successCallback(data);
+    } else {
+      var step = data.steps[0];
+      if (typeof step === 'string') {
+        console.log('this.' + step + '(' + JSON.stringify(data.data) + ')');
+        this[step](data.data, resultData => {
+          this.sequential({data: resultData, steps: data.steps.slice(1)}, successCallback, errorCallback);
+        }, errorCallback);
+      } else if (typeof step === 'object') {
+        console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(step));
+        this.sequential({data: step, steps: data.steps.slice(1)}, successCallback, errorCallback);
+      } else if (typeof step === 'function') {
+        var result = step(data.data);
+        console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(result));
+        this.sequential({data: result, steps: data.steps.slice(1)}, successCallback, errorCallback);
       }
     }
   };
