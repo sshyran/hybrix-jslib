@@ -246,12 +246,14 @@ function validateUserIDLength (userid) {
 }
 
 commonUtils = {
+  activate,
   clean,
   continueSession,
   generateKeys,
   generateInitialSessionData,
   generateSecondarySessionData,
   increaseSessionStep,
+  seedGenerator,
   sessionStep1Reply,
   validatePasswordLength,
   validateUserIDLength
@@ -259,6 +261,7 @@ commonUtils = {
 
 if (typeof module !== 'undefined') {
   module.exports = {
+    activate,
     clean,
     continueSession,
     generateKeys,
@@ -266,6 +269,7 @@ if (typeof module !== 'undefined') {
     generateSecondarySessionData,
     nextStep,
     readSession,
+    seedGenerator,
     sessionStep1Reply,
     validatePasswordLength,
     validateUserIDLength
