@@ -1,3 +1,4 @@
+var ychan = require('../ychan');
 var zchan = require('../zchan');
 var UrlBase64 = require('../crypto/UrlBase64');
 var CommonUtils = require('../index');
@@ -69,14 +70,13 @@ var HybriddNode = function (host_) {
     /* data = {
        query,
        channel: 'y'|'z'
-       options
        userKeys
        }
     */
 
     step++;
 
-    var generalSessionData = CommonUtils.getGeneralSessionData({user_keys: data.userKeys, nonce: ternary_session_data.current_nonce}, step, ternary_session_data.sess_hex);
+    var generalSessionData = ychan.getGeneralSessionData({user_keys: data.userKeys, nonce: ternary_session_data.current_nonce}, step, ternary_session_data.sess_hex);
     /*
       generalSessionData = {
       sessionID,
@@ -87,7 +87,7 @@ var HybriddNode = function (host_) {
       };
     */
     //    ternary_session_data.current_nonce[23]++;
-    var y = yhan.encode_sub({
+    var y = ychan.encode_sub({
       sessionID: generalSessionData.sessionID,
       sessionNonce: generalSessionData.sessionNonce,
       serverSessionPubKey: generalSessionData.serverSessionPubKey,
@@ -95,7 +95,7 @@ var HybriddNode = function (host_) {
       step: step,
       txtdata: data.query
     });
-    this.call({query: data.channel + '/' + y, connector: data.connector}, (encdata) => {
+    this.call({query: data.channel + '/' + y, connector: data.connector, meta: true}, (encdata) => {
       // decode encoded data into text data
       var txtdata = ychan.decode_sub({
         encdata: encdata,
@@ -123,7 +123,6 @@ var HybriddNode = function (host_) {
     /* data = {
        query,
        channel: 'z'
-       options
        userKeys
        connector
        }
@@ -145,6 +144,13 @@ var HybriddNode = function (host_) {
   };
 
   this.call = function (data, dataCallback, errorCallback) { // todo options: {connector,interval, timeout}
+    /* data = {
+       query,
+       connector,
+       meta
+       }
+    */
+    var meta = !!data.meta; // meta is a boolean indicating whether to strip the meta data from a call
     var xhrSocket = (host, query, dataCallback, errorCallback) => {
       var xhr = new data.connector.XMLHttpRequest();
       xhr.onreadystatechange = e => {
@@ -235,24 +241,32 @@ var HybriddNode = function (host_) {
               data = JSON.parse(response);
             } catch (error) {
               if (typeof errorCallback === 'function') {
+                clearInterval(interval);
                 errorCallback(error);
               }
               return;
             }
-            if (data.error !== 0) {
+            if (data.hasOwnProperty('error') && data.error !== 0) {
               if (typeof errorCallback === 'function') {
+                clearInterval(interval);
                 errorCallback(data.info);
               }
             } else if (data.stopped !== null) {
               clearInterval(interval);
-              dataCallback(data);
+              dataCallback(meta ? data : data.data);
             }
           });
         }, 100); // TODO parametrize, add timeout
 
         // TODO errorCallback gebruiken bij timeout?
-      } else if (dataCallback) { // TODO first check if error = 1
-        dataCallback(data);
+      } else if (dataCallback) {
+        if (data.hasOwnProperty('error') && data.error !== 0) {
+          if (typeof errorCallback === 'function') {
+            errorCallback(response);
+          }
+          return;
+        }
+        dataCallback(meta ? data : data.data);
       } else if (typeof errorCallback === 'function') {
         errorCallback(response);
       }
@@ -271,8 +285,8 @@ var HybriddNode = function (host_) {
     */
     nonce = nacl.crypto_box_random_nonce();
     initial_session_data = CommonUtils.generateInitialSessionData(nonce);
-    this.call({query: this.xAuthStep0Request(), connector: data.connector}, (response) => {
-      this.call({query: this.xAuthStep1Request(response.nonce1), connector: data.connector}, (response) => {
+    this.call({query: this.xAuthStep0Request(), connector: data.connector, meta: true}, (response) => {
+      this.call({query: this.xAuthStep1Request(response.nonce1), connector: data.connector, meta: true}, (response) => {
         this.xAuthFinalize(response, data.userKeys);
         if (successCallback) { successCallback(); }
       }, errorCallback, data.option);

@@ -3,13 +3,7 @@ var UrlBase64 = require('./crypto/UrlBase64');
 var Decimal = require('./crypto/decimal-light');
 var hex2dec = require('./crypto/hex2dec');
 var CommonUtils = require('./index');
-
-Decimal.set({
-  precision: 100,
-  rounding: Decimal.ROUND_HALF_UP,
-  toExpNeg: 0,
-  toExpPos: 100
-});
+Decimal.set({precision: 64});
 
 var path = function (usercrypto, step, txtdata) {
   // decodes only from UrlBase64 for now, must be real usercrypto!

@@ -1,9 +1,10 @@
 // import {HybriddNode} from './hybriddNode.js';
 DEBUG = false;
+LZString = require('../crypto/lz-string'); // TODO required globally by UrlBase64
 var HybriddNode = require('./hybriddNode');
 UrlBase64 = require('../crypto/UrlBase64'); // TODO make non global as soon as index.js can do require
+
 var CommonUtils = require('../index');
-var LZString = require('../crypto/lz-string');
 var sjcl = require('../crypto/sjcl');
 
 // fs = require('fs');
@@ -14,8 +15,8 @@ var sjcl = require('../crypto/sjcl');
 /**
  * Internet of Coins main API interface object
  * @param {Object} data - one of the three methods below must be passed.
- * @param {Object} data.http - a http object. (https://nodejs.org/api/http.html)
- * @param {Object} data.XMLHttpRequest - a XMLHttpRequest object. (https://developer.mozilla.org/nl/docs/Web/API/XMLHttpRequest)
+ * @param {Object} data.http - a http object. ({@link https://nodejs.org/api/http.html})
+ * @param {Object} data.XMLHttpRequest - a XMLHttpRequest object. ({@link https://developer.mozilla.org/nl/docs/Web/API/XMLHttpRequest})
  * @param {Function} data.custom - a custom connector method which receives a hostname, query, dataCallback and errorCallback parameters and returns a string.
  * @example
  * // Node JS
@@ -183,10 +184,10 @@ var Interface = function (data) {
     // TODO symbol as array of strings to load multiple?
     if (!assets.hasOwnProperty(data.symbol)) { // if assets has not been iniated, retrieve and initialize
       this.call({host: data.host, query: 'a/' + data.symbol + '/details', options: data.options, channel: data.channel}, (asset) => {
-        var mode = asset.data.mode.split('.')[0];
+        var mode = asset.mode.split('.')[0];
         // TODO alleen blob ophalen als die nog niet opgehaald is
         this.call({host: data.host, query: 's/deterministic/code/' + mode, options: data.options, channel: data.channel}, (blob) => {
-          this.initAsset({assetDetails: asset.data, deterministicCodeBlob: blob.data}, dataCallback, errorCallback);
+          this.initAsset({assetDetails: asset, deterministicCodeBlob: blob}, dataCallback, errorCallback);
         }, errorCallback);
       }, errorCallback);
     } else if (typeof dataCallback !== 'undefined') {
@@ -265,6 +266,8 @@ var Interface = function (data) {
  * @param {string} data.target - TODO
  * @param {Number} data.amount - TODO
  * @param {Number} data.fee - TODO
+ * @param {string} [data.host] - TODO
+ * @param {string} [data.channel] - TODO
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
@@ -274,11 +277,11 @@ var Interface = function (data) {
       'addAsset',
       {symbol: data.symbol},
       'getAddress',
-      address => { return {query: '/a/' + data.symbol + '/unspent/' + address + '/' + data.target + '/' + data.amount + '/public_key'}; },
+      address => { return {query: '/a/' + data.symbol + '/unspent/' + address + '/' + data.target + '/' + data.amount + '/public_key', channel: data.channel, host: data.host}; },
       'call',
-      unspent => { return {symbol: data.symbol, target: data.target, amount: data.amount, fee: data.fee, unspent: unspent.data}; },
+      unspent => { return {symbol: data.symbol, target: data.target, amount: data.amount, fee: data.fee, unspent: unspent}; },
       'signTransaction',
-      tx => { return { query: '/a/' + data.symbol + '/push/' + tx }; },
+      tx => { return { query: '/a/' + data.symbol + '/push/' + tx, channel: data.channel, host: data.host }; },
       'call'
     ]}, dataCallback, errorCallback);
   };
@@ -302,7 +305,8 @@ var Interface = function (data) {
  * TODO   [API Reference]{@link https://wallet1.internetofcoins.org/api/help}
  * @param {Object} data
  * @param {string} data.query - TODO
- * @param {string} data.channel - TODO
+ * @param {string} [data.channel] - Indicate the channel 'y' for encryption, 'z' for both encryption and compression
+ * @param {Boolean} [data.meta] - Indicate whether to include meta data (process information)
  * @param {string} [data.host] - TODO
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
@@ -329,35 +333,132 @@ var Interface = function (data) {
 
   /**
    * TODO
-   * @param {Array.<string|Object|Function>} - Sequential steps to be processed. An object indicates data that is supplied to the next step. A function is a transformation of the data of the previous step and given to the next step. A string is a method that used the data from the last step and supplies to the next step.
+   * @param {Array.<string|Object|Function>} data - Sequential steps to be processed. An object indicates data that is supplied to the next step. A function is a transformation of the data of the previous step and given to the next step. A string is a method that used the data from the last step and supplies to the next step.
    * @param {Function} dataCallback - Called when the method is succesful.
    * @param {Function} errorCallback - Called when an error occurs.
    */
-  this.sequential = (data, successCallback, errorCallback) => {
+  this.sequential = (data, dataCallback, errorCallback) => {
     if (data.constructor.name === 'Array') {
       data = {steps: data};
     }
 
     if (data.steps.length === 0) {
-      successCallback(data);
+      dataCallback(data.data);
     } else {
       var step = data.steps[0];
       if (typeof step === 'string') {
         if (this.hasOwnProperty(step)) {
           console.log('this.' + step + '(' + JSON.stringify(data.data) + ')');
           this[step](data.data, resultData => {
-            this.sequential({data: resultData, steps: data.steps.slice(1)}, successCallback, errorCallback);
+            this.sequential({data: resultData, steps: data.steps.slice(1)}, dataCallback, errorCallback);
           }, errorCallback);
         } else if (typeof errorCallback === 'function') {
           errorCallback('Method "' + step + '" does not exist for IoC.Interface class.');
         }
       } else if (typeof step === 'object') {
         console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(step));
-        this.sequential({data: step, steps: data.steps.slice(1)}, successCallback, errorCallback);
+        this.sequential({data: step, steps: data.steps.slice(1)}, dataCallback, errorCallback);
       } else if (typeof step === 'function') {
         var result = step(data.data);
         console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(result));
-        this.sequential({data: result, steps: data.steps.slice(1)}, successCallback, errorCallback);
+        this.sequential({data: result, steps: data.steps.slice(1)}, dataCallback, errorCallback);
+      }
+    }
+  };
+
+  /**
+   * TODO
+   * @param {Array.<string|Function>|Object} data - Parallel steps to be processed. TODO
+   * @param data.data -
+   * @param {Array.<string|Function>} data.steps -
+   * @param {Function} data.data -
+   * @param {Boolean} data.breakOnFirstError -
+   * @param {Boolean} data.onlyGetFirstResult -
+   * @param {Function} dataCallback - Called when the method is succesful.
+   * @param {Function} errorCallback - Called when an error occurs.
+   */
+  this.parallel = (data, dataCallback, errorCallback) => {
+    var steps = data;
+    var stepCount = 0;
+    var errorCount = 0;
+    var resultCount = 0;
+    var resultData;
+
+    if (steps.constructor.name === 'Array') {
+      stepCount = steps.length;
+      resultData = [];
+    } else if (typeof steps === 'object') {
+      stepCount = Object.keys(steps).length;
+      resultData = {};
+    }
+
+    if (stepCount === 0) {
+      if (steps.constructor.name === 'Array') {
+        dataCallback([]);
+      } else if (steps.constructor.name === 'object') {
+        dataCallback({});
+      }
+      return;
+    }
+    var dataSubCallback = i => result => {
+      if (data.breakOnFirstError || data.onlyGetFirstResult) {
+        dataCallback(result);
+      } else {
+        ++resultCount;
+        resultData[i] = result;
+        if (resultCount === stepCount) {
+          dataCallback(resultData);
+        }
+      }
+    };
+
+    var errorSubCallback = i => error => {
+      if (data.breakOnFirstError || data.onlyGetFirstResult) {
+        if (typeof errorCallback === 'function') {
+          errorCallback(error);
+        }
+      } else {
+        ++errorCount;
+        ++resultCount;
+        resultData[i] = error;
+        if (resultCount === stepCount) {
+          if (errorCount === resultCount) {
+            if (typeof errorCallback === 'function') {
+              errorCallback(error);
+            }
+          } else {
+            dataCallback(resultData);
+          }
+        }
+      }
+    };
+
+    var executeStep = (i, step, data) => {
+      if (typeof step === 'string') {
+        if (this.hasOwnProperty(step)) {
+          this[step](data, dataSubCallback(i), errorSubCallback(i));
+        } else if (typeof errorCallback === 'function') {
+          errorCallback('Method "' + step + '" does not exist for IoC.Interface class.');
+        }
+      } else if (typeof step === 'function') {
+        step(data, dataSubCallback(i), errorSubCallback(i));
+      }
+    };
+
+    for (var i in steps) {
+      var step = steps[i];
+      if (typeof step === 'object') {
+        if (step.hasOwnProperty('step')) {
+          if (step.hasOwnProperty('data')) {
+            executeStep(i, step.step, step.data);
+          } else {
+            executeStep(i, step.step, data);
+          }
+        } else {
+          errorCallback('No step defined.');
+        }
+      } else {
+        executeStep(i, step, data);
       }
     }
   };

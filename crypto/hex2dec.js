@@ -1,7 +1,8 @@
 // very large Hexadecimal to Decimal number converter
+var Decimal = require('./decimal-light');
+Decimal.set({precision: 64});
 
-var hex2dec = (function() {
-
+var hex2dec = (function () {
   /**
    * A function for converting hex <-> dec w/o loss of precision.
    *
@@ -17,7 +18,7 @@ var hex2dec = (function() {
 
   // Adds two arrays for the given base (10 or 16), returning the result.
   // This turns out to be the only "primitive" operation we need.
-  function add(x, y, base) {
+  function add (x, y, base) {
     var z = [];
     var n = Math.max(x.length, y.length);
     var carry = 0;
@@ -35,7 +36,7 @@ var hex2dec = (function() {
 
   // Returns a*x, where x is an array of decimal digits and a is an ordinary
   // JavaScript number. base is the number base of the array x.
-  function multiplyByNumber(num, x, base) {
+  function multiplyByNumber (num, x, base) {
     if (num < 0) return null;
     if (num == 0) return [];
 
@@ -53,7 +54,7 @@ var hex2dec = (function() {
     return result;
   }
 
-  function parseToDigitsArray(str, base) {
+  function parseToDigitsArray (str, base) {
     var digits = str.split('');
     var ary = [];
     for (var i = digits.length - 1; i >= 0; i--) {
@@ -64,7 +65,7 @@ var hex2dec = (function() {
     return ary;
   }
 
-  function convertBase(str, fromBase, toBase) {
+  function convertBase (str, fromBase, toBase) {
     var digits = parseToDigitsArray(str, fromBase);
     if (digits === null) return null;
 
@@ -85,10 +86,10 @@ var hex2dec = (function() {
     return out;
   }
 
-	var hex2dec = {	
+  var hex2dec = {
 
-    /*lHexToDec : function (s) {   // DEPRECATED
-      dec = new Decimal(0);    
+    /* lHexToDec : function (s) {   // DEPRECATED
+      dec = new Decimal(0);
       s.split('').forEach(function(chr) {
           var n = parseInt(chr, 16);
           for(var t = 8; t; t >>= 1) {
@@ -97,37 +98,36 @@ var hex2dec = (function() {
           }
       });
       return dec;
-    },*/
+    }, */
 
-    toHex : function (decStr) {
+    toHex: function (decStr) {
       var hex = convertBase(String(decStr), 10, 16);
       return hex ? '0x' + hex : null;
     },
 
-    toDec : function(hexStr) {
-      if(!hexStr) {
+    toDec: function (hexStr) {
+      if (!hexStr) {
         var result = 0;
       } else {
         if (hexStr.substring(0, 2) === '0x') hexStr = hexStr.substring(2);
         hexStr = hexStr.toLowerCase();
         var result = convertBase(hexStr, 16, 10);
       }
-      return new Decimal((result?result:0));
+      return new Decimal((result || 0));
     }
 
-  }
+  };
 
   return hex2dec;
-
 })();
 
 if (typeof define === 'function' && define.amd) {
   define(function () { return hex2dec; });
-} else if( typeof module !== 'undefined' && module != null ) {
+} else if (typeof module !== 'undefined' && module != null) {
   module.exports = hex2dec;
-} else if( typeof angular !== 'undefined' && angular != null ) {
+} else if (typeof angular !== 'undefined' && angular != null) {
   angular.module('hex2dec', [])
-  .factory('hex2dec', function () {
-    return hex2dec;
-  });
+    .factory('hex2dec', function () {
+      return hex2dec;
+    });
 }
