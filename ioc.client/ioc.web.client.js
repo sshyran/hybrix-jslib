@@ -2100,12 +2100,12 @@ var Interface = function (data) {
   /**
  * TODO
  * @param {Object} data
- * @param {string} data.symbol - TODO
- * @param {string} data.target - TODO
- * @param {Number} data.amount - TODO
+ * @param {string} data.symbol - The symbol of the asset
+ * @param {string} data.target - The target address
+ * @param {Number} data.amount - The amount that should be transferred
  * @param {Number} data.fee - TODO
- * @param {string} [data.host] - TODO
- * @param {string} [data.channel] - TODO
+ * @param {string} [data.host] - The host that should be used.
+ * @param {string} [data.channel] - Indicate the channel 'y' for encryption, 'z' for both encryption and compression
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
