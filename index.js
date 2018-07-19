@@ -128,8 +128,8 @@ function sessionStep1Reply (data, sessionData, cb) {
 
       if (typeof cb === 'function') { cb(sess_hex); }
       return {
-        sess_hex,
-        current_nonce
+        sess_hex: sess_hex,
+        current_nonce: current_nonce
       };
     }
   } catch (e) {
@@ -175,13 +175,13 @@ function generateInitialSessionData (nonce) {
   if (DEBUG) { console.log('session_hexsign:' + session_hexsign + '(' + session_hexsign.length + ')'); }
 
   return {
-    session_hexkey,
-    session_hexsign,
-    session_keypair,
-    session_nonce,
-    session_seckey,
-    session_secsign,
-    session_signpair
+    session_hexkey: session_hexkey,
+    session_hexsign: session_hexsign,
+    session_keypair: session_keypair,
+    session_nonce: session_nonce,
+    session_seckey: session_seckey,
+    session_secsign: session_secsign,
+    session_signpair: session_signpair
   };
 }
 
@@ -209,9 +209,9 @@ function generateSecondarySessionData (nonce1, sessionHexKey, signSk) {
   if (DEBUG) { console.log('CR:' + crypt_hex); }
 
   return {
-    nonce1_hex,
-    nonce2_hex,
-    crypt_hex
+    nonce1_hex: nonce1_hex,
+    nonce2_hex: nonce2_hex,
+    crypt_hex: crypt_hex
   };
 }
 

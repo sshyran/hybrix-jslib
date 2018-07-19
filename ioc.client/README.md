@@ -1,0 +1,7 @@
+- ./out/      auto documentation
+- ./test/
+- - test.html browser test for library file
+- - test.js   js file for test
+- compile.sh
+- webpack.config.web.js
+- webpack.config.module.js
