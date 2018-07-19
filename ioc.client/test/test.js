@@ -1,5 +1,5 @@
 /* TODO
-- extent wavalidator for waves and dummy
+- extend wavalidator for waves and ark
 
 Account is valid then it is a valid Base58 string and the length of corresponding array is 26 bytes. Version of address (1st byte) is equal to 1. The network byte (2nd byte) is equal to network ID. The checksum of address (last 4 bytes) is correct.
 
@@ -8,10 +8,11 @@ Account is valid then it is a valid Base58 string and the length of correspondin
 - for the assets requiring a public key for unspents, add those to sample, collect those from seed
 - do not retrieve blob if it is already retrieved
 
+- wrapperlib issue for waves, bts
 */
 
 function go () {
-  var symbol = 'btc';
+  var symbol = 'zec';
   var ioc = new IoC.Interface({XMLHttpRequest: XMLHttpRequest});
   ioc.sequential([
     'init',
@@ -44,8 +45,7 @@ function go () {
       };
     },
     'parallel'
-    /*
-    */
+
   ]
     , (data) => { console.log('Succes', data); }
     , (error) => { console.error(error); }

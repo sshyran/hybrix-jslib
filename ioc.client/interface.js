@@ -161,7 +161,20 @@ var Interface = function (data) {
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.initAsset = function (data, dataCallback, errorCallback) {
-    deterministic[data.assetDetails['keygen-base']] = CommonUtils.activate(LZString.decompressFromEncodedURIComponent(data.deterministicCodeBlob));
+    var wrapperlib = 1;
+    var replaceAll = function (target, search, replacement) {
+      var p = target.split(search);
+      return p.join(replacement);
+    };
+
+    var code = LZString.decompressFromEncodedURIComponent(data.deterministicCodeBlob);
+    code = replaceAll(code, '(typeof exports==="object"&&typeof module!=="undefined")', '(!(typeof exports==="object"&&typeof module!=="undefined"))'); // to comopensate for collistion between webpack adn browserify
+
+    deterministic[data.assetDetails['keygen-base']] = CommonUtils.activate(code);
+    // TODO waves: console.log('deterministic', deterministic[data.assetDetails['keygen-base']]);
+    // TODO waves: console.log('wrapperlib', wrapperlib);
+    // TODO waves: console.log('window', window.wrapperlib);
+
     assets[data.assetDetails.symbol] = data.assetDetails;
     assets[data.assetDetails.symbol].data = {};
     assets[data.assetDetails.symbol].data.seed = CommonUtils.seedGenerator(user_keys, data.assetDetails['keygen-base']);
