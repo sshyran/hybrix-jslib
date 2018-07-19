@@ -83,6 +83,7 @@ var HybriddNode = function (host_) {
       clientSessionSecKey,
       serverSessionPubKey,
       sessionNonce
+       connector
       };
     */
     //    ternary_session_data.current_nonce[23]++;
@@ -94,7 +95,7 @@ var HybriddNode = function (host_) {
       step: step,
       txtdata: data.query
     });
-    this.call({query: data.channel + '/' + y}, (encdata) => {
+    this.call({query: data.channel + '/' + y, connector: data.connector}, (encdata) => {
       // decode encoded data into text data
       var txtdata = ychan.decode_sub({
         encdata: encdata,
@@ -124,10 +125,11 @@ var HybriddNode = function (host_) {
        channel: 'z'
        options
        userKeys
+       connector
        }
     */
     var encodedQuery = zchan.encode({user_keys: data.userKeys, nonce: ternary_session_data.current_nonce}, step, data.query);
-    this.yCall({query: encodedQuery, channel: 'z', userKeys: data.userKeys}, encodedData => {
+    this.yCall({query: encodedQuery, channel: 'z', userKeys: data.userKeys, connector: data.connector}, encodedData => {
       var txtdata = zchan.decode_sub(encodedData);
       var data;
       try {
@@ -144,7 +146,7 @@ var HybriddNode = function (host_) {
 
   this.call = function (data, dataCallback, errorCallback) { // todo options: {connector,interval, timeout}
     var xhrSocket = (host, query, dataCallback, errorCallback) => {
-      var xhr = new XMLHttpRequest();
+      var xhr = new data.connector.XMLHttpRequest();
       xhr.onreadystatechange = e => {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
@@ -159,9 +161,9 @@ var HybriddNode = function (host_) {
     };
 
     var httpSocket = (host, query, dataCallback, errorCallback) => {
-      http.get(host + query, (res) => {
+      data.connector.http.get(host + query, (res) => {
         const { statusCode } = res;
-        const contentType = res.headers['content-type'];
+        // const contentType = res.headers['content-type'];
 
         let error;
         if (statusCode !== 200) {
@@ -203,18 +205,19 @@ var HybriddNode = function (host_) {
       }
     }
 
-    var socket;
-    if (xhrAvailable) { socket = xhrSocket; }
-    if (httpAvailable) { socket = httpSocket; }
+    var connector;
+    if (data.connector.hasOwnProperty('XMLHttpRequest')) { connector = xhrSocket; }
+    if (data.connector.hasOwnProperty('http')) { connector = httpSocket; }
+    if (data.connector.hasOwnProperty('custom')) { connector = data.connector.custom; }
 
-    if (typeof socket === 'undefined') {
+    if (typeof connector === 'undefined') {
       if (typeof errorCallback === 'function') {
-        errorCallback('Error: No http request method available.');
+        errorCallback('Error: No http request connector method available.');
       }
       return;
     }
 
-    socket(host, data.query, (response) => {
+    connector(host, data.query, (response) => {
       var data;
       try {
         data = JSON.parse(response);
@@ -226,7 +229,7 @@ var HybriddNode = function (host_) {
       }
       if (data.hasOwnProperty('id') && data.id === 'id') {
         var interval = setInterval(() => {
-          socket(host, '/p/' + data.data, (response) => {
+          connector(host, '/p/' + data.data, (response) => {
             var data;
             try {
               data = JSON.parse(response);
@@ -263,12 +266,13 @@ var HybriddNode = function (host_) {
        {
        userKeys
        options
+       connector
        }
     */
     nonce = nacl.crypto_box_random_nonce();
     initial_session_data = CommonUtils.generateInitialSessionData(nonce);
-    this.call({query: this.xAuthStep0Request()}, (response) => {
-      this.call({query: this.xAuthStep1Request(response.nonce1)}, (response) => {
+    this.call({query: this.xAuthStep0Request(), connector: data.connector}, (response) => {
+      this.call({query: this.xAuthStep1Request(response.nonce1), connector: data.connector}, (response) => {
         this.xAuthFinalize(response, data.userKeys);
         if (successCallback) { successCallback(); }
       }, errorCallback, data.option);

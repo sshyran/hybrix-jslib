@@ -13,11 +13,15 @@ var sjcl = require('../crypto/sjcl');
 
 /**
  * Internet of Coins main API interface object
+ * @param {Object} data - one of the three methods below must be passed.
+ * @param {Object} data.http - a http object. (https://nodejs.org/api/http.html)
+ * @param {Object} data.XMLHttpRequest - a XMLHttpRequest object. (https://developer.mozilla.org/nl/docs/Web/API/XMLHttpRequest)
+ * @param {Function} data.custom - a custom connector method which receives a hostname, query, dataCallback and errorCallback parameters and returns a string.
  * @example
  * // Node JS
- * var IoC = require('./ioc.lib.node');
+ * var IoC = require('./ioc.nodejs.client');
  *
- * var ioc = new IoC.Interface();
+ * var ioc = new IoC.Interface({http:require('http')});
  *
  * function onSucces(){
  *  console.error('Done.');
@@ -30,9 +34,9 @@ var sjcl = require('../crypto/sjcl');
  * ioc.init(null, onSucces, onError);
  * @example
  * // Webpage
- * // add <script src="./ioc.lib.web.js"></script> to html header
+ * // add <script src="./ioc.web.client.js"></script> to html header
  *
- * var ioc = new IoC.Interface();
+ * var ioc = new IoC.Interface({XMLHttpRequest:XMLHttpRequest});
  *
  * function onSucces(){
  *  console.error('Done.');
@@ -63,8 +67,8 @@ var sjcl = require('../crypto/sjcl');
  * @constructor
  */
 
-var Interface = function (connector_) {
-  var connector = connector_;
+var Interface = function (data) {
+  var connector = data;
   var user_keys;
   /*
     boxPk
@@ -291,7 +295,7 @@ var Interface = function (connector_) {
     // TODO check if valid hostname
     var hybriddNode = new HybriddNode.HybriddNode(data.host);
     hybriddNodes[data.host] = hybriddNode;
-    hybriddNode.init({userKeys: user_keys, options: data.options}, dataCallback, errorCallback);
+    hybriddNode.init({userKeys: user_keys, options: data.options, connector: connector}, dataCallback, errorCallback);
   };
 
   /**
