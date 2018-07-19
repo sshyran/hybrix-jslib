@@ -1,12 +1,24 @@
 // ychan encrypts an API query before sending it to the router
-ychan = function (usercrypto, step, txtdata) {
+var UrlBase64 = require('./crypto/UrlBase64');
+var Decimal = require('./crypto/decimal-light');
+var hex2dec = require('./crypto/hex2dec');
+var CommonUtils = require('./index');
+
+Decimal.set({
+  precision: 100,
+  rounding: Decimal.ROUND_HALF_UP,
+  toExpNeg: 0,
+  toExpPos: 100
+});
+
+var path = function (usercrypto, step, txtdata) {
   // decodes only from UrlBase64 for now, must be real usercrypto!
-  var encdata = ychan_encode(usercrypto, step, txtdata);
+  var encdata = encode(usercrypto, step, txtdata);
   return 'y/' + encdata;
 };
 
-ychan_obj = function (usercrypto, step, encdata) {
-  return JSON.parse(ychan_decode(usercrypto, step, encdata));
+var obj = function (usercrypto, step, encdata) {
+  return JSON.parse(decode(usercrypto, step, encdata));
 };
 
 /*
@@ -19,7 +31,7 @@ ychan_obj = function (usercrypto, step, encdata) {
   txtdata
   }
 */
-ychan_encode_sub = function (data) {
+var encode_sub = function (data) {
   var cryptUtf8 = nacl.encode_utf8(data.txtdata);
   // use nacl to create a crypto box containing the data
   var cryptBin = nacl.crypto_box(
@@ -34,11 +46,11 @@ ychan_encode_sub = function (data) {
 };
 
 // sessionData = sessionHex
-ychan_encode = function (usercrypto, step, txtdata) {
+var encode = function (usercrypto, step, txtdata) {
   var sessionData = document.querySelector('#session_data').textContent; // fetch relevant info from #session_data
   var sessionSecData = getGeneralSessionData(usercrypto, step, sessionData);
 
-  return ychan_encode_sub({
+  return encode_sub({
     sessionID: sessionSecData.sessionID,
     sessionNonce: sessionSecData.sessionNonce,
     serverSessionPubKey: sessionSecData.serverSessionPubKey,
@@ -56,7 +68,7 @@ serverSessionPubKey
 clientSessionSecKey
 }
 */
-ychan_decode_sub = function (data) {
+var decode_sub = function (data) {
   // TODO: add check for encdata.error:0?
   var txtdata;
   var hexdata = UrlBase64.safeDecompress(data.encdata);
@@ -75,13 +87,13 @@ ychan_decode_sub = function (data) {
   return txtdata;
 };
 
-ychan_decode = function (usercrypto, step, encdata) {
+var decode = function (usercrypto, step, encdata) {
   var sessionData = document.querySelector('#session_data').textContent;
   var txtdata = null;
   if (encdata !== null) {
     // decompress the data into a hex string
     var sessionSecData = getGeneralSessionData(usercrypto, step, sessionData);
-    txtdata = ychan_decode_sub({
+    txtdata = decode_sub({
       encdata,
       sessionNonce: sessionSecData.sessionNonce,
       serverSessionPubKey: sessionSecData.serverSessionPubKey,
@@ -91,20 +103,13 @@ ychan_decode = function (usercrypto, step, encdata) {
   return txtdata;
 };
 
-function getGeneralSessionData (usercrypto, step, sessionData) {
-  var sessionObject = readSession(
+var getGeneralSessionData = function (usercrypto, step, sessionData) {
+  var sessionObject = CommonUtils.readSession(
     usercrypto.user_keys,
     usercrypto.nonce,
     sessionData,
     couldNotRetrieveSessionDataAlert// TODO global callback, should be removed!!
   );
-  // TODO dit netjes doen
-  Decimal.set({
-    precision: 100,
-    rounding: Decimal.ROUND_HALF_UP,
-    toExpNeg: 0,
-    toExpPos: 100
-  });
   var sessionID = sessionObject.session_pubsign;
   // TODO: check server public signing of incoming object
   // DEBUG: alert('Incoming object: '+JSON.stringify(session_object)); // works!
@@ -127,8 +132,18 @@ function getGeneralSessionData (usercrypto, step, sessionData) {
     serverSessionPubKey,
     sessionNonce
   };
-}
+};
 
 function couldNotRetrieveSessionDataAlert () {
   console.log('Error: Could not retrieve session data.');
 }
+
+module.exports = {
+  path, // formaliy ychan
+  obj,
+  decode_sub,
+  decode,
+  encode_sub,
+  encode,
+  getGeneralSessionData
+};
