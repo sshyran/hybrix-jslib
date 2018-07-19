@@ -678,7 +678,211 @@ var IoC =
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var UrlBase64 = __webpack_require__(1);
+var __WEBPACK_AMD_DEFINE_RESULT__;var UrlBase64 = (function() {
+	var UrlBase64 = {		
+		// private property
+		_keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=",
+
+		// public method for encoding
+		Encode : function (input) {
+			var output = "";
+			var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+			var i = 0;
+
+			input = UrlBase64._utf8_encode(input);
+
+			while (i < input.length) {
+
+				chr1 = input.charCodeAt(i++);
+				chr2 = input.charCodeAt(i++);
+				chr3 = input.charCodeAt(i++);
+
+				enc1 = chr1 >> 2;
+				enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+				enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+				enc4 = chr3 & 63;
+
+				if (isNaN(chr2)) {
+					enc3 = enc4 = 64;
+				} else if (isNaN(chr3)) {
+					enc4 = 64;
+				}
+
+				output = output +
+				this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2) +
+				this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
+
+			}
+
+			return output;
+		},
+
+		// public method for decoding
+		Decode : function (input) {
+			var output = "";
+			var chr1, chr2, chr3;
+			var enc1, enc2, enc3, enc4;
+			var i = 0;
+
+			if(typeof input != 'undefined') {
+				input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+				while (i < input.length) {
+
+					enc1 = this._keyStr.indexOf(input.charAt(i++));
+					enc2 = this._keyStr.indexOf(input.charAt(i++));
+					enc3 = this._keyStr.indexOf(input.charAt(i++));
+					enc4 = this._keyStr.indexOf(input.charAt(i++));
+
+					chr1 = (enc1 << 2) | (enc2 >> 4);
+					chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+					chr3 = ((enc3 & 3) << 6) | enc4;
+
+					output = output + String.fromCharCode(chr1);
+
+					if (enc3 != 64) {
+						output = output + String.fromCharCode(chr2);
+					}
+					if (enc4 != 64) {
+						output = output + String.fromCharCode(chr3);
+					}
+
+				}
+
+				output = UrlBase64._utf8_decode(output);
+			} else { output = undefined; }
+			
+			return output;
+
+		},
+
+		// private method for UTF-8 encoding
+		_utf8_encode : function (string) {
+			string = string.replace(/\r\n/g,"\n");
+			var utftext = "";
+
+			for (var n = 0; n < string.length; n++) {
+
+				var c = string.charCodeAt(n);
+
+				if (c < 128) {
+					utftext += String.fromCharCode(c);
+				}
+				else if((c > 127) && (c < 2048)) {
+					utftext += String.fromCharCode((c >> 6) | 192);
+					utftext += String.fromCharCode((c & 63) | 128);
+				}
+				else {
+					utftext += String.fromCharCode((c >> 12) | 224);
+					utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+					utftext += String.fromCharCode((c & 63) | 128);
+				}
+
+			}
+
+			return utftext;
+		},
+
+		// private method for UTF-8 decoding
+		_utf8_decode : function (utftext) {
+			var string = "";
+			var i = 0;
+			var c = c1 = c2 = 0;
+
+			while ( i < utftext.length ) {
+
+				c = utftext.charCodeAt(i);
+
+				if (c < 128) {
+					string += String.fromCharCode(c);
+					i++;
+				}
+				else if((c > 191) && (c < 224)) {
+					c2 = utftext.charCodeAt(i+1);
+					string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+					i += 2;
+				}
+				else {
+					c2 = utftext.charCodeAt(i+1);
+					c3 = utftext.charCodeAt(i+2);
+					string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+					i += 3;
+				}
+
+			}
+
+			return string;
+		},
+
+		  atob : function (base64) {
+			var table = this._keyStr.split("");
+			if (/(=[^=]+|={3,})$/.test(base64)) throw new Error("String contains an invalid character");
+			base64 = base64.replace(/=/g, "");
+			var n = base64.length & 3;
+			if (n === 1) throw new Error("String contains an invalid character");
+			for (var i = 0, j = 0, len = base64.length / 4, bin = []; i < len; ++i) {
+			  var a = _keyStr.indexOf(base64[j++] || "A"), b = _keyStr.indexOf(base64[j++] || "A");
+			  var c = _keyStr.indexOf(base64[j++] || "A"), d = _keyStr.indexOf(base64[j++] || "A");
+			  if ((a | b | c | d) < 0) throw new Error("String contains an invalid character");
+			  bin[bin.length] = ((a << 2) | (b >> 4)) & 255;
+			  bin[bin.length] = ((b << 4) | (c >> 2)) & 255;
+			  bin[bin.length] = ((c << 6) | d) & 255;
+			};
+			return String.fromCharCode.apply(null, bin).substr(0, bin.length + n - 4);
+		  },
+
+		  btoa : function (bin) {
+			var table = this._keyStr.split("");
+			for (var i = 0, j = 0, len = bin.length / 3, base64 = []; i < len; ++i) {
+			  var a = bin.charCodeAt(j++), b = bin.charCodeAt(j++), c = bin.charCodeAt(j++);
+			  if ((a | b | c) > 255) throw new Error("String contains an invalid character");
+			  base64[base64.length] = table[a >> 2] + table[((a << 4) & 63) | (b >> 4)] +
+									  (isNaN(b) ? "=" : table[((b << 2) & 63) | (c >> 6)]) +
+									  (isNaN(b + c) ? "=" : table[c & 63]);
+			}
+			return base64.join("");
+		  },
+
+		hexToBase64 : function (str) {
+		  return btoa(String.fromCharCode.apply(null,
+			str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" "))
+		  );
+		},
+
+		base64ToHex : function (str) {
+		  for (var i = 0, bin = atob(str.replace(/[ \r\n]+$/, "")), hex = []; i < bin.length; ++i) {
+			var tmp = bin.charCodeAt(i).toString(16);
+			if (tmp.length === 1) tmp = "0" + tmp;
+			hex[hex.length] = tmp;
+		  }
+		  return hex.join(" ");
+		},
+
+		safeCompress : function (input) {
+			return UrlBase64.Encode( LZString.compressToEncodedURIComponent(input) );
+		},
+
+		safeDecompress : function (input) {
+			return LZString.decompressFromEncodedURIComponent( UrlBase64.Decode(input) );
+		}
+
+	}
+  
+return UrlBase64;
+
+})();
+
+if (true) {
+  !(__WEBPACK_AMD_DEFINE_RESULT__ = (function () { return UrlBase64; }).call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+} else {}
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// TODO var UrlBase64 = require('./crypto/UrlBase64');
 
 // returns array of double public/secret keypairs
 // one for encrypting (boxPk/boxSk) and one for signing (signPk/signSk)
@@ -957,210 +1161,6 @@ if (true) {
     validateUserIDLength
   };
 }
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_RESULT__;var UrlBase64 = (function() {
-	var UrlBase64 = {		
-		// private property
-		_keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=",
-
-		// public method for encoding
-		Encode : function (input) {
-			var output = "";
-			var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-			var i = 0;
-
-			input = UrlBase64._utf8_encode(input);
-
-			while (i < input.length) {
-
-				chr1 = input.charCodeAt(i++);
-				chr2 = input.charCodeAt(i++);
-				chr3 = input.charCodeAt(i++);
-
-				enc1 = chr1 >> 2;
-				enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-				enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-				enc4 = chr3 & 63;
-
-				if (isNaN(chr2)) {
-					enc3 = enc4 = 64;
-				} else if (isNaN(chr3)) {
-					enc4 = 64;
-				}
-
-				output = output +
-				this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2) +
-				this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
-
-			}
-
-			return output;
-		},
-
-		// public method for decoding
-		Decode : function (input) {
-			var output = "";
-			var chr1, chr2, chr3;
-			var enc1, enc2, enc3, enc4;
-			var i = 0;
-
-			if(typeof input != 'undefined') {
-				input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-
-				while (i < input.length) {
-
-					enc1 = this._keyStr.indexOf(input.charAt(i++));
-					enc2 = this._keyStr.indexOf(input.charAt(i++));
-					enc3 = this._keyStr.indexOf(input.charAt(i++));
-					enc4 = this._keyStr.indexOf(input.charAt(i++));
-
-					chr1 = (enc1 << 2) | (enc2 >> 4);
-					chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-					chr3 = ((enc3 & 3) << 6) | enc4;
-
-					output = output + String.fromCharCode(chr1);
-
-					if (enc3 != 64) {
-						output = output + String.fromCharCode(chr2);
-					}
-					if (enc4 != 64) {
-						output = output + String.fromCharCode(chr3);
-					}
-
-				}
-
-				output = UrlBase64._utf8_decode(output);
-			} else { output = undefined; }
-			
-			return output;
-
-		},
-
-		// private method for UTF-8 encoding
-		_utf8_encode : function (string) {
-			string = string.replace(/\r\n/g,"\n");
-			var utftext = "";
-
-			for (var n = 0; n < string.length; n++) {
-
-				var c = string.charCodeAt(n);
-
-				if (c < 128) {
-					utftext += String.fromCharCode(c);
-				}
-				else if((c > 127) && (c < 2048)) {
-					utftext += String.fromCharCode((c >> 6) | 192);
-					utftext += String.fromCharCode((c & 63) | 128);
-				}
-				else {
-					utftext += String.fromCharCode((c >> 12) | 224);
-					utftext += String.fromCharCode(((c >> 6) & 63) | 128);
-					utftext += String.fromCharCode((c & 63) | 128);
-				}
-
-			}
-
-			return utftext;
-		},
-
-		// private method for UTF-8 decoding
-		_utf8_decode : function (utftext) {
-			var string = "";
-			var i = 0;
-			var c = c1 = c2 = 0;
-
-			while ( i < utftext.length ) {
-
-				c = utftext.charCodeAt(i);
-
-				if (c < 128) {
-					string += String.fromCharCode(c);
-					i++;
-				}
-				else if((c > 191) && (c < 224)) {
-					c2 = utftext.charCodeAt(i+1);
-					string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
-					i += 2;
-				}
-				else {
-					c2 = utftext.charCodeAt(i+1);
-					c3 = utftext.charCodeAt(i+2);
-					string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
-					i += 3;
-				}
-
-			}
-
-			return string;
-		},
-
-		  atob : function (base64) {
-			var table = this._keyStr.split("");
-			if (/(=[^=]+|={3,})$/.test(base64)) throw new Error("String contains an invalid character");
-			base64 = base64.replace(/=/g, "");
-			var n = base64.length & 3;
-			if (n === 1) throw new Error("String contains an invalid character");
-			for (var i = 0, j = 0, len = base64.length / 4, bin = []; i < len; ++i) {
-			  var a = _keyStr.indexOf(base64[j++] || "A"), b = _keyStr.indexOf(base64[j++] || "A");
-			  var c = _keyStr.indexOf(base64[j++] || "A"), d = _keyStr.indexOf(base64[j++] || "A");
-			  if ((a | b | c | d) < 0) throw new Error("String contains an invalid character");
-			  bin[bin.length] = ((a << 2) | (b >> 4)) & 255;
-			  bin[bin.length] = ((b << 4) | (c >> 2)) & 255;
-			  bin[bin.length] = ((c << 6) | d) & 255;
-			};
-			return String.fromCharCode.apply(null, bin).substr(0, bin.length + n - 4);
-		  },
-
-		  btoa : function (bin) {
-			var table = this._keyStr.split("");
-			for (var i = 0, j = 0, len = bin.length / 3, base64 = []; i < len; ++i) {
-			  var a = bin.charCodeAt(j++), b = bin.charCodeAt(j++), c = bin.charCodeAt(j++);
-			  if ((a | b | c) > 255) throw new Error("String contains an invalid character");
-			  base64[base64.length] = table[a >> 2] + table[((a << 4) & 63) | (b >> 4)] +
-									  (isNaN(b) ? "=" : table[((b << 2) & 63) | (c >> 6)]) +
-									  (isNaN(b + c) ? "=" : table[c & 63]);
-			}
-			return base64.join("");
-		  },
-
-		hexToBase64 : function (str) {
-		  return btoa(String.fromCharCode.apply(null,
-			str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" "))
-		  );
-		},
-
-		base64ToHex : function (str) {
-		  for (var i = 0, bin = atob(str.replace(/[ \r\n]+$/, "")), hex = []; i < bin.length; ++i) {
-			var tmp = bin.charCodeAt(i).toString(16);
-			if (tmp.length === 1) tmp = "0" + tmp;
-			hex[hex.length] = tmp;
-		  }
-		  return hex.join(" ");
-		},
-
-		safeCompress : function (input) {
-			return UrlBase64.Encode( LZString.compressToEncodedURIComponent(input) );
-		},
-
-		safeDecompress : function (input) {
-			return LZString.decompressFromEncodedURIComponent( UrlBase64.Decode(input) );
-		}
-
-	}
-  
-return UrlBase64;
-
-})();
-
-if (true) {
-  !(__WEBPACK_AMD_DEFINE_RESULT__ = (function () { return UrlBase64; }).call(exports, __webpack_require__, exports, module),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-} else {}
 
 
 /***/ }),
@@ -1680,7 +1680,8 @@ if (true) {
 // import {HybriddNode} from './hybriddNode.js';
 DEBUG = false;
 var HybriddNode = __webpack_require__(4);
-var CommonUtils = __webpack_require__(0);
+UrlBase64 = __webpack_require__(0); // TODO make non global as soon as index.js can do require
+var CommonUtils = __webpack_require__(1);
 var LZString = __webpack_require__(2);
 var sjcl = __webpack_require__(9);
 
@@ -1741,7 +1742,8 @@ var sjcl = __webpack_require__(9);
  * @constructor
  */
 
-var Interface = function () {
+var Interface = function (connector_) {
+  var connector = connector_;
   var user_keys;
   /*
     boxPk
@@ -1775,7 +1777,6 @@ var Interface = function () {
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.init = function (data, dataCallback, errorCallback) {
-    //    Decimal.set({precision: 64}); // cryptocurrencies (like for example Ethereum) require extremely high precision!
     if (typeof nacl === 'undefined') {
       nacl_factory.instantiate(function (naclinstance) {
         nacl = naclinstance; // nacl is a global that is initialized here.
@@ -1855,13 +1856,17 @@ var Interface = function () {
  */
   this.addAsset = function (data, dataCallback, errorCallback) {
     // TODO symbol as array of strings to load multiple?
-    this.call({host: data.host, query: 'a/' + data.symbol + '/details', options: data.options, channel: data.channel}, (asset) => {
-      var mode = asset.data.mode.split('.')[0];
-      // TODO alleen blob ophalen als die nog niet opgehaald is
-      this.call({host: data.host, query: 's/deterministic/code/' + mode, options: data.options, channel: data.channel}, (blob) => {
-        this.initAsset({assetDetails: asset.data, deterministicCodeBlob: blob.data}, dataCallback, errorCallback);
+    if (!assets.hasOwnProperty(data.symbol)) { // if assets has not been iniated, retrieve and initialize
+      this.call({host: data.host, query: 'a/' + data.symbol + '/details', options: data.options, channel: data.channel}, (asset) => {
+        var mode = asset.data.mode.split('.')[0];
+        // TODO alleen blob ophalen als die nog niet opgehaald is
+        this.call({host: data.host, query: 's/deterministic/code/' + mode, options: data.options, channel: data.channel}, (blob) => {
+          this.initAsset({assetDetails: asset.data, deterministicCodeBlob: blob.data}, dataCallback, errorCallback);
+        }, errorCallback);
       }, errorCallback);
-    }, errorCallback);
+    } else if (typeof dataCallback !== 'undefined') {
+      dataCallback(data.symbol);
+    }
   };
 
   /**
@@ -1923,7 +1928,7 @@ var Interface = function () {
       unspent: data.unspent
     };
     var checkTransaction = deterministic[asset['keygen-base']].transaction(transactionData, dataCallback);// TODO errorCallback
-    if (typeof checkTransaction === 'undefined' && typeof dataCallback === 'function') {
+    if (typeof checkTransaction !== 'undefined' && typeof dataCallback === 'function') {
       dataCallback(checkTransaction);
     }
   };
@@ -1949,6 +1954,8 @@ var Interface = function () {
     */
     this.sequential({steps: [
       {symbol: data.symbol},
+      'addAsset',
+      {symbol: data.symbol},
       'getAddress',
       address => { return {query: '/a/' + data.symbol + '/unspent/' + address + '/' + data.target + '/' + data.amount + '/public_key'}; },
       'call',
@@ -1963,7 +1970,6 @@ var Interface = function () {
  * TODO
  * @param {Object} data
  * @param {string} data.host - TODO  multiple in array?
- * @param {Object} [data.options] - TODO
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
@@ -1981,7 +1987,6 @@ var Interface = function () {
  * @param {string} data.query - TODO
  * @param {string} data.channel - TODO
  * @param {string} [data.host] - TODO
- * @param {Object} [data.options] - TODO
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
@@ -1996,9 +2001,9 @@ var Interface = function () {
     // TODO add for y,z chan: error when no session (user_keys) have been created
     if (hybriddNodes.hasOwnProperty(host)) {
       switch (data.channel) {
-        case 'y' : hybriddNodes[host].yCall({query: data.query, channel: data.channel, userKeys: user_keys}, dataCallback, errorCallback); break;
-        case 'z' : hybriddNodes[host].zCall({query: data.query, channel: data.channel, userKeys: user_keys}, dataCallback, errorCallback); break;
-        default : hybriddNodes[host].call(data.query, dataCallback, errorCallback, data.options); break;
+        case 'y' : hybriddNodes[host].yCall({query: data.query, channel: data.channel, userKeys: user_keys, connector: connector}, dataCallback, errorCallback); break;
+        case 'z' : hybriddNodes[host].zCall({query: data.query, channel: data.channel, userKeys: user_keys, connector: connector}, dataCallback, errorCallback); break;
+        default : hybriddNodes[host].call({query: data.query, connector: connector}, dataCallback, errorCallback); break;
       }
     } else if (typeof errorCallback === 'function') {
       errorCallback('Host not initialized');
@@ -2049,7 +2054,8 @@ module.exports = {Interface};
 /***/ (function(module, exports, __webpack_require__) {
 
 var zchan = __webpack_require__(5);
-var CommonUtils = __webpack_require__(0);
+var UrlBase64 = __webpack_require__(0);
+var CommonUtils = __webpack_require__(1);
 
 var HybriddNode = function (host_) {
   var step; // Incremental step. Steps 0 and 2 used for x-authentication, subsequent steps used for y and z chan
@@ -2143,7 +2149,7 @@ var HybriddNode = function (host_) {
       step: step,
       txtdata: data.query
     });
-    this.call(data.channel + '/' + y, (encdata) => {
+    this.call({query: data.channel + '/' + y}, (encdata) => {
       // decode encoded data into text data
       var txtdata = ychan.decode_sub({
         encdata: encdata,
@@ -2164,7 +2170,7 @@ var HybriddNode = function (host_) {
       } else {
         dataCallback(txtdata);
       }
-    }, errorCallback, data.options);
+    }, errorCallback);
   };
 
   this.zCall = function (data, dataCallback, errorCallback) {
@@ -2176,7 +2182,7 @@ var HybriddNode = function (host_) {
        }
     */
     var encodedQuery = zchan.encode({user_keys: data.userKeys, nonce: ternary_session_data.current_nonce}, step, data.query);
-    this.yCall({query: encodedQuery, channel: 'z', options: data.options, userKeys: data.userKeys}, encodedData => {
+    this.yCall({query: encodedQuery, channel: 'z', userKeys: data.userKeys}, encodedData => {
       var txtdata = zchan.decode_sub(encodedData);
       var data;
       try {
@@ -2191,7 +2197,7 @@ var HybriddNode = function (host_) {
     }, errorCallback);
   };
 
-  this.call = function (query, dataCallback, errorCallback, options) { // todo options: {socket,interval, timeout}
+  this.call = function (data, dataCallback, errorCallback) { // todo options: {connector,interval, timeout}
     var xhrSocket = (host, query, dataCallback, errorCallback) => {
       var xhr = new XMLHttpRequest();
       xhr.onreadystatechange = e => {
@@ -2263,7 +2269,7 @@ var HybriddNode = function (host_) {
       return;
     }
 
-    socket(host, query, (response) => {
+    socket(host, data.query, (response) => {
       var data;
       try {
         data = JSON.parse(response);
@@ -2316,8 +2322,8 @@ var HybriddNode = function (host_) {
     */
     nonce = nacl.crypto_box_random_nonce();
     initial_session_data = CommonUtils.generateInitialSessionData(nonce);
-    this.call(this.xAuthStep0Request(), (response) => {
-      this.call(this.xAuthStep1Request(response.nonce1), (response) => {
+    this.call({query: this.xAuthStep0Request()}, (response) => {
+      this.call({query: this.xAuthStep1Request(response.nonce1)}, (response) => {
         this.xAuthFinalize(response, data.userKeys);
         if (successCallback) { successCallback(); }
       }, errorCallback, data.option);
@@ -2378,10 +2384,10 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 // ychan encrypts an API query before sending it to the router
-var UrlBase64 = __webpack_require__(1);
+var UrlBase64 = __webpack_require__(0);
 var Decimal = __webpack_require__(7);
 var hex2dec = __webpack_require__(8);
-var CommonUtils = __webpack_require__(0);
+var CommonUtils = __webpack_require__(1);
 
 Decimal.set({
   precision: 100,

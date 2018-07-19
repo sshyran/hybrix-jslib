@@ -1,4 +1,5 @@
 var zchan = require('../zchan');
+var UrlBase64 = require('../crypto/UrlBase64');
 var CommonUtils = require('../index');
 
 var HybriddNode = function (host_) {
@@ -93,7 +94,7 @@ var HybriddNode = function (host_) {
       step: step,
       txtdata: data.query
     });
-    this.call(data.channel + '/' + y, (encdata) => {
+    this.call({query: data.channel + '/' + y}, (encdata) => {
       // decode encoded data into text data
       var txtdata = ychan.decode_sub({
         encdata: encdata,
@@ -114,7 +115,7 @@ var HybriddNode = function (host_) {
       } else {
         dataCallback(txtdata);
       }
-    }, errorCallback, data.options);
+    }, errorCallback);
   };
 
   this.zCall = function (data, dataCallback, errorCallback) {
@@ -126,7 +127,7 @@ var HybriddNode = function (host_) {
        }
     */
     var encodedQuery = zchan.encode({user_keys: data.userKeys, nonce: ternary_session_data.current_nonce}, step, data.query);
-    this.yCall({query: encodedQuery, channel: 'z', options: data.options, userKeys: data.userKeys}, encodedData => {
+    this.yCall({query: encodedQuery, channel: 'z', userKeys: data.userKeys}, encodedData => {
       var txtdata = zchan.decode_sub(encodedData);
       var data;
       try {
@@ -141,7 +142,7 @@ var HybriddNode = function (host_) {
     }, errorCallback);
   };
 
-  this.call = function (query, dataCallback, errorCallback, options) { // todo options: {socket,interval, timeout}
+  this.call = function (data, dataCallback, errorCallback) { // todo options: {connector,interval, timeout}
     var xhrSocket = (host, query, dataCallback, errorCallback) => {
       var xhr = new XMLHttpRequest();
       xhr.onreadystatechange = e => {
@@ -213,7 +214,7 @@ var HybriddNode = function (host_) {
       return;
     }
 
-    socket(host, query, (response) => {
+    socket(host, data.query, (response) => {
       var data;
       try {
         data = JSON.parse(response);
@@ -266,8 +267,8 @@ var HybriddNode = function (host_) {
     */
     nonce = nacl.crypto_box_random_nonce();
     initial_session_data = CommonUtils.generateInitialSessionData(nonce);
-    this.call(this.xAuthStep0Request(), (response) => {
-      this.call(this.xAuthStep1Request(response.nonce1), (response) => {
+    this.call({query: this.xAuthStep0Request()}, (response) => {
+      this.call({query: this.xAuthStep1Request(response.nonce1)}, (response) => {
         this.xAuthFinalize(response, data.userKeys);
         if (successCallback) { successCallback(); }
       }, errorCallback, data.option);

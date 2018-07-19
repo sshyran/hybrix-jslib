@@ -1,7 +1,7 @@
 // import {HybriddNode} from './hybriddNode.js';
 DEBUG = false;
 var HybriddNode = require('./hybriddNode');
-var UrlBase64 = require('./crypto/UrlBase64');
+UrlBase64 = require('../crypto/UrlBase64'); // TODO make non global as soon as index.js can do require
 var CommonUtils = require('../index');
 var LZString = require('../crypto/lz-string');
 var sjcl = require('../crypto/sjcl');
@@ -63,7 +63,8 @@ var sjcl = require('../crypto/sjcl');
  * @constructor
  */
 
-var Interface = function () {
+var Interface = function (connector_) {
+  var connector = connector_;
   var user_keys;
   /*
     boxPk
@@ -97,7 +98,6 @@ var Interface = function () {
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.init = function (data, dataCallback, errorCallback) {
-    //    Decimal.set({precision: 64}); // cryptocurrencies (like for example Ethereum) require extremely high precision!
     if (typeof nacl === 'undefined') {
       nacl_factory.instantiate(function (naclinstance) {
         nacl = naclinstance; // nacl is a global that is initialized here.
@@ -177,13 +177,17 @@ var Interface = function () {
  */
   this.addAsset = function (data, dataCallback, errorCallback) {
     // TODO symbol as array of strings to load multiple?
-    this.call({host: data.host, query: 'a/' + data.symbol + '/details', options: data.options, channel: data.channel}, (asset) => {
-      var mode = asset.data.mode.split('.')[0];
-      // TODO alleen blob ophalen als die nog niet opgehaald is
-      this.call({host: data.host, query: 's/deterministic/code/' + mode, options: data.options, channel: data.channel}, (blob) => {
-        this.initAsset({assetDetails: asset.data, deterministicCodeBlob: blob.data}, dataCallback, errorCallback);
+    if (!assets.hasOwnProperty(data.symbol)) { // if assets has not been iniated, retrieve and initialize
+      this.call({host: data.host, query: 'a/' + data.symbol + '/details', options: data.options, channel: data.channel}, (asset) => {
+        var mode = asset.data.mode.split('.')[0];
+        // TODO alleen blob ophalen als die nog niet opgehaald is
+        this.call({host: data.host, query: 's/deterministic/code/' + mode, options: data.options, channel: data.channel}, (blob) => {
+          this.initAsset({assetDetails: asset.data, deterministicCodeBlob: blob.data}, dataCallback, errorCallback);
+        }, errorCallback);
       }, errorCallback);
-    }, errorCallback);
+    } else if (typeof dataCallback !== 'undefined') {
+      dataCallback(data.symbol);
+    }
   };
 
   /**
@@ -245,7 +249,7 @@ var Interface = function () {
       unspent: data.unspent
     };
     var checkTransaction = deterministic[asset['keygen-base']].transaction(transactionData, dataCallback);// TODO errorCallback
-    if (typeof checkTransaction === 'undefined' && typeof dataCallback === 'function') {
+    if (typeof checkTransaction !== 'undefined' && typeof dataCallback === 'function') {
       dataCallback(checkTransaction);
     }
   };
@@ -261,15 +265,9 @@ var Interface = function () {
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.transaction = function (data, dataCallback, errorCallback) {
-    /* data =
-       {
-       symbol
-       target
-       amount
-       fee
-       }
-    */
     this.sequential({steps: [
+      {symbol: data.symbol},
+      'addAsset',
       {symbol: data.symbol},
       'getAddress',
       address => { return {query: '/a/' + data.symbol + '/unspent/' + address + '/' + data.target + '/' + data.amount + '/public_key'}; },
@@ -285,7 +283,6 @@ var Interface = function () {
  * TODO
  * @param {Object} data
  * @param {string} data.host - TODO  multiple in array?
- * @param {Object} [data.options] - TODO
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
@@ -303,7 +300,6 @@ var Interface = function () {
  * @param {string} data.query - TODO
  * @param {string} data.channel - TODO
  * @param {string} [data.host] - TODO
- * @param {Object} [data.options] - TODO
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
@@ -318,9 +314,9 @@ var Interface = function () {
     // TODO add for y,z chan: error when no session (user_keys) have been created
     if (hybriddNodes.hasOwnProperty(host)) {
       switch (data.channel) {
-        case 'y' : hybriddNodes[host].yCall({query: data.query, channel: data.channel, userKeys: user_keys}, dataCallback, errorCallback); break;
-        case 'z' : hybriddNodes[host].zCall({query: data.query, channel: data.channel, userKeys: user_keys}, dataCallback, errorCallback); break;
-        default : hybriddNodes[host].call(data.query, dataCallback, errorCallback, data.options); break;
+        case 'y' : hybriddNodes[host].yCall({query: data.query, channel: data.channel, userKeys: user_keys, connector: connector}, dataCallback, errorCallback); break;
+        case 'z' : hybriddNodes[host].zCall({query: data.query, channel: data.channel, userKeys: user_keys, connector: connector}, dataCallback, errorCallback); break;
+        default : hybriddNodes[host].call({query: data.query, connector: connector}, dataCallback, errorCallback); break;
       }
     } else if (typeof errorCallback === 'function') {
       errorCallback('Host not initialized');
