@@ -107,6 +107,7 @@ var HybriddNode = function (host_) {
         try {
           data = JSON.parse(txtdata);
         } catch (error) {
+          console.error(error);
           if (typeof errorCallback === 'function') {
             errorCallback(error);
           }
@@ -134,6 +135,7 @@ var HybriddNode = function (host_) {
       try {
         data = JSON.parse(txtdata);
       } catch (error) {
+        console.error(error);
         if (typeof errorCallback === 'function') {
           errorCallback(error);
         }
@@ -157,8 +159,11 @@ var HybriddNode = function (host_) {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
             dataCallback(xhr.responseText);
-          } else if (typeof errorCallback === 'function') {
-            errorCallback(xhr.responseText);
+          } else {
+            console.error(xhr.responseText);
+            if (typeof errorCallback === 'function') {
+              errorCallback(xhr.responseText);
+            }
           }
         }
       };
@@ -176,6 +181,7 @@ var HybriddNode = function (host_) {
           error = ('Request error: Status Code: ' + statusCode);
         }
         if (error) {
+          console.error(error);
           if (typeof errorCallback === 'function') {
             errorCallback(error); // TODO error.message
           }
@@ -191,6 +197,8 @@ var HybriddNode = function (host_) {
           dataCallback(rawData);
         });
       }).on('error', (e) => {
+        console.error(`Got error: ${e.message}`);
+
         if (typeof errorCallback === 'function') {
           errorCallback(`Got error: ${e.message}`);
         }
@@ -217,6 +225,7 @@ var HybriddNode = function (host_) {
     if (data.connector.hasOwnProperty('custom')) { connector = data.connector.custom; }
 
     if (typeof connector === 'undefined') {
+      console.error('Error: No http request connector method available.');
       if (typeof errorCallback === 'function') {
         errorCallback('Error: No http request connector method available.');
       }
@@ -228,6 +237,7 @@ var HybriddNode = function (host_) {
       try {
         data = JSON.parse(response);
       } catch (error) {
+        console.error(error);
         if (typeof errorCallback === 'function') {
           errorCallback(error);
         }
@@ -235,20 +245,22 @@ var HybriddNode = function (host_) {
       }
       if (data.hasOwnProperty('id') && data.id === 'id') {
         var interval = setInterval(() => {
-          connector(host, '/p/' + data.data, (response) => {
+          connector(host, '/proc/' + data.data, (response) => {
             var data;
             try {
               data = JSON.parse(response);
             } catch (error) {
+              console.error(error);
+              clearInterval(interval);
               if (typeof errorCallback === 'function') {
-                clearInterval(interval);
                 errorCallback(error);
               }
               return;
             }
             if (data.hasOwnProperty('error') && data.error !== 0) {
+              console.error(data);
+              clearInterval(interval);
               if (typeof errorCallback === 'function') {
-                clearInterval(interval);
                 errorCallback(data.info);
               }
             } else if (data.stopped !== null) {
@@ -256,19 +268,18 @@ var HybriddNode = function (host_) {
               dataCallback(meta ? data : data.data);
             }
           });
-        }, 100); // TODO parametrize, add timeout
+        }, 500); // TODO parametrize, add timeout
 
         // TODO errorCallback gebruiken bij timeout?
       } else if (dataCallback) {
         if (data.hasOwnProperty('error') && data.error !== 0) {
+          console.error(data);
           if (typeof errorCallback === 'function') {
             errorCallback(response);
           }
           return;
         }
         dataCallback(meta ? data : data.data);
-      } else if (typeof errorCallback === 'function') {
-        errorCallback(response);
       }
     },
     errorCallback

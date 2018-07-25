@@ -25,15 +25,17 @@ function testAsset (symbol) {
     'parallel',
     (result) => {
       return {
+        status: {data: result.status, step: 'id'},
+        details: {data: result.details, step: 'id'},
         sampleValid: {data: {query: '/source/wavalidator/' + symbol + '/' + result.sample.address}, step: 'call'},
         sampleBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.sample.address}, step: 'call'},
-        sampleUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.sample.address + '/' + result.address + '/0.0001'}, step: 'call'}, // TODO add public key
+        sampleUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.sample.address + '/0.0001/' + result.address + '/' + result.sample.publicKey }, step: 'call'}, // TODO add public key
         sampleHistory: {data: {query: '/asset/' + symbol + '/history/' + result.sample.address}, step: 'call'},
         sampleTransaction: {data: {query: '/asset/' + symbol + '/transaction/' + result.sample.transaction}, step: 'call'},
 
         seedValid: {data: {query: '/source/wavalidator/' + symbol + '/' + result.address}, step: 'call'},
         seedBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.address}, step: 'call'},
-        seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + result.sample.address + '/0.0001'}, step: 'call'}, //   TODO add public key
+        seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/0.0001/' + result.sample.address }, step: 'call'}, //   TODO add public key
         seedHistory: {data: {query: '/asset/' + symbol + '/history/' + result.address}, step: 'call'}
 
       };
@@ -43,22 +45,51 @@ function testAsset (symbol) {
   step: 'sequential'
   };
 }
+
+var validStatus = status => typeof status === 'object';
+var validDetails = details => typeof details === 'object';
+var validValid = valid => valid === 'valid';
+var validBalance = balance => balance !== null && !isNaN(balance);
+var validUnspent = unspent => typeof unspent !== 'undefined';
+var validHistory = history => typeof history === 'object';
+var validTransaction = transaction => typeof transaction === 'object';
+
+var renderCell = (valid, data) => {
+  var title;
+  if (typeof data === 'object') {
+    title = JSON.stringify(data);
+  } else {
+    title = String(data);
+  }
+  title = title.replace(/\"/g, '');
+  if (valid) {
+    return '<td style="background-color:green" title="' + title + '">Pass</td>';
+  } else {
+    return '<td style="background-color:red"  title="' + title + '">Fail</td>';
+  }
+};
+
 var renderTable = (data) => {
-  var r = '<table><tr><td>Symbol</td><td colspan="5">Sample</td><td colspan="4">Generated</td></tr>';
-  r += '<tr><td></td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Transaction</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td></tr>';
+  var r = '<table><tr><td>Symbol</td><td colspan="2"></td><td colspan="5">Sample</td><td colspan="4">Generated</td></tr>';
+  r += '<tr><td></td><td>Status</td><td>Details</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Transaction</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td></tr>';
   for (var symbol in data) {
     r += '<tr>';
     r += '<td>' + symbol + '</td>';
     if (typeof data[symbol] !== 'undefined') {
-      r += '<td>' + data[symbol].sampleValid + '</td>';
-      r += '<td>' + data[symbol].sampleBalance + '</td>';
-      r += '<td>' + data[symbol].sampleUnspent + '</td>';
-      r += '<td>' + data[symbol].sampleHistory + '</td>';
-      r += '<td>' + data[symbol].sampleTransaction + '</td>';
-      r += '<td>' + data[symbol].seedValid + '</td>';
-      r += '<td>' + data[symbol].seedBalance + '</td>';
-      r += '<td>' + data[symbol].seedUnspent + '</td>';
-      r += '<td>' + data[symbol].seedHistory + '</td>';
+      r += renderCell(validStatus(data[symbol].status), data[symbol].status);
+      r += renderCell(validDetails(data[symbol].details), data[symbol].details);
+      r += renderCell(validValid(data[symbol].sampleValid), data[symbol].sampleValid);
+      r += renderCell(validBalance(data[symbol].sampleBalance), data[symbol].sampleBalance);
+      r += renderCell(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent);
+      r += renderCell(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory);
+      r += renderCell(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction);
+
+      r += renderCell(validValid(data[symbol].seedValid), data[symbol].seedValid);
+      r += renderCell(validBalance(data[symbol].seedBalance), data[symbol].seedBalance);
+      r += renderCell(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent);
+      r += renderCell(validHistory(data[symbol].seedHistory), data[symbol].seedHistory);
+    } else {
+      r += '<td colspan="11" style="background-color:red">Fail</td>';
     }
     r += '</tr>';
   }
@@ -74,11 +105,15 @@ function go () {
     {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'login',
     {host: 'http://localhost:1111/'}, 'addHost',
     //    {symbol: 'dummy', amount: 100, channel: 'y'}, 'transaction',
+
+    // TODO retrieve all asset sddd
+    // TODO filter tokens
+
     {
-      //    ark: testAsset('ark'),
+      ark: testAsset('ark'),
       bch: testAsset('bch'),
       btc: testAsset('btc'),
-      //  bts: testAsset('bts'),
+      bts: testAsset('bts'),
       burst: testAsset('burst'),
       dgb: testAsset('dgb'),
       dummy: testAsset('dummy'),
@@ -86,21 +121,19 @@ function go () {
       eth: testAsset('eth'),
       exp: testAsset('exp'),
       lsk: testAsset('lsk'),
-      //      ltc: testAsset('ltc'),
+      // ltc: testAsset('ltc')
       nxt: testAsset('nxt'),
-      // omni: testAsset('omni'),
+      omni: testAsset('omni'),
       rise: testAsset('rise'),
       shift: testAsset('shift'),
-      //  ubq: testAsset('ubq'),
+      ubq: testAsset('ubq'),
       waves: testAsset('waves'),
-      //  xcp: testAsset('xcp'),
+      xcp: testAsset('xcp'),
       xel: testAsset('xel'),
       xem: testAsset('xem'),
       zec: testAsset('zec')
     },
     'parallel'
-    // TODO retrieve all asset sddd
-    // TODO filter tokens
 
   ]
     , renderTable

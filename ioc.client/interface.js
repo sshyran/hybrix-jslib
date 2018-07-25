@@ -329,9 +329,21 @@ var Interface = function (data) {
         case 'z' : hybriddNodes[host].zCall({query: data.query, channel: data.channel, userKeys: user_keys, connector: connector}, dataCallback, errorCallback); break;
         default : hybriddNodes[host].call({query: data.query, connector: connector}, dataCallback, errorCallback); break;
       }
-    } else if (typeof errorCallback === 'function') {
-      errorCallback('Host not initialized');
+    } else {
+      console.error('Host not initialized');
+      if (typeof errorCallback === 'function') {
+        errorCallback('Host not initialized');
+      }
     }
+  };
+  /**
+   * TODO
+   * @param {Array.<string|Object|Function>} data - TODO
+   * @param {Function} dataCallback - Called when the method is succesful.
+   * @param {Function} errorCallback - Called when an error occurs.
+   */
+  this.id = (data, dataCallback, errorCallback) => {
+    dataCallback(data);
   };
 
   /**
@@ -351,19 +363,22 @@ var Interface = function (data) {
       var step = data.steps[0];
       if (typeof step === 'string') {
         if (this.hasOwnProperty(step)) {
-          //          console.log('this.' + step + '(' + JSON.stringify(data.data) + ')');
+          console.log('this.' + step + '(' + JSON.stringify(data.data) + ')');
           this[step](data.data, resultData => {
             this.sequential({data: resultData, steps: data.steps.slice(1)}, dataCallback, errorCallback);
           }, errorCallback);
-        } else if (typeof errorCallback === 'function') {
-          errorCallback('Method "' + step + '" does not exist for IoC.Interface class.');
+        } else {
+          console.error('Method "' + step + '" does not exist for IoC.Interface class.');
+          if (typeof errorCallback === 'function') {
+            errorCallback('Method "' + step + '" does not exist for IoC.Interface class.');
+          }
         }
       } else if (typeof step === 'object') {
-        //        console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(step));
+        console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(step));
         this.sequential({data: step, steps: data.steps.slice(1)}, dataCallback, errorCallback);
       } else if (typeof step === 'function') {
         var result = step(data.data);
-        //        console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(result));
+        console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(result));
         this.sequential({data: result, steps: data.steps.slice(1)}, dataCallback, errorCallback);
       }
     }
@@ -417,15 +432,17 @@ var Interface = function (data) {
 
     var errorSubCallback = i => error => {
       if (data.breakOnFirstError || data.onlyGetFirstResult) {
+        console.error(error);
         if (typeof errorCallback === 'function') {
           errorCallback(error);
         }
       } else {
         ++errorCount;
         ++resultCount;
-        resultData[i] = error;
+        resultData[i] = undefined; // error;
         if (resultCount === stepCount) {
           if (errorCount === resultCount) {
+            console.error(error);
             if (typeof errorCallback === 'function') {
               errorCallback(error);
             }
@@ -440,8 +457,11 @@ var Interface = function (data) {
       if (typeof step === 'string') {
         if (this.hasOwnProperty(step)) {
           this[step](data, dataSubCallback(i), errorSubCallback(i));
-        } else if (typeof errorCallback === 'function') {
-          errorCallback('Method "' + step + '" does not exist for IoC.Interface class.');
+        } else {
+          console.error('Method "' + step + '" does not exist for IoC.Interface class.');
+          if (typeof errorCallback === 'function') {
+            errorCallback('Method "' + step + '" does not exist for IoC.Interface class.');
+          }
         }
       } else if (typeof step === 'function') {
         step(data, dataSubCallback(i), errorSubCallback(i));
@@ -458,7 +478,11 @@ var Interface = function (data) {
             executeStep(i, step.step, data);
           }
         } else {
-          errorCallback('No step defined.');
+          console.error('No step defined.');
+
+          if (typeof errorCallback === 'function') {
+            errorCallback('No step defined.');
+          }
         }
       } else {
         executeStep(i, step, data);
