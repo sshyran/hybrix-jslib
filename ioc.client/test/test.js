@@ -48,6 +48,7 @@ function testAsset (symbol) {
     'parallel',
     (result) => {
       return {
+        sample: {data: result.sample, step: 'id'},
         status: {data: result.status, step: 'id'},
         details: {data: result.details, step: 'id'},
         sampleValid: {data: result.sampleValid + ' ' + result.sample.address, step: 'id'},
@@ -77,8 +78,10 @@ var validValid = valid => typeof valid === 'string' && valid.startsWith('valid')
 var validBalance = balance => balance !== null && !isNaN(balance);
 var validUnspent = unspent => typeof unspent !== 'undefined';
 var validHistory = history => typeof history === 'object';
+var validSample = sample => typeof sample === 'object';
 var validTransaction = transaction => typeof transaction === 'object';
 var validSign = sign => typeof sign !== 'undefined' && sign !== false && sign !== '' && sign !== null && sign !== 'false' && sign !== '[UNDER MAINTENANCE]';
+
 var renderCell = (valid, data) => {
   var title;
   if (typeof data === 'object') {
@@ -95,14 +98,15 @@ var renderCell = (valid, data) => {
 };
 
 var renderTable = (data) => {
-  var r = '<table><tr><td>Symbol</td><td colspan="2"></td><td colspan="5">Sample</td><td colspan="5">Generated</td></tr>';
-  r += '<tr><td></td><td>Status</td><td>Details</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Transaction</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Sign</td></tr>';
+  var r = '<table><tr><td>Symbol</td><td colspan="2"></td><td colspan="6">Sample</td><td colspan="5">Generated</td></tr>';
+  r += '<tr><td></td><td>Status</td><td>Sample</td><td>Details</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Transaction</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Sign</td></tr>';
   for (var symbol in data) {
     r += '<tr>';
     r += '<td>' + symbol + '</td>';
     if (typeof data[symbol] !== 'undefined') {
       r += renderCell(validStatus(data[symbol].status), data[symbol].status);
       r += renderCell(validDetails(data[symbol].details), data[symbol].details);
+      r += renderCell(validSample(data[symbol].sample), data[symbol].sample);
       r += renderCell(validValid(data[symbol].sampleValid), data[symbol].sampleValid);
       r += renderCell(validBalance(data[symbol].sampleBalance), data[symbol].sampleBalance);
       r += renderCell(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent);

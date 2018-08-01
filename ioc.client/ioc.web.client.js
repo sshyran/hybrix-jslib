@@ -2000,8 +2000,15 @@ var Interface = function (data) {
  */
   this.initAsset = function (data, dataCallback, errorCallback) {
     var code = LZString.decompressFromEncodedURIComponent(data.deterministicCodeBlob);
-
-    deterministic[data.assetDetails['keygen-base']] = CommonUtils.activate(code);
+    try {
+      deterministic[data.assetDetails['keygen-base']] = CommonUtils.activate(code);
+    } catch (e) {
+      console.error(e);
+      if (typeof errorCallback === 'function') {
+        errorCallback(e);// TODO prepend error message
+      }
+      return;
+    }
 
     assets[data.assetDetails.symbol] = data.assetDetails;
     assets[data.assetDetails.symbol].data = {};
@@ -2075,7 +2082,7 @@ var Interface = function (data) {
     // TODO check amount
     // TODO check target
     if (!assets.hasOwnProperty(data.symbol)) {
-      console.error('Asset not added');
+      console.error('Asset not added.');
       if (typeof errorCallback === 'function') {
         errorCallback('Asset not added.');// TODO error message
       }
@@ -2083,6 +2090,7 @@ var Interface = function (data) {
     }
     var asset = assets[data.symbol];
     if (!deterministic.hasOwnProperty(asset['keygen-base'])) {
+      console.error('Asset not initialized');
       if (typeof errorCallback === 'function') {
         errorCallback('Asset not initialized.');// TODO error message
       }
