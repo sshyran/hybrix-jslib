@@ -3,6 +3,7 @@ DEBUG = false;
 LZString = require('../crypto/lz-string'); // TODO required globally by UrlBase64
 var HybriddNode = require('./hybriddNode');
 UrlBase64 = require('../crypto/urlbase64'); // TODO make non global as soon as index.js can do require
+var Decimal = require('../crypto/decimal-light');
 
 var CommonUtils = require('../index');
 var sjcl = require('../crypto/sjcl');
@@ -280,14 +281,20 @@ var Interface = function (data) {
       return;
     }
 
+    toInt = function (input, factor) {
+      var f = Number(factor);
+      var x = new Decimal(String(input));
+      return x.times('1' + (f > 1 ? new Array(f + 1).join('0') : '')).toString();
+    };
+
     // deterministic[assetDetails['keygen-base']]
     var transactionData = {
       mode: asset.data.keys.mode,
       symbol: asset.symbol,
       source: asset.data.address,
       target: data.target,
-      amount: data.amount,
-      fee: data.fee || asset.fee,
+      amount: toInt(data.amount, asset.factor),
+      fee: toInt(data.fee || asset.fee, asset.factor),
       factor: asset.factor,
       contract: asset.contract,
       keys: asset.data.keys,
@@ -411,7 +418,7 @@ var Interface = function (data) {
       var step = data.steps[0];
       if (typeof step === 'string') {
         if (this.hasOwnProperty(step)) {
-          console.log('this.' + step + '(' + JSON.stringify(data.data) + ')');
+          if (DEBUG) { console.log('this.' + step + '(' + JSON.stringify(data.data) + ')'); }
           this[step](data.data, resultData => {
             this.sequential({data: resultData, steps: data.steps.slice(1)}, dataCallback, errorCallback);
           }, errorCallback);
@@ -422,11 +429,11 @@ var Interface = function (data) {
           }
         }
       } else if (typeof step === 'object') {
-        console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(step));
+        if (DEBUG) { console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(step)); }
         this.sequential({data: step, steps: data.steps.slice(1)}, dataCallback, errorCallback);
       } else if (typeof step === 'function') {
         var result = step(data.data);
-        console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(result));
+        if (DEBUG) { console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(result)); }
         this.sequential({data: result, steps: data.steps.slice(1)}, dataCallback, errorCallback);
       }
     }
