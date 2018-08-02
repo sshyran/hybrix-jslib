@@ -176,8 +176,10 @@ var Interface = function (data) {
     assets[data.assetDetails.symbol].data = {};
     assets[data.assetDetails.symbol].data.seed = CommonUtils.seedGenerator(user_keys, data.assetDetails['keygen-base']);
     try {
+      var mode = data.assetDetails.mode.split('.')[1]; // (here submode is named mode confusingly enough)
+      assets[data.assetDetails.symbol].data.mode = mode;
       assets[data.assetDetails.symbol].data.keys = deterministic[data.assetDetails['keygen-base']].keys(assets[data.assetDetails.symbol].data);
-      assets[data.assetDetails.symbol].data.keys.mode = data.assetDetails.mode.split('.')[1]; // (here submode is named mode confusingly enough)
+      assets[data.assetDetails.symbol].data.keys.mode = mode;
       assets[data.assetDetails.symbol].data.address = deterministic[data.assetDetails['keygen-base']].address(assets[data.assetDetails.symbol].data.keys);
     } catch (e) {
       console.error(e);
@@ -223,6 +225,25 @@ var Interface = function (data) {
   this.getAddress = function (data, dataCallback, errorCallback) {
     if (assets.hasOwnProperty(data.symbol) && typeof dataCallback === 'function') {
       dataCallback(assets[data.symbol].data.address);
+    } else if (typeof errorCallback === 'function') {
+      errorCallback('Asset not initialized');
+    }
+  };
+
+  /**
+ * TODO
+ * @param {Object} data
+ * @param {string} data.symbol - TODO  multiple in array?
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
+  this.getPublicKey = function (data, dataCallback, errorCallback) {
+    if (assets.hasOwnProperty(data.symbol) && typeof dataCallback === 'function') {
+      if (assets[data.symbol].data.keys.hasOwnProperty('publicKey')) {
+        dataCallback(assets[data.symbol].data.keys.publicKey);
+      } else {
+        dataCallback(undefined);
+      }
     } else if (typeof errorCallback === 'function') {
       errorCallback('Asset not initialized');
     }
