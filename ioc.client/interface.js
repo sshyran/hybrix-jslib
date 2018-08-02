@@ -2,7 +2,7 @@
 DEBUG = false;
 LZString = require('../crypto/lz-string'); // TODO required globally by UrlBase64
 var HybriddNode = require('./hybriddNode');
-UrlBase64 = require('../crypto/UrlBase64'); // TODO make non global as soon as index.js can do require
+UrlBase64 = require('../crypto/urlbase64'); // TODO make non global as soon as index.js can do require
 
 var CommonUtils = require('../index');
 var sjcl = require('../crypto/sjcl');

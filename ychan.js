@@ -1,5 +1,5 @@
 // ychan encrypts an API query before sending it to the router
-var UrlBase64 = require('./crypto/UrlBase64');
+var UrlBase64 = require('./crypto/urlbase64');
 var Decimal = require('./crypto/decimal-light');
 var hex2dec = require('./crypto/hex2dec');
 var CommonUtils = require('./index');

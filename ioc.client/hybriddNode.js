@@ -1,6 +1,6 @@
 var ychan = require('../ychan');
 var zchan = require('../zchan');
-var UrlBase64 = require('../crypto/UrlBase64');
+var UrlBase64 = require('../crypto/urlbase64');
 var CommonUtils = require('../index');
 
 var HybriddNode = function (host_) {
