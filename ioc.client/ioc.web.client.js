@@ -2000,15 +2000,30 @@ var Interface = function (data) {
  */
   this.initAsset = function (data, dataCallback, errorCallback) {
     var code = LZString.decompressFromEncodedURIComponent(data.deterministicCodeBlob);
-
-    deterministic[data.assetDetails['keygen-base']] = CommonUtils.activate(code);
+    try {
+      deterministic[data.assetDetails['keygen-base']] = CommonUtils.activate(code);
+    } catch (e) {
+      console.error(e);
+      if (typeof errorCallback === 'function') {
+        errorCallback(e);// TODO prepend error message
+      }
+      return;
+    }
 
     assets[data.assetDetails.symbol] = data.assetDetails;
     assets[data.assetDetails.symbol].data = {};
     assets[data.assetDetails.symbol].data.seed = CommonUtils.seedGenerator(user_keys, data.assetDetails['keygen-base']);
-    assets[data.assetDetails.symbol].data.keys = deterministic[data.assetDetails['keygen-base']].keys(assets[data.assetDetails.symbol].data);
-    assets[data.assetDetails.symbol].data.keys.mode = data.assetDetails.mode.split('.')[1]; // (here submode is named mode confusingly enough)
-    assets[data.assetDetails.symbol].data.address = deterministic[data.assetDetails['keygen-base']].address(assets[data.assetDetails.symbol].data.keys);
+    try {
+      assets[data.assetDetails.symbol].data.keys = deterministic[data.assetDetails['keygen-base']].keys(assets[data.assetDetails.symbol].data);
+      assets[data.assetDetails.symbol].data.keys.mode = data.assetDetails.mode.split('.')[1]; // (here submode is named mode confusingly enough)
+      assets[data.assetDetails.symbol].data.address = deterministic[data.assetDetails['keygen-base']].address(assets[data.assetDetails.symbol].data.keys);
+    } catch (e) {
+      console.error(e);
+      if (typeof errorCallback === 'function') {
+        errorCallback(e);// TODO prepend error message
+      }
+      return;
+    }
     if (dataCallback) { dataCallback(data.assetDetails.symbol); }
   };
 
@@ -2067,6 +2082,7 @@ var Interface = function (data) {
     // TODO check amount
     // TODO check target
     if (!assets.hasOwnProperty(data.symbol)) {
+      console.error('Asset not added.');
       if (typeof errorCallback === 'function') {
         errorCallback('Asset not added.');// TODO error message
       }
@@ -2074,6 +2090,7 @@ var Interface = function (data) {
     }
     var asset = assets[data.symbol];
     if (!deterministic.hasOwnProperty(asset['keygen-base'])) {
+      console.error('Asset not initialized');
       if (typeof errorCallback === 'function') {
         errorCallback('Asset not initialized.');// TODO error message
       }
@@ -2094,7 +2111,17 @@ var Interface = function (data) {
       seed: asset.data.seed,
       unspent: data.unspent
     };
-    var checkTransaction = deterministic[asset['keygen-base']].transaction(transactionData, dataCallback);// TODO errorCallback
+
+    var checkTransaction;
+    try {
+      checkTransaction = deterministic[asset['keygen-base']].transaction(transactionData, dataCallback);// TODO errorCallback
+    } catch (e) {
+      console.error(e);
+      if (typeof errorCallback === 'function') {
+        errorCallback(e);// TODO prepend error message
+      }
+      return;
+    }
     if (typeof checkTransaction !== 'undefined' && typeof dataCallback === 'function') {
       dataCallback(checkTransaction);
     }
