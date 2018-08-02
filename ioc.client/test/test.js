@@ -22,10 +22,12 @@ function testAsset (symbol) {
       sample: {data: {query: '/asset/' + symbol + '/sample'}, step: 'call'},
       details: {data: {query: '/asset/' + symbol + '/details'}, step: 'call'},
       status: {data: {query: '/asset/' + symbol + '/status'}, step: 'call'},
-      address: {data: {symbol: symbol}, step: 'getAddress'}
+      address: {data: {symbol: symbol}, step: 'getAddress'},
+      publicKey: {data: {symbol: symbol}, step: 'getPublicKey'}
     },
     'parallel',
     (result) => {
+      console.warn('/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.sample.address + '/' + result.publicKey);
       return {
         sample: {data: result.sample, step: 'id'},
         status: {data: result.status, step: 'id'},
@@ -34,15 +36,14 @@ function testAsset (symbol) {
 
         sampleValid: {data: {query: '/source/wavalidator/' + symbol + '/' + result.sample.address}, step: 'call'},
         sampleBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.sample.address}, step: 'call'},
-        sampleUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.sample.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.address + '/' + result.sample.publicKey }, step: 'call'}, // TODO add public key
+        sampleUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.sample.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.address + '/' + result.sample.publicKey }, step: 'call'},
         sampleHistory: {data: {query: '/asset/' + symbol + '/history/' + result.sample.address}, step: 'call'},
         sampleTransaction: {data: {query: '/asset/' + symbol + '/transaction/' + result.sample.transaction}, step: 'call'},
 
         seedValid: {data: {query: '/source/wavalidator/' + symbol + '/' + result.address}, step: 'call'},
         seedBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.address}, step: 'call'},
-        seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.sample.address }, step: 'call'}, //   TODO add public key
+        seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.sample.address + '/' + result.publicKey }, step: 'call'},
         seedHistory: {data: {query: '/asset/' + symbol + '/history/' + result.address}, step: 'call'}
-
       };
     },
     'parallel',

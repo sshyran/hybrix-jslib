@@ -233,6 +233,25 @@ var Interface = function (data) {
   /**
  * TODO
  * @param {Object} data
+ * @param {string} data.symbol - TODO  multiple in array?
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
+  this.getPublicKey = function (data, dataCallback, errorCallback) {
+    if (assets.hasOwnProperty(data.symbol) && typeof dataCallback === 'function') {
+      if (assets[data.symbol].data.keys.hasOwnProperty('publicKey')) {
+        dataCallback(assets[data.symbol].data.keys.publicKey);
+      } else {
+        dataCallback(undefined);
+      }
+    } else if (typeof errorCallback === 'function') {
+      errorCallback('Asset not initialized');
+    }
+  };
+
+  /**
+ * TODO
+ * @param {Object} data
  * @param {string} data.symbol - TODO
  * @param {string} data.target - TODO
  * @param {Number} data.amount - TODO
