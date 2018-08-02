@@ -176,8 +176,10 @@ var Interface = function (data) {
     assets[data.assetDetails.symbol].data = {};
     assets[data.assetDetails.symbol].data.seed = CommonUtils.seedGenerator(user_keys, data.assetDetails['keygen-base']);
     try {
+      var mode = data.assetDetails.mode.split('.')[1]; // (here submode is named mode confusingly enough)
+      assets[data.assetDetails.symbol].data.mode = mode;
       assets[data.assetDetails.symbol].data.keys = deterministic[data.assetDetails['keygen-base']].keys(assets[data.assetDetails.symbol].data);
-      assets[data.assetDetails.symbol].data.keys.mode = data.assetDetails.mode.split('.')[1]; // (here submode is named mode confusingly enough)
+      assets[data.assetDetails.symbol].data.keys.mode = mode;
       assets[data.assetDetails.symbol].data.address = deterministic[data.assetDetails['keygen-base']].address(assets[data.assetDetails.symbol].data.keys);
     } catch (e) {
       console.error(e);
