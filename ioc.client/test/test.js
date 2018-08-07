@@ -27,7 +27,6 @@ function testAsset (symbol) {
     },
     'parallel',
     (result) => {
-      console.warn('/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.sample.address + '/' + result.publicKey);
       return {
         sample: {data: result.sample, step: 'id'},
         status: {data: result.status, step: 'id'},
@@ -76,14 +75,14 @@ function testAsset (symbol) {
 var validStatus = status => typeof status === 'object';
 var validDetails = details => typeof details === 'object';
 var validValid = valid => typeof valid === 'string' && valid.startsWith('valid');
-var validBalance = balance => balance !== null && !isNaN(balance);
+var validBalance = (balance, factor) => typeof balance !== 'undefined' && balance !== null && !isNaN(balance) && balance.toString().indexOf('.') !== -1 && balance.toString().split('.')[1].length === Number(factor);
 var validUnspent = unspent => typeof unspent !== 'undefined';
 var validHistory = history => typeof history === 'object';
 var validSample = sample => typeof sample === 'object';
 var validTransaction = transaction => typeof transaction === 'object';
 var validSign = sign => typeof sign !== 'undefined' && sign !== false && sign !== '' && sign !== null && sign !== 'false' && sign !== '[UNDER MAINTENANCE]';
 
-var renderCell = (valid, data) => {
+var renderCell = (valid, data, counter) => {
   var title;
   if (typeof data === 'object') {
     title = JSON.stringify(data);
@@ -91,7 +90,9 @@ var renderCell = (valid, data) => {
     title = String(data);
   }
   title = title.replace(/\"/g, '');
+  counter.total++;
   if (valid) {
+    counter.valid++;
     return '<td style="background-color:green" title="' + title + '">Pass</td>';
   } else {
     return '<td style="background-color:red"  title="' + title + '">Fail</td>';
@@ -99,32 +100,35 @@ var renderCell = (valid, data) => {
 };
 
 var renderTable = (data) => {
+  var counter = {valid: 0, total: 0};
+
   var r = '<table><tr><td>Symbol</td><td colspan="2"></td><td colspan="6">Sample</td><td colspan="5">Generated</td></tr>';
-  r += '<tr><td></td><td>Status</td><td>Sample</td><td>Details</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Transaction</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Sign</td></tr>';
+  r += '<tr><td></td><td>Status</td><td>Details</td><td>Sample</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Transaction</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Sign</td></tr>';
   for (var symbol in data) {
     r += '<tr>';
     r += '<td>' + symbol + '</td>';
     if (typeof data[symbol] !== 'undefined') {
-      r += renderCell(validStatus(data[symbol].status), data[symbol].status);
-      r += renderCell(validDetails(data[symbol].details), data[symbol].details);
-      r += renderCell(validSample(data[symbol].sample), data[symbol].sample);
-      r += renderCell(validValid(data[symbol].sampleValid), data[symbol].sampleValid);
-      r += renderCell(validBalance(data[symbol].sampleBalance), data[symbol].sampleBalance);
-      r += renderCell(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent);
-      r += renderCell(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory);
-      r += renderCell(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction);
+      r += renderCell(validStatus(data[symbol].status), data[symbol].status, counter);
+      r += renderCell(validDetails(data[symbol].details), data[symbol].details, counter);
+      r += renderCell(validSample(data[symbol].sample), data[symbol].sample, counter);
+      r += renderCell(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter);
+      r += renderCell(validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter);
+      r += renderCell(validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter);
+      r += renderCell(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter);
+      r += renderCell(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter);
 
-      r += renderCell(validValid(data[symbol].seedValid), data[symbol].seedValid);
-      r += renderCell(validBalance(data[symbol].seedBalance), data[symbol].seedBalance);
-      r += renderCell(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent);
-      r += renderCell(validHistory(data[symbol].seedHistory), data[symbol].seedHistory);
-      r += renderCell(validSign(data[symbol].seedSign), data[symbol].seedSign);
+      r += renderCell(validValid(data[symbol].seedValid), data[symbol].seedValid, counter);
+      r += renderCell(validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter);
+      r += renderCell(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter);
+      r += renderCell(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter);
+      r += renderCell(validSign(data[symbol].seedSign), data[symbol].seedSign, counter);
     } else {
       r += '<td colspan="13" style="background-color:red">Fail</td>';
     }
     r += '</tr>';
   }
   r += '</table>';
+  r += '<h1>' + (counter.valid / counter.total * 100) + '%</h1>';
   console.log(data);
   document.body.innerHTML = r;
 };
@@ -143,7 +147,6 @@ function go () {
     {
       dummy: testAsset('dummy'),
       eth: testAsset('eth'),
-
       ark: testAsset('ark'),
       bch: testAsset('bch'),
       btc: testAsset('btc'), // Error: Expected property "1" of type BigInteger, got n
@@ -158,12 +161,12 @@ function go () {
       omni: testAsset('omni'), // TypeError: undefined is not an object (evaluating 'n.unspent.unspents')
       rise: testAsset('rise'),
       shift: testAsset('shift'),
-      ubq: testAsset('ubq'),
+      ubq: testAsset('ubq'), // details.fee =null>
       waves: testAsset('waves'),
       xcp: testAsset('xcp'), // Error: Expected property "1" of type Satoshi, got Number -546
       xel: testAsset('xel'), // unspents not working properly ERROR
       xem: testAsset('xem'),
-      zec: testAsset('zec')// bitcore.ErrorTransactionFeeErrorTooSmall: Fee is too small: expected more than 667 but got 0 Use Transaction#uncheckedSerialize if you want to skip security checks. See http://bitcore.io/guide/transaction.html#Serialization for more info.
+      zec: testAsset('zec')
     },
     'parallel'
 

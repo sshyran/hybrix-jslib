@@ -1,5 +1,5 @@
 var UrlBase64 = (function() {
-	var UrlBase64 = {		
+	var UrlBase64 = {
 		// private property
 		_keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=",
 
@@ -44,7 +44,7 @@ var UrlBase64 = (function() {
 			var enc1, enc2, enc3, enc4;
 			var i = 0;
 
-			if(typeof input != 'undefined') {
+			if(typeof input != "undefined") {
 				input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
 
 				while (i < input.length) {
@@ -71,7 +71,7 @@ var UrlBase64 = (function() {
 
 				output = UrlBase64._utf8_decode(output);
 			} else { output = undefined; }
-			
+
 			return output;
 
 		},
