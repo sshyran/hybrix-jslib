@@ -161,12 +161,12 @@ function go () {
       omni: testAsset('omni'), // TypeError: undefined is not an object (evaluating 'n.unspent.unspents')
       rise: testAsset('rise'),
       shift: testAsset('shift'),
-      ubq: testAsset('ubq'),
+      ubq: testAsset('ubq'), // details.fee =null>
       waves: testAsset('waves'),
       xcp: testAsset('xcp'), // Error: Expected property "1" of type Satoshi, got Number -546
       xel: testAsset('xel'), // unspents not working properly ERROR
       xem: testAsset('xem'),
-      zec: testAsset('zec')// bitcore.ErrorTransactionFeeErrorTooSmall: Fee is too small: expected more than 667 but got 0 Use Transaction#uncheckedSerialize if you want to skip security checks. See http://bitcore.io/guide/transaction.html#Serialization for more info.
+      zec: testAsset('zec')
     },
     'parallel'
 

@@ -2119,20 +2119,41 @@ var Interface = function (data) {
       return;
     }
 
-    toInt = function (input, factor) {
+    var toInt = function (input, factor) {
       var f = Number(factor);
+      console.log('input', input);
       var x = new Decimal(String(input));
       return x.times('1' + (f > 1 ? new Array(f + 1).join('0') : '')).toString();
     };
 
-    // deterministic[assetDetails['keygen-base']]
+    var fee;
+    try {
+      fee = toInt(data.fee || asset.fee, data.factor);
+    } catch (e) {
+      console.error(e);
+      if (typeof errorCallback === 'function') {
+        errorCallback(e);// TODO error message
+      }
+      return;
+    }
+    var amount;
+    try {
+      amount = toInt(data.amount, data.factor);
+    } catch (e) {
+      console.error(e);
+      if (typeof errorCallback === 'function') {
+        errorCallback(e);// TODO error message
+      }
+      return;
+    }
+
     var transactionData = {
       mode: asset.data.keys.mode,
       symbol: asset.symbol,
       source: asset.data.address,
       target: data.target,
-      amount: toInt(data.amount, asset.factor),
-      fee: toInt(data.fee || asset.fee, asset.factor),
+      amount: amount,
+      fee: fee,
       factor: asset.factor,
       contract: asset.contract,
       keys: asset.data.keys,
