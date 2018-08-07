@@ -1,4 +1,3 @@
-// import {HybriddNode} from './hybriddNode.js';
 DEBUG = false;
 LZString = require('../crypto/lz-string'); // TODO required globally by UrlBase64
 var HybriddNode = require('./hybriddNode');
@@ -7,7 +6,9 @@ var Decimal = require('../crypto/decimal-light');
 
 var CommonUtils = require('../index');
 var sjcl = require('../crypto/sjcl');
+var hexToBase32 = require('../crypto/hex2Base32').hexToBase32;
 
+var DJB2 = require('../crypto/hashDJB2');
 // fs = require('fs');
 // var naclFactory = require('../crypto/nacl');
 // TODO include sjcl?
@@ -411,6 +412,63 @@ var Interface = function (data) {
       }
     }
   };
+  /**
+ * TODO   WIP Create a new deterministic account with the entropy provided.
+ * @param {Object} data
+ * @param {string} [data.entropy] - TODO
+ * @param {Function} [data.pool] - TODO
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
+  this.createAccount = function (data, dataCallback, errorCallback) {
+    console.error('Not implemented yet');
+    if (typeof errorCallback === 'function') {
+      errorCallback('Not implemented yet');
+    }
+    return; // FIXME after pool is fixed properly
+
+    var pool = function (randomNumber) {
+    /*  SecureRandom.seedTime();
+      SecureRandom.seedInt16(randomNumber);
+      var poolHex = SecureRandom.poolCopyOnInit != null
+        ? Crypto.util.bytesToHex(SecureRandom.poolCopyOnInit)
+        : Crypto.util.bytesToHex(SecureRandom.pool); */
+      return 'ABCDEF1234567890'.repeat(100); // FIXME
+    };
+
+    var entropy = '';
+    var maxIndex = 1000 + Math.floor(Math.random() * 256);
+
+    var numberList = new Array(maxIndex).fill(0).map(() => {
+      return Math.floor(Math.random() * Math.pow(8, 16));
+    });
+
+    var iterate = index => {
+      if (index === maxIndex) {
+        if (entropy.length < 411 + 20 + 60) {
+          console.error('Entropy is of insufficient length. Required > ' + (411 + 20 + 60));
+          if (typeof errorCallback === 'function') {
+            errorCallback('Entropy is of insufficient length. Required > ' + (411 + 20 + 60));
+          }
+        } else {
+          var offset = Math.floor(Math.random() * 411);
+          // 411+20+60
+          var passwd = hexToBase32(entropy.substr(offset + 20, 60));
+          var userid = hexToBase32(entropy.substr(offset, 12) +
+                                   DJB2.hash(entropy.substr(offset, 12).toUpperCase()).substr(0, 4) +
+                                   DJB2.hash(entropy.substr(offset, 12).toLowerCase() + passwd.toUpperCase()).substr(4, 4));
+
+          dataCallback({userid, passwd});
+        }
+      } else {
+        entropy = pool(numberList[index]);
+        ++index;
+        iterate(index);
+      }
+    };
+    iterate(0);
+  };
+
   /**
    * TODO
    * @param {Array.<string|Object|Function>} data - TODO

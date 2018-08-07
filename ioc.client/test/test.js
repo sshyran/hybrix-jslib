@@ -139,6 +139,8 @@ function go () {
     'init',
     {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'login',
     {host: 'http://localhost:1111/'}, 'addHost',
+    //    {}, 'createAccount',
+    //    data => { console.log(data); },
     //    {symbol: 'dummy', amount: 100, channel: 'y'}, 'transaction',
 
     // TODO retrieve all asset sddd
