@@ -2121,7 +2121,6 @@ var Interface = function (data) {
 
     var toInt = function (input, factor) {
       var f = Number(factor);
-      console.log('input', input);
       var x = new Decimal(String(input));
       return x.times('1' + (f > 1 ? new Array(f + 1).join('0') : '')).toString();
     };
