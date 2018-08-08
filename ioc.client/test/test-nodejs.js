@@ -1,31 +1,30 @@
 /*
-function initNACL(callbackArray) {
-  var nacl_factory = require('../common/crypto/nacl.js');
-  nacl_factory.instantiate(function (naclinstance) {
-    nacl = naclinstance; // nacl is a global that is initialized here.
-    functions.sequential(this.callbackArray);
-  }.bind({callbackArray: callbackArray})
-  );
-} */
-window = {};
+ *  This IoC interface test can be run in nodejs v6.0 or higher
+ */
 
+// add NACL in your favourite flavour
 nacl_factory = require('../../crypto/nacl.js');
 
+// create IoC interface object
 var IoC = require('../ioc.nodejs.client.js');
 var ioc = new IoC.Interface({http: require('http')});
 
+// perform some magic
 ioc.sequential([
-  'init',
-  {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'login',
-  {host: 'http://localhost:1111/'}, 'addHost',
-  {
-    dummy: testAsset('dummy')
-  }, 'parallel'
-]
+    'init',
+    {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'login',
+    {host: 'http://localhost:1111/'}, 'addHost',
+    {
+      dummy: testAsset('dummy')
+    }, 'parallel'
+  ]
   , (data) => { console.log(JSON.stringify(data)); }
   , (error) => { console.error(error); }
 );
 
+
+
+// helper function to test all calls to a hybridd asset
 function testAsset (symbol) {
   var testAmount = 0.0001;
 

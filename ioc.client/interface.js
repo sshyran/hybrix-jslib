@@ -6,14 +6,23 @@ var Decimal = require('../crypto/decimal-light');
 
 var CommonUtils = require('../index');
 var sjcl = require('../crypto/sjcl');
-var hexToBase32 = require('../crypto/hex2Base32').hexToBase32;
+var hexToBase32 = require('../crypto/hex2base32').hexToBase32;
 
 var DJB2 = require('../crypto/hashDJB2');
-// fs = require('fs');
-// var naclFactory = require('../crypto/nacl');
-// TODO include sjcl?
-// nacl_factory = require('../crypto/nacl');
 
+// create window global if it does not exist
+if(typeof window === 'undefined') {
+  window = {};
+}
+
+/* NOT NEEDED AS IT IS INCLUDED AT COMPILE TIME
+ * fs = require('fs');
+ * var naclFactory = require('../crypto/nacl');
+ * TODO include sjcl?
+ * nacl_factory = require('../crypto/nacl');
+ */
+ 
+ 
 /**
  * Internet of Coins main API interface object
  * @param {Object} data - one of the three methods below must be passed.
@@ -193,7 +202,7 @@ var Interface = function (data) {
     if (dataCallback) { dataCallback(data.assetDetails.symbol); }
   };
 
-  /**
+/**
  * TODO
  * @param {Object} data
  * @param {string} data.symbol - TODO multiple in array?
@@ -412,7 +421,7 @@ var Interface = function (data) {
       }
     }
   };
-  /**
+/**
  * TODO   WIP Create a new deterministic account with the entropy provided.
  * @param {Object} data
  * @param {string} [data.entropy] - TODO
