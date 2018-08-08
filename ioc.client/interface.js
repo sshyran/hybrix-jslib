@@ -172,17 +172,18 @@ var Interface = function (data) {
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.initAsset = function (data, dataCallback, errorCallback) {
-    var code = LZString.decompressFromEncodedURIComponent(data.deterministicCodeBlob);
-    try {
-      deterministic[data.assetDetails['keygen-base']] = CommonUtils.activate(code);
-    } catch (e) {
-      console.error(e);
-      if (typeof errorCallback === 'function') {
-        errorCallback(e);// TODO prepend error message
+    if (!deterministic.hasOwnProperty(data.assetDetails['keygen-base'])) { //  blob was not yet initialized
+      var code = LZString.decompressFromEncodedURIComponent(data.deterministicCodeBlob);
+      try {
+        deterministic[data.assetDetails['keygen-base']] = CommonUtils.activate(code);
+      } catch (e) {
+        console.error(e);
+        if (typeof errorCallback === 'function') {
+          errorCallback(e);// TODO prepend error message
+        }
+        return;
       }
-      return;
     }
-
     assets[data.assetDetails.symbol] = data.assetDetails;
     assets[data.assetDetails.symbol].data = {};
     assets[data.assetDetails.symbol].data.seed = CommonUtils.seedGenerator(user_keys, data.assetDetails['keygen-base']);
@@ -216,10 +217,13 @@ var Interface = function (data) {
     if (!assets.hasOwnProperty(data.symbol)) { // if assets has not been iniated, retrieve and initialize
       this.call({host: data.host, query: 'a/' + data.symbol + '/details', options: data.options, channel: data.channel}, (asset) => {
         var mode = asset.mode.split('.')[0];
-        // TODO alleen blob ophalen als die nog niet opgehaald is
-        this.call({host: data.host, query: 's/deterministic/code/' + mode, options: data.options, channel: data.channel}, (blob) => {
-          this.initAsset({assetDetails: asset, deterministicCodeBlob: blob}, dataCallback, errorCallback);
-        }, errorCallback);
+        if (deterministic.hasOwnProperty(asset['keygen-base'])) { // Deterministic blob was already retrieved
+          this.initAsset({assetDetails: asset, deterministicCodeBlob: deterministic[asset['keygen-base']]}, dataCallback, errorCallback);
+        } else {
+          this.call({host: data.host, query: 's/deterministic/code/' + mode, options: data.options, channel: data.channel}, (blob) => {
+            this.initAsset({assetDetails: asset, deterministicCodeBlob: blob}, dataCallback, errorCallback);
+          }, errorCallback);
+        }
       }, errorCallback);
     } else if (typeof dataCallback !== 'undefined') {
       dataCallback(data.symbol);
