@@ -7,11 +7,12 @@ var Decimal = require('../crypto/decimal-light');
 var CommonUtils = require('../index');
 var sjcl = require('../crypto/sjcl');
 var hexToBase32 = require('../crypto/hex2base32').hexToBase32;
+var proof = require('../crypto/proof');
 
 var DJB2 = require('../crypto/hashDJB2');
 
 // create window global if it does not exist
-if(typeof window === 'undefined') {
+if (typeof window === 'undefined') {
   window = {};
 }
 
@@ -21,8 +22,7 @@ if(typeof window === 'undefined') {
  * TODO include sjcl?
  * nacl_factory = require('../crypto/nacl');
  */
- 
- 
+
 /**
  * Internet of Coins main API interface object
  * @param {Object} data - one of the three methods below must be passed.
@@ -139,8 +139,8 @@ var Interface = function (data) {
   /**
  * Create a new session and - if required - log out of current session.
  * @param {Object} data
- * @param {string} data.username - TODO
- * @param {string} data.password - TODO
+ * @param {string} data.username - The username for the deterministic session
+ * @param {string} data.password - The password for the deterministic session
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
@@ -164,25 +164,26 @@ var Interface = function (data) {
   };
 
   /**
- * TODO
+ * Initialize an asset (crypto currency or token)
  * @param {Object} data
- * @param {Object} data.assetDetails - TODO
- * @param {string} data.deterministicCodeBlob - TODO
+ * @param {Object} data.assetDetails - Asset details as retrieved by calling `/asset/$SYMBOL/details`
+ * @param {string} data.deterministicCodeBlob - A string containing the deterministic code blob.
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.initAsset = function (data, dataCallback, errorCallback) {
-    var code = LZString.decompressFromEncodedURIComponent(data.deterministicCodeBlob);
-    try {
-      deterministic[data.assetDetails['keygen-base']] = CommonUtils.activate(code);
-    } catch (e) {
-      console.error(e);
-      if (typeof errorCallback === 'function') {
-        errorCallback(e);// TODO prepend error message
+    if (!deterministic.hasOwnProperty(data.assetDetails['keygen-base'])) { //  blob was not yet initialized
+      var code = LZString.decompressFromEncodedURIComponent(data.deterministicCodeBlob);
+      try {
+        deterministic[data.assetDetails['keygen-base']] = CommonUtils.activate(code);
+      } catch (e) {
+        console.error(e);
+        if (typeof errorCallback === 'function') {
+          errorCallback(e);// TODO prepend error message
+        }
+        return;
       }
-      return;
     }
-
     assets[data.assetDetails.symbol] = data.assetDetails;
     assets[data.assetDetails.symbol].data = {};
     assets[data.assetDetails.symbol].data.seed = CommonUtils.seedGenerator(user_keys, data.assetDetails['keygen-base']);
@@ -202,24 +203,26 @@ var Interface = function (data) {
     if (dataCallback) { dataCallback(data.assetDetails.symbol); }
   };
 
-/**
- * TODO
+  /**
+ * Add an asset (crypto currency or token) to the session.
  * @param {Object} data
- * @param {string} data.symbol - TODO multiple in array?
- * @param {string} [data.channel] - TODO
- * @param {Object} [data.options] - TODO
+ * @param {string} data.symbol - The symbol of the asset
+ * @param {string} [data.channel] - The channel used for the calls. 'y' for encryped, 'z' for encryped and compresses;
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.addAsset = function (data, dataCallback, errorCallback) {
     // TODO symbol as array of strings to load multiple?
     if (!assets.hasOwnProperty(data.symbol)) { // if assets has not been iniated, retrieve and initialize
-      this.call({host: data.host, query: 'a/' + data.symbol + '/details', options: data.options, channel: data.channel}, (asset) => {
+      this.call({host: data.host, query: 'a/' + data.symbol + '/details', channel: data.channel}, (asset) => {
         var mode = asset.mode.split('.')[0];
-        // TODO alleen blob ophalen als die nog niet opgehaald is
-        this.call({host: data.host, query: 's/deterministic/code/' + mode, options: data.options, channel: data.channel}, (blob) => {
-          this.initAsset({assetDetails: asset, deterministicCodeBlob: blob}, dataCallback, errorCallback);
-        }, errorCallback);
+        if (deterministic.hasOwnProperty(asset['keygen-base'])) { // Deterministic blob was already retrieved
+          this.initAsset({assetDetails: asset, deterministicCodeBlob: deterministic[asset['keygen-base']]}, dataCallback, errorCallback);
+        } else {
+          this.call({host: data.host, query: 's/deterministic/code/' + mode, channel: data.channel}, (blob) => {
+            this.initAsset({assetDetails: asset, deterministicCodeBlob: blob}, dataCallback, errorCallback);
+          }, errorCallback);
+        }
       }, errorCallback);
     } else if (typeof dataCallback !== 'undefined') {
       dataCallback(data.symbol);
@@ -229,7 +232,19 @@ var Interface = function (data) {
   /**
  * TODO
  * @param {Object} data
- * @param {string} data.symbol - TODO  multiple in array?
+ * @param {string} data.hash - TODO
+ * @param {string} [data.difficulty] - TODO
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
+  this.proofOfWork = function (data, dataCallback, errorCallback) {
+    proof(data.hash, dataCallback, errorCallback, data.difficulty);
+  };
+
+  /**
+ * Get the address associated to a specific asset for current session.
+ * @param {Object} data
+ * @param {string} data.symbol - The asset symbol.
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
@@ -242,9 +257,9 @@ var Interface = function (data) {
   };
 
   /**
- * TODO
+ * Get the publick key associated to a specific asset for current session.
  * @param {Object} data
- * @param {string} data.symbol - TODO  multiple in array?
+ * @param {string} data.symbol - The asset symbol.
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
@@ -261,13 +276,13 @@ var Interface = function (data) {
   };
 
   /**
- * TODO
+ * Create a signed transaction
  * @param {Object} data
- * @param {string} data.symbol - TODO
- * @param {string} data.target - TODO
- * @param {Number} data.amount - TODO
- * @param {Number} data.fee - TODO
- * @param {Object} data.unspent - TODO
+ * @param {string} data.symbol - The symbol of the asset.
+ * @param {string} data.target - The target address.
+ * @param {Number} data.amount - The amount.
+ * @param {Number} data.fee - The fee.
+ * @param {Object} data.unspent - Pretransaction data.
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
@@ -348,12 +363,12 @@ var Interface = function (data) {
   };
 
   /**
- * TODO
+ * Create and execute a transaction
  * @param {Object} data
  * @param {string} data.symbol - The symbol of the asset
  * @param {string} data.target - The target address
  * @param {Number} data.amount - The amount that should be transferred
- * @param {Number} data.fee - TODO
+ * @param {Number} data.fee - The fee.
  * @param {string} [data.host] - The host that should be used.
  * @param {string} [data.channel] - Indicate the channel 'y' for encryption, 'z' for both encryption and compression
  * @param {Function} dataCallback - Called when the method is succesful.
@@ -375,9 +390,9 @@ var Interface = function (data) {
   };
 
   /**
- * TODO
+ * Add a hybridd node as host.
  * @param {Object} data
- * @param {string} data.host - TODO  multiple in array?
+ * @param {string} data.host - The hostname TODO  multiple in array?
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
@@ -386,16 +401,17 @@ var Interface = function (data) {
     // TODO check if valid hostname
     var hybriddNode = new HybriddNode.HybriddNode(data.host);
     hybriddNodes[data.host] = hybriddNode;
-    hybriddNode.init({userKeys: user_keys, options: data.options, connector: connector}, dataCallback, errorCallback);
+    // TODO only login to node if a session is available
+    hybriddNode.init({userKeys: user_keys, connector: connector}, dataCallback, errorCallback);
   };
 
   /**
- * TODO   [API Reference]{@link https://wallet1.internetofcoins.org/api/help}
+ * Make a call to hybridd node
  * @param {Object} data
- * @param {string} data.query - TODO
+ * @param {string} data.query - The query path. For reference: [Hybridd API]{@link https://wallet1.internetofcoins.org/api/help}
  * @param {string} [data.channel] - Indicate the channel 'y' for encryption, 'z' for both encryption and compression
  * @param {Boolean} [data.meta] - Indicate whether to include meta data (process information)
- * @param {string} [data.host] - TODO
+ * @param {string} [data.host] - Select a specific host, if omitted one will be chosen at random.
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
@@ -421,7 +437,7 @@ var Interface = function (data) {
       }
     }
   };
-/**
+  /**
  * TODO   WIP Create a new deterministic account with the entropy provided.
  * @param {Object} data
  * @param {string} [data.entropy] - TODO
@@ -479,17 +495,17 @@ var Interface = function (data) {
   };
 
   /**
-   * TODO
-   * @param {Array.<string|Object|Function>} data - TODO
-   * @param {Function} dataCallback - Called when the method is succesful.
-   * @param {Function} errorCallback - Called when an error occurs.
+   * Identity function, outputs the data that is passed
+   * @param {Array.<string|Object|Function>} data - data passed to  dataCallback
+   * @param {Function} dataCallback - Called with data provided.
+   * @param {Function} errorCallback - Ignored
    */
   this.id = (data, dataCallback, errorCallback) => {
     dataCallback(data);
   };
 
   /**
-   * TODO
+   * Sequentually executes functions and passes results to next step.
    * @param {Array.<string|Object|Function>} data - Sequential steps to be processed. An object indicates data that is supplied to the next step. A function is a transformation of the data of the previous step and given to the next step. A string is a method that used the data from the last step and supplies to the next step.
    * @param {Function} dataCallback - Called when the method is succesful.
    * @param {Function} errorCallback - Called when an error occurs.
@@ -527,13 +543,13 @@ var Interface = function (data) {
   };
 
   /**
-   * TODO
+   * Parallely executes several steps and collects results in a single object.
    * @param {Array.<string|Function>|Object} data - Parallel steps to be processed. TODO
    * @param data.data -
-   * @param {Array.<string|Function>} data.steps -
-   * @param {Function} data.data -
-   * @param {Boolean} data.breakOnFirstError -
-   * @param {Boolean} data.onlyGetFirstResult -
+   * @param {Array.<string|Function>} data.steps - TODO
+   * @param {Function} data.data -  TODO
+   * @param {Boolean} data.breakOnFirstError -  TODO
+   * @param {Boolean} data.onlyGetFirstResult -  TODO
    * @param {Function} dataCallback - Called when the method is succesful.
    * @param {Function} errorCallback - Called when an error occurs.
    */

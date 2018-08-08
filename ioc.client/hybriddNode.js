@@ -13,7 +13,7 @@ var HybriddNode = function (host_) {
      session_hexkey,
      session_hexsign,
      session_keypair,
-     session_nonce,
+     session_nonce,option
      session_seckey,
      session_secsign,
      session_signpair
@@ -290,7 +290,6 @@ var HybriddNode = function (host_) {
     /* data =
        {
        userKeys
-       options
        connector
        }
     */
@@ -300,8 +299,8 @@ var HybriddNode = function (host_) {
       this.call({query: this.xAuthStep1Request(response.nonce1), connector: data.connector, meta: true}, (response) => {
         this.xAuthFinalize(response, data.userKeys);
         if (successCallback) { successCallback(); }
-      }, errorCallback, data.option);
-    }, errorCallback, data.options);
+      }, errorCallback);
+    }, errorCallback);
   };
 };
 
