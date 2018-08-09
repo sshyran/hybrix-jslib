@@ -309,12 +309,12 @@ var Interface = function (data) {
     var toInt = function (input, factor) {
       var f = Number(factor);
       var x = new Decimal(String(input));
-      return x.times('1' + (f > 1 ? new Array(f + 1).join('0') : '')).toString();
+      return x.times('1' + (f > 1 ? '0'.repeat(f + 1) : '')).toString();
     };
 
     var fee;
     try {
-      fee = toInt(data.fee || asset.fee, data.factor);
+      fee = toInt(Number(data.fee || asset.fee), asset.factor);
     } catch (e) {
       console.error(e);
       if (typeof errorCallback === 'function') {
@@ -324,7 +324,7 @@ var Interface = function (data) {
     }
     var amount;
     try {
-      amount = toInt(data.amount, data.factor);
+      amount = toInt(Number(data.amount), asset.factor);
     } catch (e) {
       console.error(e);
       if (typeof errorCallback === 'function') {
@@ -332,7 +332,6 @@ var Interface = function (data) {
       }
       return;
     }
-
     var transactionData = {
       mode: asset.data.keys.mode,
       symbol: asset.symbol,
