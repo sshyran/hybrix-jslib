@@ -1,18 +1,3 @@
-/* TODO
-   - extend wavalidator for waves and ark
-
-   Account is valid then it is a valid Base58 string and the length of corresponding array is 26 bytes. Version of address (1st byte) is equal to 1. The network byte (2nd byte) is equal to network ID. The checksum of address (last 4 bytes) is correct.
-
-   3PBUkL5rphESXxq1yJzW2erVzTTKAXXeCUo
-
-   - for the assets requiring a public key for unspents, add those to sample, collect those from seed
-   - do not retrieve blob if it is already retrieved
-
-   - wrapperlib issue for waves, bts
-
-   - parallel option to call dataCallback at every result (top show intermediate updates)
-*/
-
 function testAsset (symbol) {
   var testAmount = 0.0001;
 
@@ -82,7 +67,7 @@ var validSample = sample => typeof sample === 'object';
 var validTransaction = transaction => typeof transaction === 'object';
 var validSign = sign => typeof sign !== 'undefined' && sign !== false && sign !== '' && sign !== null && sign !== 'false' && sign !== '[UNDER MAINTENANCE]';
 
-var renderCell_node = (valid, data, counter) => {
+var renderCellCLI = (valid, data, counter) => {
   var title;
   if (typeof data === 'object') {
     title = JSON.stringify(data);
@@ -99,44 +84,44 @@ var renderCell_node = (valid, data, counter) => {
   }
 };
 
-var renderTable_node = (data) => {
+var renderTableCLI = (data) => {
   var counter = {valid: 0, total: 0};
 
-  var r = "\n";
-     r += ' #     SAMPLE                                       GENERATED                       '+"\n";
-     r += '      ┌────┬──────┬─────┬────┬──────┬──────┬────┬──┬────┬──────┬──────┬────┬────┐'+"\n";
-     r += '      │Stat│Detail│Sampl│Vald│Balnce│Unspnt│Hist│TX│Vald│Balnce│Unspnt│Hist│Sign│'+"\n";
-         
+  var r = '\n';
+  r += ' #     SAMPLE                                       GENERATED                       ' + '\n';
+  r += '      ┌────┬──────┬─────┬────┬──────┬──────┬────┬──┬────┬──────┬──────┬────┬────┐' + '\n';
+  r += '      │Stat│Detail│Sampl│Vald│Balnce│Unspnt│Hist│TX│Vald│Balnce│Unspnt│Hist│Sign│' + '\n';
+
   for (var symbol in data) {
-     r += '      ├────┼──────┼─────┼────┼──────┼──────┼────┼──┼────┼──────┼──────┼────┼────┤'+"\n";
-     r += symbol.substr(0,5)+'     '.substr(0,5-symbol.length)+' │';
+    r += '      ├────┼──────┼─────┼────┼──────┼──────┼────┼──┼────┼──────┼──────┼────┼────┤' + '\n';
+    r += symbol.substr(0, 5) + '     '.substr(0, 5 - symbol.length) + ' │';
     if (typeof data[symbol] !== 'undefined') {
-      r += renderCell_node(validStatus(data[symbol].status), data[symbol].status, counter)+'   │';
-      r += renderCell_node(validDetails(data[symbol].details), data[symbol].details, counter)+'     │';
-      r += renderCell_node(validSample(data[symbol].sample), data[symbol].sample, counter)+'    │';
-      r += renderCell_node(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter)+'   │';
-      r += renderCell_node(validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter)+'     │';
-      r += renderCell_node(validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter)+'     │';
-      r += renderCell_node(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter)+'   │';
-      r += renderCell_node(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter)+' │';
-      r += renderCell_node(validValid(data[symbol].seedValid), data[symbol].seedValid, counter)+'   │';
-      r += renderCell_node(validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter)+'     │';
-      r += renderCell_node(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter)+'     │';
-      r += renderCell_node(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter)+'   │';
-      r += renderCell_node(validSign(data[symbol].seedSign), data[symbol].seedSign, counter)+'   │';
-      r += "\n";
+      r += renderCellCLI(validStatus(data[symbol].status), data[symbol].status, counter) + '   │';
+      r += renderCellCLI(validDetails(data[symbol].details), data[symbol].details, counter) + '     │';
+      r += renderCellCLI(validSample(data[symbol].sample), data[symbol].sample, counter) + '    │';
+      r += renderCellCLI(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter) + '   │';
+      r += renderCellCLI(validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter) + '     │';
+      r += renderCellCLI(validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter) + '     │';
+      r += renderCellCLI(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter) + '   │';
+      r += renderCellCLI(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter) + ' │';
+      r += renderCellCLI(validValid(data[symbol].seedValid), data[symbol].seedValid, counter) + '   │';
+      r += renderCellCLI(validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter) + '     │';
+      r += renderCellCLI(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter) + '     │';
+      r += renderCellCLI(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter) + '   │';
+      r += renderCellCLI(validSign(data[symbol].seedSign), data[symbol].seedSign, counter) + '   │';
+      r += '\n';
     } else {
-     r += 'X   │X     │X    │X   │X     │X     │X   │X │X   │X     │X     │X   │X   │'+"\n";
+      r += 'X   │X     │X    │X   │X     │X     │X   │X │X   │X     │X     │X   │X   │' + '\n';
     }
   }
-  r += '      └────┴──────┴─────┴────┴──────┴──────┴────┴──┴────┴──────┴──────┴────┴────┘'+"\n";
-  r += "\n";
-  r += '      SUCCESS RATE: ' + (counter.valid / counter.total * 100) + '%'+"\n";
-  //console.log(data);
+  r += '      └────┴──────┴─────┴────┴──────┴──────┴────┴──┴────┴──────┴──────┴────┴────┘' + '\n';
+  r += '\n';
+  r += '      SUCCESS RATE: ' + (counter.valid / counter.total * 100) + '%' + '\n';
+  // console.log(data);
   console.log(r);
 };
 
-var renderCell_web = (valid, data, counter) => {
+var renderCellWeb = (valid, data, counter) => {
   var title;
   if (typeof data === 'object') {
     title = JSON.stringify(data);
@@ -153,7 +138,7 @@ var renderCell_web = (valid, data, counter) => {
   }
 };
 
-var renderTable_web = (data) => {
+var renderTableWeb = (data) => {
   var counter = {valid: 0, total: 0};
 
   var r = '<table><tr><td>Symbol</td><td colspan="2"></td><td colspan="6">Sample</td><td colspan="5">Generated</td></tr>';
@@ -162,20 +147,20 @@ var renderTable_web = (data) => {
     r += '<tr>';
     r += '<td>' + symbol + '</td>';
     if (typeof data[symbol] !== 'undefined') {
-      r += renderCell_web(validStatus(data[symbol].status), data[symbol].status, counter);
-      r += renderCell_web(validDetails(data[symbol].details), data[symbol].details, counter);
-      r += renderCell_web(validSample(data[symbol].sample), data[symbol].sample, counter);
-      r += renderCell_web(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter);
-      r += renderCell_web(validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter);
-      r += renderCell_web(validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter);
-      r += renderCell_web(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter);
-      r += renderCell_web(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter);
+      r += renderCellWeb(validStatus(data[symbol].status), data[symbol].status, counter);
+      r += renderCellWeb(validDetails(data[symbol].details), data[symbol].details, counter);
+      r += renderCellWeb(validSample(data[symbol].sample), data[symbol].sample, counter);
+      r += renderCellWeb(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter);
+      r += renderCellWeb(validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter);
+      r += renderCellWeb(validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter);
+      r += renderCellWeb(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter);
+      r += renderCellWeb(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter);
 
-      r += renderCell_web(validValid(data[symbol].seedValid), data[symbol].seedValid, counter);
-      r += renderCell_web(validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter);
-      r += renderCell_web(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter);
-      r += renderCell_web(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter);
-      r += renderCell_web(validSign(data[symbol].seedSign), data[symbol].seedSign, counter);
+      r += renderCellWeb(validValid(data[symbol].seedValid), data[symbol].seedValid, counter);
+      r += renderCellWeb(validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter);
+      r += renderCellWeb(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter);
+      r += renderCellWeb(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter);
+      r += renderCellWeb(validSign(data[symbol].seedSign), data[symbol].seedSign, counter);
     } else {
       r += '<td colspan="13" style="background-color:red">Fail</td>';
     }
@@ -187,20 +172,19 @@ var renderTable_web = (data) => {
   document.body.innerHTML = r;
 };
 
-
-
 function go (mode) {
-  
-  if(mode==='node') {
+  var ioc;
+
+  if (mode === 'node') {
     // create IoC interface object
-    var IoC = require('../ioc.nodejs.client.js');
-    var ioc = new IoC.Interface({http: require('http')});
-    var renderTable = renderTable_node;
+    IoC = require('../ioc.nodejs.client.js');
+    ioc = new IoC.Interface({http: require('http')});
+    var renderTable = renderTableCLI;
   } else {
-    var ioc = new IoC.Interface({XMLHttpRequest: XMLHttpRequest});
-    var renderTable = renderTable_web;
+    ioc = new IoC.Interface({XMLHttpRequest: XMLHttpRequest});
+    var renderTable = renderTableWeb;
   }
-  
+
   ioc.sequential([
     'init',
     {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'login',
@@ -244,13 +228,11 @@ function go (mode) {
   );
 }
 
-
-
 /*
  *  Test if browser or nodejs and run go()
  */
 
-if(typeof window === 'undefined') {
+if (typeof window === 'undefined') {
   // add NACL in your favourite flavour
   nacl_factory = require('../../crypto/nacl.js');
   // run the tests
