@@ -1,6 +1,5 @@
 function testAsset (symbol) {
   var testAmount = 0.0001;
-
   return { data: [
     {symbol: symbol}, 'addAsset',
     {
@@ -174,15 +173,15 @@ var renderTableWeb = (data) => {
 
 function go (mode) {
   var ioc;
-
+  var renderTable;
   if (mode === 'node') {
     // create IoC interface object
     IoC = require('../ioc.nodejs.client.js');
     ioc = new IoC.Interface({http: require('http')});
-    var renderTable = renderTableCLI;
+    renderTable = renderTableCLI;
   } else {
     ioc = new IoC.Interface({XMLHttpRequest: XMLHttpRequest});
-    var renderTable = renderTableWeb;
+    renderTable = renderTableWeb;
   }
 
   ioc.sequential([

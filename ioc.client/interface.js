@@ -18,6 +18,9 @@ if (typeof window === 'undefined') {
 if (typeof crypto === 'undefined') {
   crypto = {};
 }
+if (typeof FormData === 'undefined') {
+  FormData = {};
+}
 
 /* NOT NEEDED AS IT IS INCLUDED AT COMPILE TIME
  * fs = require('fs');
