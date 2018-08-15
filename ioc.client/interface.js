@@ -233,7 +233,7 @@ var Interface = function (data) {
   };
 
   /**
- * TODO
+ * Perform proof or work.
  * @param {Object} data
  * @param {string} data.hash - TODO
  * @param {string} [data.difficulty] - TODO
@@ -242,6 +242,77 @@ var Interface = function (data) {
  */
   this.proofOfWork = function (data, dataCallback, errorCallback) {
     proof(data.hash, dataCallback, errorCallback, data.difficulty);
+  };
+
+  /**
+ * Execute a function in a deterministic blob.
+ * @param {Object} data
+ * @param {string} [data.symbol] - The asset symbol . Either this or the id needs to be defined.
+ * @param {string} [data.id] - id of the deterministic blob. (For assets this is the keygen-base)
+ * @param {string} data.func - The deterministic function to be called
+ * @param {string} data.data - The data to be passed to the deterministic function
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
+  this.deterministic = function (data, dataCallback, errorCallback) {
+    if (data.func === 'keys') {
+      console.error('Access to the keys function is restricted.');
+      if (typeof errorCallback === 'function') {
+        errorCallback('Access to the keys function is restricted.');
+      }
+      return;
+    }
+
+    var id;
+    var displayId;
+    if (data.hasOwnProperty('id')) {
+      id = data.id;
+      displayId = id;
+    } else if (data.hasOwnProperty('symbol')) {
+      if (assets.hasOwnProperty(data.symbol) && typeof dataCallback === 'function') {
+        id = assets[data.symbol]['keygen-base'];
+        displayId = id + '(' + data.symbol + ')';
+      } else {
+        console.error('Asset ' + data.symbol + ' not initialized.');
+        if (typeof errorCallback === 'function') {
+          errorCallback('Asset ' + data.symbol + ' not initialized.');
+        }
+        return;
+      }
+    } else {
+      console.error('Either data.id or data.symbol needs to be defined.');
+      if (typeof errorCallback === 'function') {
+        errorCallback('Either data.id or data.symbol needs to be defined.');
+      }
+    }
+
+    if (deterministic.hasOwnProperty(id)) {
+      if (deterministic[id].hasOwnProperty(data.func) && typeof deterministic[id][data.func] === 'function') {
+        var result;
+        try {
+          result = deterministic[id][data.func](data.data, dataCallback, errorCallback);
+        } catch (e) {
+          console.error(e);// todo more descriptive error
+          if (typeof errorCallback === 'function') {
+            errorCallback(e);// todo more descriptive error
+          }
+          return;
+        }
+        if (typeof result !== 'undefined') { // when nothing is returned, expect it to be async
+          dataCallback(result);
+        }
+      } else {
+        console.error('Deterministic function ' + data.func + ' for ' + displayId + ' not defined or not a function.');
+        if (typeof errorCallback === 'function') {
+          errorCallback('Deterministic function ' + data.func + ' for ' + displayId + ' not defined or not a function.');
+        }
+      }
+    } else {
+      console.error('Deterministic blob for ' + displayId + ' not initialized.');
+      if (typeof errorCallback === 'function') {
+        errorCallback('Deterministic blob for ' + displayId + ' not initialized.');
+      }
+    }
   };
 
   /**
@@ -254,8 +325,11 @@ var Interface = function (data) {
   this.getAddress = function (data, dataCallback, errorCallback) {
     if (assets.hasOwnProperty(data.symbol) && typeof dataCallback === 'function') {
       dataCallback(assets[data.symbol].data.address);
-    } else if (typeof errorCallback === 'function') {
-      errorCallback('Asset not initialized');
+    } else {
+      console.error('Asset ' + data.symbol + ' not initialized.');
+      if (typeof errorCallback === 'function') {
+        errorCallback('Asset ' + data.symbol + ' not initialized.');
+      }
     }
   };
 
@@ -274,7 +348,7 @@ var Interface = function (data) {
         dataCallback(undefined);
       }
     } else if (typeof errorCallback === 'function') {
-      errorCallback('Asset not initialized');
+      errorCallback('Asset ' + data.symbol + ' not initialized.');
     }
   };
 
@@ -294,17 +368,17 @@ var Interface = function (data) {
     // TODO check amount
     // TODO check target
     if (!assets.hasOwnProperty(data.symbol)) {
-      console.error('Asset not added.');
+      console.error('Asset ' + data.symbol + ' not added.');
       if (typeof errorCallback === 'function') {
-        errorCallback('Asset not added.');// TODO error message
+        errorCallback('Asset ' + data.symbol + ' not added.');
       }
       return;
     }
     var asset = assets[data.symbol];
     if (!deterministic.hasOwnProperty(asset['keygen-base'])) {
-      console.error('Asset not initialized');
+      console.error('Asset ' + data.symbol + ' not initialized');
       if (typeof errorCallback === 'function') {
-        errorCallback('Asset not initialized.');// TODO error message
+        errorCallback('Asset ' + data.symbol + ' not initialized.');// TODO error message
       }
       return;
     }

@@ -298,7 +298,7 @@ var HybriddNode = function (host_) {
     this.call({query: this.xAuthStep0Request(), connector: data.connector, meta: true}, (response) => {
       this.call({query: this.xAuthStep1Request(response.nonce1), connector: data.connector, meta: true}, (response) => {
         this.xAuthFinalize(response, data.userKeys);
-        if (successCallback) { successCallback(); }
+        if (successCallback) { successCallback(host); }
       }, errorCallback);
     }, errorCallback);
   };
