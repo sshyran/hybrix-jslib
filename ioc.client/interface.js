@@ -11,9 +11,12 @@ var proof = require('../crypto/proof');
 
 var DJB2 = require('../crypto/hashDJB2');
 
-// create window global if it does not exist
+// create window and/or crypto globals if they do not exist
 if (typeof window === 'undefined') {
   window = {};
+}
+if (typeof crypto === 'undefined') {
+  crypto = {};
 }
 
 /* NOT NEEDED AS IT IS INCLUDED AT COMPILE TIME
