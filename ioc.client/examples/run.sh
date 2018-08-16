@@ -4,7 +4,7 @@ WHEREAMI=`pwd`
 export PATH=$WHEREAMI/../../node/bin:"$PATH"
 NODEINST=`which node`
 
-	echo " [i] using node executable $NODEINST"
+	# echo " [i] using node executable $NODEINST"
 	node $@
 
 PATH=$OLDPATH
