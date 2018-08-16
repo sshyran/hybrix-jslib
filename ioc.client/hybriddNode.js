@@ -107,7 +107,7 @@ var HybriddNode = function (host_) {
         try {
           data = JSON.parse(txtdata);
         } catch (error) {
-          console.error(error);
+          if (DEBUG) { console.error(error); }
           if (typeof errorCallback === 'function') {
             errorCallback(error);
           }
@@ -135,7 +135,7 @@ var HybriddNode = function (host_) {
       try {
         data = JSON.parse(txtdata);
       } catch (error) {
-        console.error(error);
+        if (DEBUG) { console.error(error); }
         if (typeof errorCallback === 'function') {
           errorCallback(error);
         }
@@ -160,7 +160,7 @@ var HybriddNode = function (host_) {
           if (xhr.status === 200) {
             dataCallback(xhr.responseText);
           } else {
-            console.error(xhr.responseText);
+            if (DEBUG) { console.error(xhr.responseText); }
             if (typeof errorCallback === 'function') {
               errorCallback(xhr.responseText);
             }
@@ -181,7 +181,7 @@ var HybriddNode = function (host_) {
           error = ('Request error: Status Code: ' + statusCode);
         }
         if (error) {
-          console.error(error);
+          if (DEBUG) { console.error(error); }
           if (typeof errorCallback === 'function') {
             errorCallback(error); // TODO error.message
           }
@@ -197,7 +197,7 @@ var HybriddNode = function (host_) {
           dataCallback(rawData);
         });
       }).on('error', (e) => {
-        console.error(`Got error: ${e.message}`);
+        if (DEBUG) { console.error(`Got error: ${e.message}`); }
 
         if (typeof errorCallback === 'function') {
           errorCallback(`Got error: ${e.message}`);
@@ -225,7 +225,7 @@ var HybriddNode = function (host_) {
     if (data.connector.hasOwnProperty('custom')) { connector = data.connector.custom; }
 
     if (typeof connector === 'undefined') {
-      console.error('Error: No http request connector method available.');
+      if (DEBUG) { console.error('Error: No http request connector method available.'); }
       if (typeof errorCallback === 'function') {
         errorCallback('Error: No http request connector method available.');
       }
@@ -237,7 +237,7 @@ var HybriddNode = function (host_) {
       try {
         data = JSON.parse(response);
       } catch (error) {
-        console.error(error);
+        if (DEBUG) { console.error(error); }
         if (typeof errorCallback === 'function') {
           errorCallback(error);
         }
@@ -250,7 +250,7 @@ var HybriddNode = function (host_) {
             try {
               data = JSON.parse(response);
             } catch (error) {
-              console.error(error);
+              if (DEBUG) { console.error(error); }
               clearInterval(interval);
               if (typeof errorCallback === 'function') {
                 errorCallback(error);
@@ -258,7 +258,7 @@ var HybriddNode = function (host_) {
               return;
             }
             if (data.hasOwnProperty('error') && data.error !== 0) {
-              console.error(data);
+              if (DEBUG) { console.error(data); }
               clearInterval(interval);
               if (typeof errorCallback === 'function') {
                 errorCallback(data.info);
@@ -273,7 +273,7 @@ var HybriddNode = function (host_) {
         // TODO errorCallback gebruiken bij timeout?
       } else if (dataCallback) {
         if (data.hasOwnProperty('error') && data.error !== 0) {
-          console.error(data);
+          if (DEBUG) { console.error(data); }
           if (typeof errorCallback === 'function') {
             errorCallback(response);
           }

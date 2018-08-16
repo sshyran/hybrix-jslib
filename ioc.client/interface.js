@@ -183,7 +183,7 @@ var Interface = function (data) {
       try {
         deterministic[data.assetDetails['keygen-base']] = CommonUtils.activate(code);
       } catch (e) {
-        console.error(e);
+        if (DEBUG) { console.error(e); }
         if (typeof errorCallback === 'function') {
           errorCallback(e);// TODO prepend error message
         }
@@ -200,7 +200,7 @@ var Interface = function (data) {
       assets[data.assetDetails.symbol].data.keys.mode = mode;
       assets[data.assetDetails.symbol].data.address = deterministic[data.assetDetails['keygen-base']].address(assets[data.assetDetails.symbol].data.keys);
     } catch (e) {
-      console.error(e);
+      if (DEBUG) { console.error(e); }
       if (typeof errorCallback === 'function') {
         errorCallback(e);// TODO prepend error message
       }
@@ -259,7 +259,7 @@ var Interface = function (data) {
  */
   this.deterministic = function (data, dataCallback, errorCallback) {
     if (data.func === 'keys') {
-      console.error('Access to the keys function is restricted.');
+      if (DEBUG) { console.error('Access to the keys function is restricted.'); }
       if (typeof errorCallback === 'function') {
         errorCallback('Access to the keys function is restricted.');
       }
@@ -276,14 +276,14 @@ var Interface = function (data) {
         id = assets[data.symbol]['keygen-base'];
         displayId = id + '(' + data.symbol + ')';
       } else {
-        console.error('Asset ' + data.symbol + ' not initialized.');
+        if (DEBUG) { console.error('Asset ' + data.symbol + ' not initialized.'); }
         if (typeof errorCallback === 'function') {
           errorCallback('Asset ' + data.symbol + ' not initialized.');
         }
         return;
       }
     } else {
-      console.error('Either data.id or data.symbol needs to be defined.');
+      if (DEBUG) { console.error('Either data.id or data.symbol needs to be defined.'); }
       if (typeof errorCallback === 'function') {
         errorCallback('Either data.id or data.symbol needs to be defined.');
       }
@@ -295,7 +295,7 @@ var Interface = function (data) {
         try {
           result = deterministic[id][data.func](data.data, dataCallback, errorCallback);
         } catch (e) {
-          console.error(e);// todo more descriptive error
+          if (DEBUG) { console.error(e); }// todo more descriptive error
           if (typeof errorCallback === 'function') {
             errorCallback(e);// todo more descriptive error
           }
@@ -305,13 +305,13 @@ var Interface = function (data) {
           dataCallback(result);
         }
       } else {
-        console.error('Deterministic function ' + data.func + ' for ' + displayId + ' not defined or not a function.');
+        if (DEBUG) { console.error('Deterministic function ' + data.func + ' for ' + displayId + ' not defined or not a function.'); }
         if (typeof errorCallback === 'function') {
           errorCallback('Deterministic function ' + data.func + ' for ' + displayId + ' not defined or not a function.');
         }
       }
     } else {
-      console.error('Deterministic blob for ' + displayId + ' not initialized.');
+      if (DEBUG) { console.error('Deterministic blob for ' + displayId + ' not initialized.'); }
       if (typeof errorCallback === 'function') {
         errorCallback('Deterministic blob for ' + displayId + ' not initialized.');
       }
@@ -329,7 +329,7 @@ var Interface = function (data) {
     if (assets.hasOwnProperty(data.symbol) && typeof dataCallback === 'function') {
       dataCallback(assets[data.symbol].data.address);
     } else {
-      console.error('Asset ' + data.symbol + ' not initialized.');
+      if (DEBUG) { console.error('Asset ' + data.symbol + ' not initialized.'); }
       if (typeof errorCallback === 'function') {
         errorCallback('Asset ' + data.symbol + ' not initialized.');
       }
@@ -371,7 +371,7 @@ var Interface = function (data) {
     // TODO check amount
     // TODO check target
     if (!assets.hasOwnProperty(data.symbol)) {
-      console.error('Asset ' + data.symbol + ' not added.');
+      if (DEBUG) { console.error('Asset ' + data.symbol + ' not added.'); }
       if (typeof errorCallback === 'function') {
         errorCallback('Asset ' + data.symbol + ' not added.');
       }
@@ -379,7 +379,7 @@ var Interface = function (data) {
     }
     var asset = assets[data.symbol];
     if (!deterministic.hasOwnProperty(asset['keygen-base'])) {
-      console.error('Asset ' + data.symbol + ' not initialized');
+      if (DEBUG) { console.error('Asset ' + data.symbol + ' not initialized'); }
       if (typeof errorCallback === 'function') {
         errorCallback('Asset ' + data.symbol + ' not initialized.');// TODO error message
       }
@@ -396,7 +396,7 @@ var Interface = function (data) {
     try {
       fee = toInt(Number(data.fee || asset.fee), asset.factor);
     } catch (e) {
-      console.error(e);
+      if (DEBUG) { console.error(e); }
       if (typeof errorCallback === 'function') {
         errorCallback(e);// TODO error message
       }
@@ -406,7 +406,7 @@ var Interface = function (data) {
     try {
       amount = toInt(Number(data.amount), asset.factor);
     } catch (e) {
-      console.error(e);
+      if (DEBUG) { console.error(e); }
       if (typeof errorCallback === 'function') {
         errorCallback(e);// TODO error message
       }
@@ -430,7 +430,7 @@ var Interface = function (data) {
     try {
       checkTransaction = deterministic[asset['keygen-base']].transaction(transactionData, dataCallback);// TODO errorCallback
     } catch (e) {
-      console.error(e);
+      if (DEBUG) { console.error(e); }
       if (typeof errorCallback === 'function') {
         errorCallback(e);// TODO prepend error message
       }
@@ -510,7 +510,7 @@ var Interface = function (data) {
         default : hybriddNodes[host].call({query: data.query, connector: connector}, dataCallback, errorCallback); break;
       }
     } else {
-      console.error('Host not initialized');
+      if (DEBUG) { console.error('Host not initialized'); }
       if (typeof errorCallback === 'function') {
         errorCallback('Host not initialized');
       }
@@ -525,7 +525,7 @@ var Interface = function (data) {
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.createAccount = function (data, dataCallback, errorCallback) {
-    console.error('Not implemented yet');
+    if (DEBUG) { console.error('Not implemented yet'); }
     if (typeof errorCallback === 'function') {
       errorCallback('Not implemented yet');
     }
@@ -550,7 +550,7 @@ var Interface = function (data) {
     var iterate = index => {
       if (index === maxIndex) {
         if (entropy.length < 411 + 20 + 60) {
-          console.error('Entropy is of insufficient length. Required > ' + (411 + 20 + 60));
+          if (DEBUG) { console.error('Entropy is of insufficient length. Required > ' + (411 + 20 + 60)); }
           if (typeof errorCallback === 'function') {
             errorCallback('Entropy is of insufficient length. Required > ' + (411 + 20 + 60));
           }
@@ -605,7 +605,7 @@ var Interface = function (data) {
             this.sequential({data: resultData, steps: data.steps.slice(1)}, dataCallback, errorCallback);
           }, errorCallback);
         } else {
-          console.error('Method "' + step + '" does not exist for IoC.Interface class.');
+          if (DEBUG) { console.error('Method "' + step + '" does not exist for IoC.Interface class.'); }
           if (typeof errorCallback === 'function') {
             errorCallback('Method "' + step + '" does not exist for IoC.Interface class.');
           }
@@ -669,7 +669,7 @@ var Interface = function (data) {
 
     var errorSubCallback = i => error => {
       if (data.breakOnFirstError || data.onlyGetFirstResult) {
-        console.error(error);
+        if (DEBUG) { console.error(error); }
         if (typeof errorCallback === 'function') {
           errorCallback(error);
         }
@@ -679,7 +679,7 @@ var Interface = function (data) {
         resultData[i] = undefined; // error;
         if (resultCount === stepCount) {
           if (errorCount === resultCount) {
-            console.error(error);
+            if (DEBUG) { console.error(error); }
             if (typeof errorCallback === 'function') {
               errorCallback(error);
             }
@@ -695,7 +695,7 @@ var Interface = function (data) {
         if (this.hasOwnProperty(step)) {
           this[step](data, dataSubCallback(i), errorSubCallback(i));
         } else {
-          console.error('Method "' + step + '" does not exist for IoC.Interface class.');
+          if (DEBUG) { console.error('Method "' + step + '" does not exist for IoC.Interface class.'); }
           if (typeof errorCallback === 'function') {
             errorCallback('Method "' + step + '" does not exist for IoC.Interface class.');
           }
@@ -715,7 +715,7 @@ var Interface = function (data) {
             executeStep(i, step.step, data);
           }
         } else {
-          console.error('No step defined.');
+          if (DEBUG) { console.error('No step defined.'); }
 
           if (typeof errorCallback === 'function') {
             errorCallback('No step defined.');
