@@ -470,6 +470,28 @@ var Interface = function (data) {
   };
 
   /**
+ * Creates a raw transaction
+ * @param {Object} data
+ * @param {string} data.symbol - The symbol of the asset
+ * @param {string} data.target - The target address
+ * @param {Number} data.amount - The amount that should be transferred
+ * @param {Number} data.fee - The fee.
+ * @param {string} [data.host] - The host that should be used.
+ * @param {string} [data.channel] - Indicate the channel 'y' for encryption, 'z' for both encryption and compression
+ * @param {Function} dataCallback - Called when the method is succesful. Passes result data.
+ * @param {Function} errorCallback - Called when an error occurs. Passes error.
+ * @param {Function} progressCallback - Called whenever there is a progress updated. Passes a number between 0 and 1.
+ */
+  this.rawTransaction = function (data, dataCallback, errorCallback, progressCallback) {
+    this.sequential({steps: [
+      {symbol: data.symbol}, 'addAsset',
+      {symbol: data.symbol}, 'getAddress',
+      address => { return {query: '/a/' + data.symbol + '/unspent/' + address + '/' + data.amount + '/' + data.target + '/public_key', channel: data.channel, host: data.host}; }, 'call',
+      unspent => { return {symbol: data.symbol, target: data.target, amount: data.amount, fee: data.fee, unspent: unspent}; }, 'signTransaction'
+    ]}, dataCallback, errorCallback, progressCallback);
+  };
+
+  /**
  * Create and execute a transaction
  * @param {Object} data
  * @param {string} data.symbol - The symbol of the asset
@@ -478,22 +500,15 @@ var Interface = function (data) {
  * @param {Number} data.fee - The fee.
  * @param {string} [data.host] - The host that should be used.
  * @param {string} [data.channel] - Indicate the channel 'y' for encryption, 'z' for both encryption and compression
- * @param {Function} dataCallback - Called when the method is succesful.
- * @param {Function} errorCallback - Called when an error occurs.
+ * @param {Function} dataCallback - Called when the method is succesful. Passes result data.
+ * @param {Function} errorCallback - Called when an error occurs. Passes error.
+ * @param {Function} progressCallback - Called whenever there is a progress updated. Passes a number between 0 and 1.
  */
-  this.transaction = function (data, dataCallback, errorCallback) {
+  this.transaction = function (data, dataCallback, errorCallback, progressCallback) {
     this.sequential({steps: [
-      {symbol: data.symbol},
-      'addAsset',
-      {symbol: data.symbol},
-      'getAddress',
-      address => { return {query: '/a/' + data.symbol + '/unspent/' + address + '/' + data.target + '/' + data.amount + '/public_key', channel: data.channel, host: data.host}; },
-      'call',
-      unspent => { return {symbol: data.symbol, target: data.target, amount: data.amount, fee: data.fee, unspent: unspent}; },
-      'signTransaction',
-      tx => { return { query: '/a/' + data.symbol + '/push/' + tx, channel: data.channel, host: data.host }; },
-      'call'
-    ]}, dataCallback, errorCallback);
+      data, 'rawTransaction',
+      tx => { return { query: '/a/' + data.symbol + '/push/' + tx, channel: data.channel, host: data.host }; }, 'call'
+    ]}, dataCallback, errorCallback, progressCallback);
   };
 
   /**
@@ -614,24 +629,43 @@ var Interface = function (data) {
   /**
    * Sequentually executes functions and passes results to next step.
    * @param {Array.&lt;string|Object|Function>} data - Sequential steps to be processed. An object indicates data that is supplied to the next step. A function is a transformation of the data of the previous step and given to the next step. A string is a method that used the data from the last step and supplies to the next step.
-   * @param {Function} dataCallback - Called when the method is succesful.
-   * @param {Function} errorCallback - Called when an error occurs.
+   * @param {Function} dataCallback - Called when the method is succesful. Passes result data.
+   * @param {Function} errorCallback - Called when an error occurs. Passes error.
+   * @param {Function} progressCallback - Called whenever there is a progress updated. Passes a number between 0 and 1.
    */
-  this.sequential = (data, dataCallback, errorCallback) => {
+  this.sequential = (data, dataCallback, errorCallback, progressCallback, currentStep, totalSteps) => {
     if (data.constructor.name === 'Array') {
       data = {steps: data};
     }
+    if (typeof currentStep === 'undefined') {
+      currentStep = 0;
+      totalSteps = data.steps.length;
+    }
 
     if (data.steps.length === 0) {
+      if (typeof progressCallback === 'function') {
+        progressCallback(1);
+      }
       dataCallback(data.data);
     } else {
+      if (typeof progressCallback === 'function') {
+        progressCallback(currentStep / totalSteps);
+      }
       var step = data.steps[0];
       if (typeof step === 'string') {
         if (this.hasOwnProperty(step)) {
           if (DEBUG) { console.log('this.' + step + '(' + JSON.stringify(data.data) + ')'); }
+
+          var subStepProgressCallback;
+          if (typeof progressCallback === 'function') {
+            subStepProgressCallback = (progress) => {
+              progressCallback((currentStep + progress) / totalSteps);
+            };
+          }
+
           this[step](data.data, resultData => {
-            this.sequential({data: resultData, steps: data.steps.slice(1)}, dataCallback, errorCallback);
-          }, errorCallback);
+            this.sequential({data: resultData, steps: data.steps.slice(1)}, dataCallback, errorCallback, progressCallback, currentStep + 1, totalSteps);
+          }, errorCallback, subStepProgressCallback);
         } else {
           if (DEBUG) { console.error('Method "' + step + '" does not exist for IoC.Interface class.'); }
           if (typeof errorCallback === 'function') {
@@ -640,47 +674,51 @@ var Interface = function (data) {
         }
       } else if (typeof step === 'object') {
         if (DEBUG) { console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(step)); }
-        this.sequential({data: step, steps: data.steps.slice(1)}, dataCallback, errorCallback);
+        this.sequential({data: step, steps: data.steps.slice(1)}, dataCallback, errorCallback, progressCallback, currentStep + 1, totalSteps);
       } else if (typeof step === 'function') {
         var result = step(data.data);
         if (DEBUG) { console.log(JSON.stringify(data.data) + ' => ' + JSON.stringify(result)); }
-        this.sequential({data: result, steps: data.steps.slice(1)}, dataCallback, errorCallback);
+        this.sequential({data: result, steps: data.steps.slice(1)}, dataCallback, errorCallback, progressCallback, currentStep + 1, totalSteps);
       }
     }
   };
 
   /**
    * Parallely executes several steps and collects results in a single object.
-   * @param {Array.&lt;string|Function>|Object} data - Parallel steps to be processed. TODO
-   * @param data.data -
-   * @param {Array.&lt;string|Function>} data.steps - TODO
-   * @param {Function} data.data -  TODO
-   * @param {Boolean} data.breakOnFirstError -  TODO
-   * @param {Boolean} data.onlyGetFirstResult -  TODO
-   * @param {Function} dataCallback - Called when the method is succesful.
-   * @param {Function} errorCallback - Called when an error occurs.
+   * @param {Object} data - Parallel steps to be processed. TODO
+   * @param {Object} data.label - TODO
+   * @param {Object} data.label.data - TODO
+   * @param {Object} data.label.step - TODO
+   * @param {Function} dataCallback - Called when the method is succesful. Passes result data.
+   * @param {Function} errorCallback - Called when an error occurs. Passes error.
+   * @param {Function} progressCallback - Called whenever there is a progress updated. Passes a number between 0 and 1.
    */
-  this.parallel = (data, dataCallback, errorCallback) => {
+  this.parallel = (data, dataCallback, errorCallback, progressCallback) => {
     var steps = data;
-    var stepCount = 0;
+    var stepCount = Object.keys(steps).length;
     var errorCount = 0;
     var resultCount = 0;
-    var resultData;
 
-    if (steps.constructor.name === 'Array') {
-      stepCount = steps.length;
-      resultData = [];
-    } else if (typeof steps === 'object') {
-      stepCount = Object.keys(steps).length;
-      resultData = {};
+    var resultMarks = {};
+    var resultProgress = {};
+    for (var i in steps) {
+      resultProgress[i] = 0;
+    }
+    var parallelProgressCallback;
+    if (typeof progressCallback === 'function') {
+      parallelProgressCallback = () => {
+        var totalProgress = 0;
+        for (var i in steps) {
+          totalProgress += resultProgress[i];
+        }
+        progressCallback(totalProgress / stepCount);
+      };
     }
 
+    var resultData = {};
+
     if (stepCount === 0) {
-      if (steps.constructor.name === 'Array') {
-        dataCallback([]);
-      } else if (steps.constructor.name === 'object') {
-        dataCallback({});
-      }
+      dataCallback({});
       return;
     }
     var dataSubCallback = i => result => {
@@ -688,8 +726,12 @@ var Interface = function (data) {
         dataCallback(result);
       } else {
         ++resultCount;
+        resultProgress[i] = 1;
+        resultMarks[i] = true;
         resultData[i] = result;
-        if (resultCount === stepCount) {
+        if (typeof progressCallback === 'function') { parallelProgressCallback(); }
+        if (Object.keys(resultMarks).length === stepCount) {
+          //        if (resultCount === stepCount) {
           dataCallback(resultData);
         }
       }
@@ -702,25 +744,37 @@ var Interface = function (data) {
           errorCallback(error);
         }
       } else {
+        resultMarks[i] = false;
+        resultProgress[i] = 1;
         ++errorCount;
         ++resultCount;
         resultData[i] = undefined; // error;
-        if (resultCount === stepCount) {
-          if (errorCount === resultCount) {
+        if (typeof progressCallback === 'function') { parallelProgressCallback(); }
+        if (Object.keys(resultMarks).length === stepCount) {
+        // if (resultCount === stepCount) {
+          /* if (errorCount === resultCount) {
             if (DEBUG) { console.error(error); }
             if (typeof errorCallback === 'function') {
               errorCallback(error);
             }
-          } else {
-            dataCallback(resultData);
-          }
+          } else { */
+          dataCallback(resultData);
+          // }
         }
       }
     };
-
+    var subProgressCallback;
+    if (typeof progressCallback === 'function') {
+      subProgressCallback = i => progress => {
+        resultProgress[i] = progress;
+        parallelProgressCallback();
+      };
+    }
     var executeStep = (i, step, data) => {
       if (typeof step === 'string') {
         if (this.hasOwnProperty(step)) {
+          // TODO pass a progressCallback
+
           this[step](data, dataSubCallback(i), errorSubCallback(i));
         } else {
           if (DEBUG) { console.error('Method "' + step + '" does not exist for IoC.Interface class.'); }
@@ -773,7 +827,7 @@ module.exports = {Interface};
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Aug 16 2018 08:56:07 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Aug 16 2018 15:00:01 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

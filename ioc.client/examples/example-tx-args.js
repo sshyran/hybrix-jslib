@@ -1,6 +1,6 @@
 nacl_factory = require('../../crypto/nacl.js');
 
-var hostname = 'http://wallet-uat.internetofcoins.org/api/';
+var hostname = 'http://localhost:1111/';
 
 // command line options and init
 var stdio = require('stdio');
@@ -23,16 +23,16 @@ var ops = stdio.getopt({
 if (ops.userid) { userid = ops.userid; }
 if (ops.passwd) { passwd = ops.passwd; }
 
-var symbol = ops.pubkey ? ops.pubkey :
-             ops.privkey ? ops.privkey :
-             ops.keypair ? ops.keypair :
-             typeof ops.rawtransaction!=='undefined' && ops.rawtransaction[0] ? ops.rawtransaction[0] : null;
+var symbol = ops.pubkey ? ops.pubkey
+  : ops.privkey ? ops.privkey
+    : ops.keypair ? ops.keypair
+      : typeof ops.rawtransaction !== 'undefined' && ops.rawtransaction[0] ? ops.rawtransaction[0] : null;
 
 /*
 var base = symbol.split('.')[0];
 if(base === 'xcp' || base === 'omni') {
   base = 'btc';
-}*/
+} */
 
 var IoC = require('../ioc.nodejs.client.js');
 var ioc = new IoC.Interface({http: require('http')});
@@ -42,31 +42,13 @@ if (ops.rawtransaction) {
   var target = ops.rawtransaction[2];
 
   ioc.sequential([
-      'init',
-      {username: userid, password: passwd}, 'login',
-      {host: hostname}, 'addHost',
-      {symbol: symbol}, 'addAsset',
-      {
-        details: {data: {query: '/asset/' + symbol + '/details'}, step: 'call'},
-        address: {data: {symbol: symbol}, step: 'getAddress'}
-      }, 'parallel',
-      (result) => {
-        // DEBUG:
-        // console.log("\n"+'Details: '+JSON.stringify(result.details)+"\n");
-        // console.log('Source address: '+result.address+"\n");
-        return {
-          details: {data: result.details, step: 'id'},
-          address: {data: result.address, step: 'id'},
-          unspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(amount) + Number(result.details.fee)) + '/' + result.address }, step: 'call'} //   TODO add public key
-        }
-      }, 'parallel',
-      (result) => {
-        return {
-          tx: {data: {symbol: symbol, target: result.address, unspent: result.unspent, amount: Number(amount), fee: result.details.fee}, step: 'signTransaction'}
-        }
-      }, 'parallel',
-    ]
-    , (data) => { console.log(data.tx+"\n"); }
-    , (error) => { console.error(error); }
+    'init',
+    {username: userid, password: passwd}, 'login',
+    {host: hostname}, 'addHost',
+    {symbol: symbol, amount: Number(amount), target: target }, 'rawTransaction'
+  ]
+    , (data) => { console.log(data + '\n'); }
+    , (error) => { console.error('Error: ' + error); }
+    //, (progress) => { console.log(Math.floor(progress * 100) + '%'); }
   );
 }

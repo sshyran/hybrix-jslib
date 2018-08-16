@@ -810,7 +810,7 @@ ioc.sequential([
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line478">line 478</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line493">line 493</a>
     </li></ul></dd>
     
 
@@ -1149,7 +1149,7 @@ ioc.sequential([
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line497">line 497</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line512">line 512</a>
     </li></ul></dd>
     
 
@@ -1424,7 +1424,7 @@ ioc.sequential([
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line527">line 527</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line542">line 542</a>
     </li></ul></dd>
     
 
@@ -2402,7 +2402,7 @@ ioc.sequential([
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line582">line 582</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line597">line 597</a>
     </li></ul></dd>
     
 
@@ -3304,7 +3304,7 @@ ioc.sequential([
     
 
     
-    <h4 class="name" id="parallel"><span class="type-signature"></span>parallel<span class="signature">(data, dataCallback, errorCallback)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="parallel"><span class="type-signature"></span>parallel<span class="signature">(data, dataCallback, errorCallback, progressCallback)</span><span class="type-signature"></span></h4>
     
 
     
@@ -3354,9 +3354,6 @@ ioc.sequential([
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;(string|function())></span>
-|
-
 <span class="param-type">Object</span>
 
 
@@ -3393,31 +3390,55 @@ ioc.sequential([
 
         <tr>
             
+                <td class="name"><code>label</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">TODO
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
                 <td class="name"><code>data</code></td>
             
 
             <td class="type">
             
-            </td>
-
-            
-
-            
-
-            <td class="description last">-</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>steps</code></td>
-            
-
-            <td class="type">
-            
                 
-<span class="param-type">Array.&lt;(string|function())></span>
+<span class="param-type">Object</span>
 
 
             
@@ -3434,13 +3455,13 @@ ioc.sequential([
 
         <tr>
             
-                <td class="name"><code>data</code></td>
+                <td class="name"><code>step</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">function</span>
+<span class="param-type">Object</span>
 
 
             
@@ -3454,49 +3475,10 @@ ioc.sequential([
         </tr>
 
     
+    </tbody>
+</table>
 
-        <tr>
-            
-                <td class="name"><code>breakOnFirstError</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Boolean</span>
-
-
-            
             </td>
-
-            
-
-            
-
-            <td class="description last">TODO</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onlyGetFirstResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">TODO</td>
         </tr>
 
     
@@ -3526,7 +3508,7 @@ ioc.sequential([
 
             
 
-            <td class="description last">Called when the method is succesful.</td>
+            <td class="description last">Called when the method is succesful. Passes result data.</td>
         </tr>
 
     
@@ -3549,7 +3531,30 @@ ioc.sequential([
 
             
 
-            <td class="description last">Called when an error occurs.</td>
+            <td class="description last">Called when an error occurs. Passes error.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>progressCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called whenever there is a progress updated. Passes a number between 0 and 1.</td>
         </tr>
 
     
@@ -3590,7 +3595,7 @@ ioc.sequential([
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line635">line 635</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line668">line 668</a>
     </li></ul></dd>
     
 
@@ -3897,7 +3902,429 @@ ioc.sequential([
     
 
     
-    <h4 class="name" id="sequential"><span class="type-signature"></span>sequential<span class="signature">(data, dataCallback, errorCallback)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="rawTransaction"><span class="type-signature"></span>rawTransaction<span class="signature">(data, dataCallback, errorCallback, progressCallback)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Creates a raw transaction
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>symbol</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The symbol of the asset</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>target</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The target address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>amount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The amount that should be transferred</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fee</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The fee.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>host</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The host that should be used.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>channel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Indicate the channel 'y' for encryption, 'z' for both encryption and compression</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dataCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called when the method is succesful. Passes result data.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>errorCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called when an error occurs. Passes error.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>progressCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called whenever there is a progress updated. Passes a number between 0 and 1.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line457">line 457</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="sequential"><span class="type-signature"></span>sequential<span class="signature">(data, dataCallback, errorCallback, progressCallback)</span><span class="type-signature"></span></h4>
     
 
     
@@ -3980,7 +4407,7 @@ ioc.sequential([
 
             
 
-            <td class="description last">Called when the method is succesful.</td>
+            <td class="description last">Called when the method is succesful. Passes result data.</td>
         </tr>
 
     
@@ -4003,7 +4430,30 @@ ioc.sequential([
 
             
 
-            <td class="description last">Called when an error occurs.</td>
+            <td class="description last">Called when an error occurs. Passes error.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>progressCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called whenever there is a progress updated. Passes a number between 0 and 1.</td>
         </tr>
 
     
@@ -4044,7 +4494,7 @@ ioc.sequential([
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line592">line 592</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line608">line 608</a>
     </li></ul></dd>
     
 
@@ -4400,7 +4850,7 @@ ioc.sequential([
     
 
     
-    <h4 class="name" id="transaction"><span class="type-signature"></span>transaction<span class="signature">(data, dataCallback, errorCallback)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="transaction"><span class="type-signature"></span>transaction<span class="signature">(data, dataCallback, errorCallback, progressCallback)</span><span class="type-signature"></span></h4>
     
 
     
@@ -4701,7 +5151,7 @@ ioc.sequential([
 
             
 
-            <td class="description last">Called when the method is succesful.</td>
+            <td class="description last">Called when the method is succesful. Passes result data.</td>
         </tr>
 
     
@@ -4724,7 +5174,30 @@ ioc.sequential([
 
             
 
-            <td class="description last">Called when an error occurs.</td>
+            <td class="description last">Called when an error occurs. Passes error.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>progressCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called whenever there is a progress updated. Passes a number between 0 and 1.</td>
         </tr>
 
     
@@ -4765,7 +5238,7 @@ ioc.sequential([
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line456">line 456</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line479">line 479</a>
     </li></ul></dd>
     
 
@@ -4815,7 +5288,7 @@ ioc.sequential([
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Aug 16 2018 08:56:07 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Aug 16 2018 15:00:01 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -224,6 +224,8 @@ function go (mode) {
   ]
     , renderTable
     , (error) => { console.error(error); }
+    , (progress) => { console.log(progress); }
+
   );
 }
 
