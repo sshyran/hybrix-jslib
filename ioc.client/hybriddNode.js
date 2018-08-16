@@ -172,28 +172,31 @@ var HybriddNode = function (host_) {
     };
 
     var httpSocket = (host, query, dataCallback, errorCallback) => {
+      // var counter = 0;
       data.connector.http.get(host + query, (res) => {
-        const { statusCode } = res;
+        //        const { statusCode } = res;
         // const contentType = res.headers['content-type'];
 
-        let error;
-        if (statusCode !== 200) {
+        var error;
+        if (res.statusCode !== 200) {
           error = ('Request error: Status Code: ' + statusCode);
         }
         if (error) {
           if (DEBUG) { console.error(error); }
+          res.resume(); // consume response data to free up memory
           if (typeof errorCallback === 'function') {
             errorCallback(error); // TODO error.message
           }
-          // consume response data to free up memory
-          res.resume();
           return;
         }
 
         res.setEncoding('utf8');
-        let rawData = '';
+        var rawData = '';
         res.on('data', (chunk) => { rawData += chunk; });
+        res.on('timeout', () => { console.log('>>>>>>TIMEOUT'); }); // TODO error callback
+        res.on('error', (e) => { console.log('>>>>>>ERROR'); errorCallback(`Got error: ${e}`); });
         res.on('end', () => {
+          res.resume();
           dataCallback(rawData);
         });
       }).on('error', (e) => {
@@ -202,6 +205,9 @@ var HybriddNode = function (host_) {
         if (typeof errorCallback === 'function') {
           errorCallback(`Got error: ${e.message}`);
         }
+      }).setTimeout(10000, () => {
+        // handle timeout here
+        errorCallback('>>>>TIMEOUT');
       });
     };
 
@@ -231,7 +237,7 @@ var HybriddNode = function (host_) {
       }
       return;
     }
-
+    var query = data.query;
     connector(host, data.query, (response) => {
       var data;
       try {
@@ -244,31 +250,31 @@ var HybriddNode = function (host_) {
         return;
       }
       if (data.hasOwnProperty('id') && data.id === 'id') {
-        var interval = setInterval(() => {
+        var followUp = () => {
           connector(host, '/proc/' + data.data, (response) => {
-            var data;
+            var parsedResponse;
             try {
-              data = JSON.parse(response);
+              parsedResponse = JSON.parse(response);
             } catch (error) {
               if (DEBUG) { console.error(error); }
-              clearInterval(interval);
               if (typeof errorCallback === 'function') {
                 errorCallback(error);
               }
               return;
             }
-            if (data.hasOwnProperty('error') && data.error !== 0) {
-              if (DEBUG) { console.error(data); }
-              clearInterval(interval);
+            if (parsedResponse.hasOwnProperty('error') && parsedResponse.error !== 0) {
+              if (DEBUG) { console.error(parsedResponse); }
               if (typeof errorCallback === 'function') {
-                errorCallback(data.info);
+                errorCallback(parsedResponse.info);
               }
-            } else if (data.stopped !== null) {
-              clearInterval(interval);
-              dataCallback(meta ? data : data.data);
+            } else if (parsedResponse.stopped !== null) {
+              dataCallback(meta ? parsedResponse : parsedResponse.data);
+            } else {
+              setTimeout(followUp, 500); // TODO parametrize, add timeout
             }
           });
-        }, 500); // TODO parametrize, add timeout
+        };
+        followUp();
 
         // TODO errorCallback gebruiken bij timeout?
       } else if (dataCallback) {
