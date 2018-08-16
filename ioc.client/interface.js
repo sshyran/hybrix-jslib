@@ -668,8 +668,6 @@ var Interface = function (data) {
   this.parallel = (data, dataCallback, errorCallback, progressCallback) => {
     var steps = data;
     var stepCount = Object.keys(steps).length;
-    var errorCount = 0;
-    var resultCount = 0;
 
     var resultMarks = {};
     var resultProgress = {};
@@ -694,45 +692,31 @@ var Interface = function (data) {
       return;
     }
     var dataSubCallback = i => result => {
-      if (data.breakOnFirstError || data.onlyGetFirstResult) {
-        dataCallback(result);
-      } else {
-        ++resultCount;
-        resultProgress[i] = 1;
-        resultMarks[i] = true;
-        resultData[i] = result;
-        if (typeof progressCallback === 'function') { parallelProgressCallback(); }
-        if (Object.keys(resultMarks).length === stepCount) {
-          //        if (resultCount === stepCount) {
-          dataCallback(resultData);
-        }
+      if (resultMarks.hasOwnProperty(i)) { return; }
+      resultProgress[i] = 1;
+      resultMarks[i] = true;
+      resultData[i] = result;
+      if (typeof progressCallback === 'function') { parallelProgressCallback(); }
+      if (Object.keys(resultMarks).length === stepCount) {
+        dataCallback(resultData);
       }
     };
 
     var errorSubCallback = i => error => {
-      if (data.breakOnFirstError || data.onlyGetFirstResult) {
-        if (DEBUG) { console.error(error); }
-        if (typeof errorCallback === 'function') {
-          errorCallback(error);
-        }
-      } else {
-        resultMarks[i] = false;
-        resultProgress[i] = 1;
-        ++errorCount;
-        ++resultCount;
-        resultData[i] = undefined; // error;
-        if (typeof progressCallback === 'function') { parallelProgressCallback(); }
-        if (Object.keys(resultMarks).length === stepCount) {
-        // if (resultCount === stepCount) {
-          /* if (errorCount === resultCount) {
+      if (resultMarks.hasOwnProperty(i)) { return; }
+      resultMarks[i] = false;
+      resultProgress[i] = 1;
+      resultData[i] = undefined; // error;
+      if (typeof progressCallback === 'function') { parallelProgressCallback(); }
+      if (Object.keys(resultMarks).length === stepCount) {
+        /* if (errorCount === resultCount) {
             if (DEBUG) { console.error(error); }
             if (typeof errorCallback === 'function') {
               errorCallback(error);
             }
           } else { */
-          dataCallback(resultData);
-          // }
-        }
+        dataCallback(resultData);
+        // }
       }
     };
     var subProgressCallback;
@@ -745,9 +729,7 @@ var Interface = function (data) {
     var executeStep = (i, step, data) => {
       if (typeof step === 'string') {
         if (this.hasOwnProperty(step)) {
-          // TODO pass a progressCallback
-
-          this[step](data, dataSubCallback(i), errorSubCallback(i));
+          this[step](data, dataSubCallback(i), errorSubCallback(i), subProgressCallback);
         } else {
           if (DEBUG) { console.error('Method "' + step + '" does not exist for IoC.Interface class.'); }
           if (typeof errorCallback === 'function') {
@@ -755,7 +737,7 @@ var Interface = function (data) {
           }
         }
       } else if (typeof step === 'function') {
-        step(data, dataSubCallback(i), errorSubCallback(i));
+        step(data, dataSubCallback(i), errorSubCallback(i), subProgressCallback);
       }
     };
 

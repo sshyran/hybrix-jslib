@@ -17,6 +17,7 @@ var ops = stdio.getopt({
   'keypair': {key: 'K', args: 1, description: 'Get public and private key from wallet [argument: symbol]'},
   'rawtransaction': {key: 'r', args: 3, description: 'Create a raw transaction [argument: symbol] [argument: amount] [argument: target_address]'},
   'string': {key: 'e', args: 0, description: 'Make escaped string output for rawtransaction'},
+  'quiet': {key: 'q', args: 0, description: 'No extra output'},
   'eth_forcenonce': {key: 'E', args: 1, description: 'Force nonce transaction number for Ethereum [argument: integer]'}
 });
 
@@ -49,6 +50,6 @@ if (ops.rawtransaction) {
   ]
     , (data) => { console.log(data + '\n'); }
     , (error) => { console.error('Error: ' + error); }
-    //, (progress) => { console.log(Math.floor(progress * 100) + '%'); }
+    , ops.quiet ? undefined : (progress) => { console.log(Math.floor(progress * 100) + '%'); }
   );
 }
