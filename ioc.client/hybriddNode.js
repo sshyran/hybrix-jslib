@@ -223,7 +223,7 @@ var HybriddNode = function (host_) {
         if (typeof errorCallback === 'function') {
           errorCallback(`Got error: ${e.message}`);
         }
-      }).setTimeout(1000, () => { // TODO parametrize
+      }).setTimeout(10000, () => { // TODO parametrize
         // handle timeout here
         if (DEBUG) { console.error('Request timed out.'); }
         if (typeof errorCallback === 'function') {
