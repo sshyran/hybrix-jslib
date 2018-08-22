@@ -30,8 +30,8 @@ if (typeof FormData === 'undefined') {
  */
 
 /**
- * Internet of Coins main API interface object
- * @param {Object} data - one of the three methods below must be passed.
+ * Internet of Coins main API interface object. It connects to servers running Internet of Coins Hybridd using the REST API.  For reference: [Hybridd API]{@link https://wallet1.internetofcoins.org/api/help}
+ * @param {Object} data - one of the three methods below must be passed:
  * @param {Object} data.http - a http object. ({@link https://nodejs.org/api/http.html})
  * @param {Object} data.XMLHttpRequest - a XMLHttpRequest object. ({@link https://developer.mozilla.org/nl/docs/Web/API/XMLHttpRequest})
  * @param {Function} data.custom - a custom connector method which receives a hostname, query, dataCallback and errorCallback parameters and returns a string.
@@ -51,9 +51,9 @@ if (typeof FormData === 'undefined') {
  *
  * ioc.init(null, onSucces, onError);
  * @example
- * // Webpage
- * // add <script src="./ioc.web.client.js"></script> to html header
- *
+ * <!-- Webpage -->
+ * <script src="./ioc.web.client.js"></script> to html header
+ * <script>
  * var ioc = new IoC.Interface({XMLHttpRequest:XMLHttpRequest});
  *
  * function onSucces(){
@@ -65,9 +65,8 @@ if (typeof FormData === 'undefined') {
  * }
  *
  * ioc.init(null, onSucces, onError);
+ * </script>
  * @example
- * var ioc = new IoC.Interface();
- *
  * ioc.sequential([
  *   'init', // Initialize ioc
  *   {username: '****************', password: '****************'}, // Define credentials
@@ -80,7 +79,8 @@ if (typeof FormData === 'undefined') {
  *   'transaction' // Execute the transaction
  * ],
  *  onSucces,
- *  onError
+ *  onError,
+ *  onProgress
  * );
  * @constructor
  */

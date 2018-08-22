@@ -121,6 +121,10 @@ var HybriddNode = function (host_) {
   };
 
   this.zCall = function (data, dataCallback, errorCallback) {
+    if (typeof errorCallback !== 'function') {
+      console.log('A NO ERROR FUNC!!!!');
+    }
+
     /* data = {
        query,
        channel: 'z'
@@ -172,16 +176,16 @@ var HybriddNode = function (host_) {
     };
 
     var httpSocket = (host, query, dataCallback, errorCallback) => {
-      // var counter = 0;
+      if (typeof errorCallback !== 'function' || typeof dataCallback !== 'function') {
+        console.log('B NO ERROR FUNC!!!!');
+      }
+
       data.connector.http.get(host + query, (res) => {
-        //        const { statusCode } = res;
         // const contentType = res.headers['content-type'];
 
-        var error;
-        if (res.statusCode !== 200) {
-          error = ('Request error: Status Code: ' + statusCode);
-        }
-        if (error) {
+        if (res.statusCode < 200 || res.statusCode > 299) {
+          var error = ('Request error: Status Code: ' + res.statusCode);
+
           if (DEBUG) { console.error(error); }
           res.resume(); // consume response data to free up memory
           if (typeof errorCallback === 'function') {
@@ -191,13 +195,27 @@ var HybriddNode = function (host_) {
         }
 
         res.setEncoding('utf8');
-        var rawData = '';
-        res.on('data', (chunk) => { rawData += chunk; });
-        res.on('timeout', () => { console.log('>>>>>>TIMEOUT'); }); // TODO error callback
-        res.on('error', (e) => { console.log('>>>>>>ERROR'); errorCallback(`Got error: ${e}`); });
+        var rawData = [];
+        res.on('data', (chunk) => { rawData.push(chunk); });
+        res.on('timeout', () => {
+          res.resume();
+          if (DEBUG) { console.error('Request timed out.'); }
+
+          if (typeof errorCallback === 'function') {
+            errorCallback('Request timed out.');
+          }
+        });
+        res.on('error', (e) => {
+          res.resume();
+          if (DEBUG) { console.error(`Got error: ${e.message}`); }
+
+          if (typeof errorCallback === 'function') {
+            errorCallback(`Got error: ${e.message}`);
+          }
+        });
         res.on('end', () => {
           res.resume();
-          dataCallback(rawData);
+          dataCallback(rawData.join(''));
         });
       }).on('error', (e) => {
         if (DEBUG) { console.error(`Got error: ${e.message}`); }
@@ -205,9 +223,12 @@ var HybriddNode = function (host_) {
         if (typeof errorCallback === 'function') {
           errorCallback(`Got error: ${e.message}`);
         }
-      }).setTimeout(10000, () => {
+      }).setTimeout(1000, () => { // TODO parametrize
         // handle timeout here
-        errorCallback('>>>>TIMEOUT');
+        if (DEBUG) { console.error('Request timed out.'); }
+        if (typeof errorCallback === 'function') {
+          errorCallback('Request timed out');
+        }
       });
     };
 
@@ -272,7 +293,8 @@ var HybriddNode = function (host_) {
             } else {
               setTimeout(followUp, 500); // TODO parametrize, add timeout
             }
-          });
+          },
+          errorCallback);
         };
         followUp();
 
