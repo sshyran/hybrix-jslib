@@ -258,14 +258,6 @@ var Interface = function (data) {
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.deterministic = function (data, dataCallback, errorCallback) {
-    if (data.func === 'keys') {
-      if (DEBUG) { console.error('Access to the keys function is restricted.'); }
-      if (typeof errorCallback === 'function') {
-        errorCallback('Access to the keys function is restricted.');
-      }
-      return;
-    }
-
     var id;
     var displayId;
     if (data.hasOwnProperty('id')) {
