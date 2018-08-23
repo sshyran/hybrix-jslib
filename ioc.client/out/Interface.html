@@ -810,7 +810,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line485">line 485</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line503">line 503</a>
     </li></ul></dd>
     
 
@@ -1149,7 +1149,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line504">line 504</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line522">line 522</a>
     </li></ul></dd>
     
 
@@ -1424,7 +1424,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line534">line 534</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line552">line 552</a>
     </li></ul></dd>
     
 
@@ -2025,7 +2025,7 @@ ioc.init(null, onSucces, onError);
     
 
     
-    <h4 class="name" id="getPublicKey"><span class="type-signature"></span>getPublicKey<span class="signature">(data, dataCallback, errorCallback)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getKeys"><span class="type-signature"></span>getKeys<span class="signature">(data, dataCallback, errorCallback)</span><span class="type-signature"></span></h4>
     
 
     
@@ -2033,7 +2033,7 @@ ioc.init(null, onSucces, onError);
 
 
 <div class="description">
-    Get the publick key associated to a specific asset for current session.
+    Get the keys associated to a specific asset for current session. Important: handle your private keys confidentially.
 </div>
 
 
@@ -2255,6 +2255,236 @@ ioc.init(null, onSucces, onError);
     
 
     
+    <h4 class="name" id="getPublicKey"><span class="type-signature"></span>getPublicKey<span class="signature">(data, dataCallback, errorCallback)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get the publick key associated to a specific asset for current session.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>symbol</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The asset symbol.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dataCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called when the method is succesful.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>errorCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called when an error occurs.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line356">line 356</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="id"><span class="type-signature"></span>id<span class="signature">(data, dataCallback, errorCallback)</span><span class="type-signature"></span></h4>
     
 
@@ -2402,7 +2632,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line589">line 589</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line607">line 607</a>
     </li></ul></dd>
     
 
@@ -3595,7 +3825,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line660">line 660</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line678">line 678</a>
     </li></ul></dd>
     
 
@@ -4290,7 +4520,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line449">line 449</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line467">line 467</a>
     </li></ul></dd>
     
 
@@ -4494,7 +4724,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line600">line 600</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line618">line 618</a>
     </li></ul></dd>
     
 
@@ -4816,7 +5046,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line361">line 361</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line379">line 379</a>
     </li></ul></dd>
     
 
@@ -5238,7 +5468,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line471">line 471</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line489">line 489</a>
     </li></ul></dd>
     
 
