@@ -1,6 +1,6 @@
 nacl_factory = require('../../crypto/nacl.js');
 
-var hostname = 'http://localhost:1111/';
+var hostname = 'http://wallet-uat.internetofcoins.org/api/';
 
 // command line options and init
 var stdio = require('stdio');
