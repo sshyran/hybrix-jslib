@@ -281,7 +281,7 @@ var Interface = function (data) {
       }
     }
 
-    if (deterministic.hasOwnProperty(id)) {
+    var execute = () => {
       if (deterministic[id].hasOwnProperty(data.func) && typeof deterministic[id][data.func] === 'function') {
         var result;
         try {
@@ -302,11 +302,23 @@ var Interface = function (data) {
           errorCallback('Deterministic function ' + data.func + ' for ' + displayId + ' not defined or not a function.');
         }
       }
-    } else {
-      if (DEBUG) { console.error('Deterministic blob for ' + displayId + ' not initialized.'); }
-      if (typeof errorCallback === 'function') {
-        errorCallback('Deterministic blob for ' + displayId + ' not initialized.');
-      }
+    };
+    if (deterministic.hasOwnProperty(id)) {
+      execute();
+    } else { // if blob not yet available, get it.
+      this.call({host: data.host, query: '/source/deterministic/code/' + id, channel: data.channel}, (blob) => {
+        var code = LZString.decompressFromEncodedURIComponent(blob);
+        try {
+          deterministic[id] = CommonUtils.activate(code);
+        } catch (e) {
+          if (DEBUG) { console.error(e); }
+          if (typeof errorCallback === 'function') {
+            errorCallback(e);// TODO prepend error message
+          }
+          return;
+        }
+        execute();
+      });
     }
   };
 
