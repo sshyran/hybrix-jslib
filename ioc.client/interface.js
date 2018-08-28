@@ -318,7 +318,7 @@ var Interface = function (data) {
           return;
         }
         execute();
-      });
+      }, errorCallback);
     }
   };
 
