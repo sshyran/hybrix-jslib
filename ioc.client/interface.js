@@ -123,6 +123,7 @@ var Interface = function (data) {
     if (typeof nacl === 'undefined') {
       nacl_factory.instantiate(function (naclinstance) {
         nacl = naclinstance; // nacl is a global that is initialized here.
+        window.nacl = nacl;
         if (typeof dataCallback === 'function') { dataCallback(); }
       });
     } else {
@@ -714,7 +715,7 @@ var Interface = function (data) {
       return;
     }
     var dataSubCallback = i => result => {
-      if (resultMarks.hasOwnProperty(i)) { console.log('DOUBLE DATA ', JSON.stringify(steps[i])); return; }
+      if (resultMarks.hasOwnProperty(i)) { return; }
       resultProgress[i] = 1;
       resultMarks[i] = true;
       resultData[i] = result;
@@ -725,7 +726,7 @@ var Interface = function (data) {
     };
 
     var errorSubCallback = i => error => {
-      if (resultMarks.hasOwnProperty(i)) { console.log('DOUBLE ERROR ', JSON.stringify(steps[i])); return; }
+      if (resultMarks.hasOwnProperty(i)) { return; }
       resultMarks[i] = false;
       resultProgress[i] = 1;
       resultData[i] = undefined; // error;

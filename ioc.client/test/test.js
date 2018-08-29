@@ -1,5 +1,3 @@
-DEBUG = true;
-
 function testAsset (symbol) {
   var testAmount = 0.0001;
   return { data: [
@@ -63,7 +61,7 @@ var validDetails = details => typeof details === 'object';
 var validValid = valid => typeof valid === 'string' && valid.startsWith('valid');
 var validBalance = (balance, factor) => typeof balance !== 'undefined' && balance !== null && !isNaN(balance) && balance.toString().indexOf('.') !== -1 && balance.toString().split('.')[1].length === Number(factor);
 var validUnspent = unspent => typeof unspent !== 'undefined';
-var validHistory = history => typeof history === 'object';
+var validHistory = history => typeof history !== 'undefined';
 var validSample = sample => typeof sample === 'object';
 var validTransaction = transaction => typeof transaction === 'object';
 var validSign = sign => typeof sign !== 'undefined' && sign !== false && sign !== '' && sign !== null && sign !== 'false' && sign !== '[UNDER MAINTENANCE]';
@@ -112,7 +110,7 @@ var renderTableCLI = (data) => {
       r += renderCellCLI(validSign(data[symbol].seedSign), data[symbol].seedSign, counter) + '   │';
       r += '\n';
     } else {
-      r += 'X   │X     │X    │X   │X     │X     │X   │X │X   │X     │X     │X   │X   │' + '\n';
+      r += 'X   │X     │X    │X   │X     │X     │X   │X │X   │X     │X     │X   │X   │ !' + '\n';
     }
   }
   r += '      └────┴──────┴─────┴────┴──────┴──────┴────┴──┴────┴──────┴──────┴────┴────┘' + '\n';
@@ -185,7 +183,6 @@ function go (mode) {
     ioc = new IoC.Interface({XMLHttpRequest: XMLHttpRequest});
     renderTable = renderTableWeb;
   }
-
   ioc.sequential([
     'init',
     {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'login',
@@ -198,7 +195,7 @@ function go (mode) {
     // TODO filter tokens
 
     {
-      /* dummy: testAsset('dummy'),
+      dummy: testAsset('dummy'),
       eth: testAsset('eth'),
       ark: testAsset('ark'),
       bch: testAsset('bch'),
@@ -211,15 +208,15 @@ function go (mode) {
       lsk: testAsset('lsk'),
       ltc: testAsset('ltc'), //  Error: Invalid network version
       nxt: testAsset('nxt'), // unspents not working properly ERROR
-      omni: testAsset('omni'), // TypeError: undefined is not an object (evaluating 'n.unspent.unspents')
+      omni: testAsset('omni'), // TypeError: undefined is not an object (evaluating 'n.unspent.unspents') */
       rise: testAsset('rise'),
       shift: testAsset('shift'),
-      ubq: testAsset('ubq'), // details.fee =null> */
-      waves: testAsset('waves')
-      /* xcp: testAsset('xcp'), // Error: Expected property "1" of type Satoshi, got Number -546
+      ubq: testAsset('ubq'), // details.fee =null>
+      waves: testAsset('waves'),
+      xcp: testAsset('xcp'), // Error: Expected property "1" of type Satoshi, got Number -546
       xel: testAsset('xel'), // unspents not working properly ERROR
       xem: testAsset('xem'),
-      zec: testAsset('zec') */
+      zec: testAsset('zec')
     },
     'parallel'
 
