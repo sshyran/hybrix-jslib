@@ -120,15 +120,19 @@ var Interface = function (data) {
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.init = function (data, dataCallback, errorCallback) {
-    if (typeof nacl === 'undefined') {
-      nacl_factory.instantiate(function (naclinstance) {
-        nacl = naclinstance; // nacl is a global that is initialized here.
-        window.nacl = nacl;
-        if (typeof dataCallback === 'function') { dataCallback(); }
-      });
-    } else {
-      if (typeof dataCallback === 'function') { dataCallback(); }
-    }
+    this.logout(null,
+      () => {
+        if (typeof nacl === 'undefined') {
+          nacl_factory.instantiate(function (naclinstance) {
+            nacl = naclinstance; // nacl is a global that is initialized here.
+            window.nacl = nacl;
+            if (typeof dataCallback === 'function') { dataCallback(); }
+          });
+        } else {
+          if (typeof dataCallback === 'function') { dataCallback(); }
+        }
+      },
+      errorCallback);
   };
 
   /**
