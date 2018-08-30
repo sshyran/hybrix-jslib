@@ -3,14 +3,14 @@ nacl_factory = require('../../crypto/nacl.js');
 var IoC = require('../ioc.nodejs.client.js');
 var ioc = new IoC.Interface({http: require('http')});
 
-// IoC credentials
+//IoC credentials:
 var username = '';
 var password = '';
 
 // Parameters of the order
 var token = 'eth.kin';
 var amountETH = "0.2";
-var amountToken = "899";
+var amountToken = "890";
 var isOrderToBuyToken = false;
 
 var host = 'http://localhost:1111/';

@@ -8,8 +8,8 @@ var username = '';
 var password = '';
 
 // Withdrawal paramaters. To withdraw a token, set the token variable to the token symbol (e.g. 'eth.kin'). To withdraw ethereum, set the token to the symbol of ethereum (i.e. 'eth').
-var token = 'eth';
-var amount = "0.0001";
+var token = 'eth.kin';
+var amount = "890";
 
 var host = 'http://localhost:1111/';
 

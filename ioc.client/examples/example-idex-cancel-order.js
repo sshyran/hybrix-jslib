@@ -3,16 +3,16 @@ nacl_factory = require('../../crypto/nacl.js');
 var IoC = require('../ioc.nodejs.client.js');
 var ioc = new IoC.Interface({http: require('http')});
 
-// IoC credentials
+//IoC credentials:
 var username = '';
 var password = '';
 
-// Parameters of the order that needs to be cancelled
+// Parameters of the order that needs to be cancelled (double check that the 'nonceOfOrder' is indeed set to the nonce of the order you want to cancel)
 var token = 'eth.kin';
 var amountETH = "0.2";
-var amountToken = "899";
+var amountToken = "890";
 var isOrderToBuyToken = false;
-var nonceOfOrder = 23;
+var nonceOfOrder = 25;
 
 var host = 'http://localhost:1111/';
 
@@ -39,6 +39,7 @@ ioc.sequential([
       return {data: result, id: 'dex_idex', func: 'cancelSignedIdexOrder'}
     }, 'deterministic',
     (result) => {
+        console.log(result)
         return {query: '/engine/idex/push/cancel/' + JSON.stringify(result)}
       }
     , 'call'
