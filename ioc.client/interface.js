@@ -567,22 +567,21 @@ var Interface = function (data) {
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.createAccount = function (data, dataCallback, errorCallback) {
-    /* if (DEBUG) { console.error('Not implemented yet'); }
-    if (typeof errorCallback === 'function') {
-      errorCallback('Not implemented yet');
-    }*/
-    //return; // FIXME after pool is fixed properly
 
     if (!typeof data.entropy === 'string') {
       if(data.entropy.length<482) {
         data.entropy = crypto.randomBytes(482).toString();
+      } else {
+        if (DEBUG) { console.error('Not enough entropy provided to function createAccount!'); }
+        return false;
       }
     }
 
+    var pool;
     if (typeof data.pool === 'function') {
-      var pool = data.pool;
+      pool = data.pool;
     } else {
-      var pool = function (randomNumber) {
+      pool = function (randomNumber) {
         // randomNumber not used by pool in this instance
         // DEPRECATED: return 'ABCDEF1234567890'.repeat(100); // FIXME
         return crypto.randomBytes(1600).toString('hex');
