@@ -558,7 +558,7 @@ var Interface = function (data) {
       }
     }
   };
-/**
+  /**
  * TODO   WIP Create a new deterministic account with the entropy provided.
  * @param {Object} data
  * @param {string} [data.entropy] - Optional: must be a random string of at least 482 bytes, else taken from crypto.randomBytes.
@@ -567,9 +567,8 @@ var Interface = function (data) {
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.createAccount = function (data, dataCallback, errorCallback) {
-
     if (!typeof data.entropy === 'string') {
-      if(data.entropy.length<482) {
+      if (data.entropy.length < 482) {
         data.entropy = crypto.randomBytes(482).toString();
       } else {
         if (DEBUG) { console.error('Not enough entropy provided to function createAccount!'); }
@@ -587,7 +586,7 @@ var Interface = function (data) {
         return crypto.randomBytes(1600).toString('hex');
       };
     }
-    
+
     var entropy = '';
     var maxIndex = 1000 + Math.floor(Math.random() * 256);
 
