@@ -16,7 +16,7 @@ if (typeof window === 'undefined') {
   window = {};
 }
 if (typeof crypto === 'undefined') {
-  crypto = {};
+  var crypto = require('crypto');
 }
 if (typeof FormData === 'undefined') {
   FormData = {};
@@ -561,26 +561,31 @@ var Interface = function (data) {
   /**
  * TODO   WIP Create a new deterministic account with the entropy provided.
  * @param {Object} data
- * @param {string} [data.entropy] - TODO
- * @param {Function} [data.pool] - TODO
+ * @param {string} [data.entropy] - Optional: must be a random string of at least 482 bytes, else taken from crypto.randomBytes.
+ * @param {Function} [data.pool] - Optional: pool function can be overridden by a custom 1600 byte pool generator.
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.createAccount = function (data, dataCallback, errorCallback) {
-    if (DEBUG) { console.error('Not implemented yet'); }
-    if (typeof errorCallback === 'function') {
-      errorCallback('Not implemented yet');
+    if (!typeof data.entropy === 'string') {
+      if (data.entropy.length < 482) {
+        data.entropy = crypto.randomBytes(482).toString();
+      } else {
+        if (DEBUG) { console.error('Not enough entropy provided to function createAccount!'); }
+        return false;
+      }
     }
-    return; // FIXME after pool is fixed properly
 
-    var pool = function (randomNumber) {
-    /*  SecureRandom.seedTime();
-      SecureRandom.seedInt16(randomNumber);
-      var poolHex = SecureRandom.poolCopyOnInit != null
-        ? Crypto.util.bytesToHex(SecureRandom.poolCopyOnInit)
-        : Crypto.util.bytesToHex(SecureRandom.pool); */
-      return 'ABCDEF1234567890'.repeat(100); // FIXME
-    };
+    var pool;
+    if (typeof data.pool === 'function') {
+      pool = data.pool;
+    } else {
+      pool = function (randomNumber) {
+        // randomNumber not used by pool in this instance
+        // DEPRECATED: return 'ABCDEF1234567890'.repeat(100); // FIXME
+        return crypto.randomBytes(1600).toString('hex');
+      };
+    }
 
     var entropy = '';
     var maxIndex = 1000 + Math.floor(Math.random() * 256);
@@ -591,14 +596,15 @@ var Interface = function (data) {
 
     var iterate = index => {
       if (index === maxIndex) {
-        if (entropy.length < 411 + 20 + 60) {
-          if (DEBUG) { console.error('Entropy is of insufficient length. Required > ' + (411 + 20 + 60)); }
+        entropy.required = 411 + 20 + 60;
+        if (entropy.length < entropy.required) {
+          if (DEBUG) { console.error('Entropy is of insufficient length. Required > ' + entropy.required); }
           if (typeof errorCallback === 'function') {
-            errorCallback('Entropy is of insufficient length. Required > ' + (411 + 20 + 60));
+            errorCallback('Entropy is of insufficient length. Required > ' + entropy.required);
           }
         } else {
           var offset = Math.floor(Math.random() * 411);
-          // 411+20+60
+          // 411+20+60 -> entropy.required
           var passwd = hexToBase32(entropy.substr(offset + 20, 60));
           var userid = hexToBase32(entropy.substr(offset, 12) +
                                    DJB2.hash(entropy.substr(offset, 12).toUpperCase()).substr(0, 4) +
