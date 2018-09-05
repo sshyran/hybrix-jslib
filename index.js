@@ -48,7 +48,7 @@ function seedGenerator (user_keys, asset) {
   function xorEntropyMix (key, str) {
     var c = '';
     var k = 0;
-    for (i = 0; i < str.length; i++) {
+    for (var i = 0; i < str.length; i++) {
       c += String.fromCharCode(str[i].charCodeAt(0).toString(10) ^ key[k].charCodeAt(0).toString(10)); // XORing with key
       k++;
       if (k >= key.length) { k = 0; }
@@ -247,7 +247,7 @@ function validateUserIDLength (userid) {
   return typeof userid !== 'undefined' && userid.length === 16;
 }
 
-commonUtils = {
+exports.commonUtils = {
   activate,
   clean,
   continueSession,
