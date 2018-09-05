@@ -180,6 +180,7 @@ function go (mode) {
     ioc = new IoC.Interface({http: require('http')});
     renderTable = renderTableCLI;
   } else {
+    //    DEBUG = true;
     ioc = new IoC.Interface({XMLHttpRequest: XMLHttpRequest});
     renderTable = renderTableWeb;
   }
