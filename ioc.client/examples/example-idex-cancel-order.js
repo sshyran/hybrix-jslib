@@ -39,7 +39,6 @@ ioc.sequential([
       return {data: result, id: 'dex_idex', func: 'cancelSignedIdexOrder'}
     }, 'deterministic',
     (result) => {
-        console.log(result)
         return {query: '/engine/idex/push/cancel/' + JSON.stringify(result)}
       }
     , 'call'
