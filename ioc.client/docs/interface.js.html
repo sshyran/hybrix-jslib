@@ -213,10 +213,11 @@ var Interface = function (data) {
   this.initAsset = function (data, dataCallback, errorCallback) {
     if (!clientModules.hasOwnProperty(data.assetDetails['keygen-base'])) { //  blob was not yet initialized
       // TODO Error if no data.clientModuleCodeBlob was provided
-      var code = LZString.decompressFromEncodedURIComponent(data.clientModuleCodeBlob);
       try {
-        clientModules[data.assetDetails['keygen-base']] = CommonUtils.activate(code);
-        clientModuleBlobs[data.assetDetails['keygen-base']] = code;
+        var code = LZString.decompressFromEncodedURIComponent(data.clientModuleCodeBlob);
+        var mode = data.assetDetails['mode'].split('.')[0];
+        clientModules[mode] = CommonUtils.activate(code);
+        clientModuleBlobs[mode] = data.clientModuleCodeBlob;
       } catch (e) {
         if (DEBUG) { console.error(e); }
         if (typeof errorCallback === 'function') {
@@ -253,10 +254,10 @@ var Interface = function (data) {
    * @param {Function} errorCallback - Called when an error occurs.
    */
   this.import = function (data, dataCallback, errorCallback) {
-    var code = LZString.decompressFromEncodedURIComponent(data.blob);
     try {
+      var code = LZString.decompressFromEncodedURIComponent(data.blob);
       clientModules[data.id] = CommonUtils.activate(code);
-      clientModuleBlobs[data.id] = code;
+      clientModuleBlobs[data.id] = data.blob;
     } catch (e) {
       if (DEBUG) { console.error(e); }
       if (typeof errorCallback === 'function') {
@@ -283,6 +284,15 @@ var Interface = function (data) {
     } else {
       data.callback(clientModuleBlobs[data.id]);
     }
+  };
+  /**
+   * List locally available client modules.
+   * @param {Object} data - ignored
+   * @param {Function} dataCallback - Called when the method is succesful.
+   * @param {Function} errorCallback - Called when an error occurs.
+   */
+  this.modules = function (data, dataCallback, errorCallback) {
+    dataCallback(Object.keys(clientModules));
   };
 
   /**
@@ -383,10 +393,10 @@ var Interface = function (data) {
       execute();
     } else { // if blob not yet available, get it.
       this.call({host: data.host, query: '/source/deterministic/code/' + id, channel: data.channel}, (blob) => {
-        var code = LZString.decompressFromEncodedURIComponent(blob);
         try {
+          var code = LZString.decompressFromEncodedURIComponent(blob);
           clientModules[id] = CommonUtils.activate(code);
-          clientModuleBlobs[id] = code;
+          clientModuleBlobs[id] = blob;
         } catch (e) {
           if (DEBUG) { console.error(e); }
           if (typeof errorCallback === 'function') {
