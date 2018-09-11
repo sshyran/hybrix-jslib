@@ -95,7 +95,7 @@ if (typeof FormData === 'undefined') {
  * ioc.sequential([
  *   'init', // Initialize ioc
  *   {username: '****************', password: '****************'}, // Define credentials
- *   'login', // Do the login
+ *   'session', // Create a local deterministic session
  *   {host: 'http://localhost:1111/'}, // Define the host
  *   'addHost', // Add and initialize the host
  *   {symbol: 'dummy'}, // Define the asset
@@ -127,8 +127,8 @@ var Interface = function (data) {
      }
      }
   */
-  var deterministic = {};
-  /*  per keygen-base:
+  var clientModules = {};
+  /*  per id/keygen-base:
       {$KEYGEN-BASE :
       {
       keys()
@@ -137,6 +137,9 @@ var Interface = function (data) {
       }
       }
   */
+  var clientModuleBlobs = {};
+  //  per id/keygen-base: a string containing the code
+
   var hybriddNodes = {};
   /**
  * Initialize the NACL factory if nacl has not been defined yet.
@@ -173,14 +176,14 @@ var Interface = function (data) {
   };
 
   /**
- * Create a new session and - if required - log out of current session.
+ * Create a local deterministic session and - if required - log out of current session.
  * @param {Object} data
  * @param {string} data.username - The username for the deterministic session
  * @param {string} data.password - The password for the deterministic session
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
-  this.login = function (data, dataCallback, errorCallback) {
+  this.session = function (data, dataCallback, errorCallback) {
     if (!CommonUtils.validateUserIDLength(data.username)) {
       if (typeof errorCallback === 'function') {
         errorCallback('Invalid username.');
@@ -203,15 +206,17 @@ var Interface = function (data) {
  * Initialize an asset (crypto currency or token)
  * @param {Object} data
  * @param {Object} data.assetDetails - Asset details as retrieved by calling `/asset/$SYMBOL/details`
- * @param {string} data.deterministicCodeBlob - A string containing the deterministic code blob.
+ * @param {string} data.clientModuleCodeBlob - A string containing the client module code blob.
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.initAsset = function (data, dataCallback, errorCallback) {
-    if (!deterministic.hasOwnProperty(data.assetDetails['keygen-base'])) { //  blob was not yet initialized
-      var code = LZString.decompressFromEncodedURIComponent(data.deterministicCodeBlob);
+    if (!clientModules.hasOwnProperty(data.assetDetails['keygen-base'])) { //  blob was not yet initialized
+      // TODO Error if no data.clientModuleCodeBlob was provided
+      var code = LZString.decompressFromEncodedURIComponent(data.clientModuleCodeBlob);
       try {
-        deterministic[data.assetDetails['keygen-base']] = CommonUtils.activate(code);
+        clientModules[data.assetDetails['keygen-base']] = CommonUtils.activate(code);
+        clientModuleBlobs[data.assetDetails['keygen-base']] = code;
       } catch (e) {
         if (DEBUG) { console.error(e); }
         if (typeof errorCallback === 'function') {
@@ -226,9 +231,9 @@ var Interface = function (data) {
     try {
       var mode = data.assetDetails.mode.split('.')[1]; // (here submode is named mode confusingly enough)
       assets[data.assetDetails.symbol].data.mode = mode;
-      assets[data.assetDetails.symbol].data.keys = deterministic[data.assetDetails['keygen-base']].keys(assets[data.assetDetails.symbol].data);
+      assets[data.assetDetails.symbol].data.keys = clientModules[data.assetDetails['keygen-base']].keys(assets[data.assetDetails.symbol].data);
       assets[data.assetDetails.symbol].data.keys.mode = mode;
-      assets[data.assetDetails.symbol].data.address = deterministic[data.assetDetails['keygen-base']].address(assets[data.assetDetails.symbol].data.keys);
+      assets[data.assetDetails.symbol].data.address = clientModules[data.assetDetails['keygen-base']].address(assets[data.assetDetails.symbol].data.keys);
     } catch (e) {
       if (DEBUG) { console.error(e); }
       if (typeof errorCallback === 'function') {
@@ -237,6 +242,47 @@ var Interface = function (data) {
       return;
     }
     if (dataCallback) { dataCallback(data.assetDetails.symbol); }
+  };
+
+  /**
+   * Import a client module code blob.
+   * @param {Object} data
+   * @param {string} data.id - id of the client code blob.
+   * @param {string} data.blob - The client code blob
+   * @param {Function} dataCallback - Called when the method is succesful.
+   * @param {Function} errorCallback - Called when an error occurs.
+   */
+  this.import = function (data, dataCallback, errorCallback) {
+    var code = LZString.decompressFromEncodedURIComponent(data.blob);
+    try {
+      clientModules[data.id] = CommonUtils.activate(code);
+      clientModuleBlobs[data.id] = code;
+    } catch (e) {
+      if (DEBUG) { console.error(e); }
+      if (typeof errorCallback === 'function') {
+        errorCallback(e);// TODO prepend error message
+      }
+    }
+    dataCallback(data.id);
+  };
+
+  /**
+   * Export a client module code blob.
+   * @param {Object} data
+   * @param {string} data.id - id of the client code blob.
+   * @param {Function} dataCallback - Called when the method is succesful.
+   * @param {Function} errorCallback - Called when an error occurs.
+   */
+  this.export = function (data, dataCallback, errorCallback) {
+    if (!data.hasOwnProperty('id')) {
+      if (DEBUG) { console.error('No client module id provided.'); }
+      if (typeof errorCallback === 'function') { errorCallback('No client module id provided.'); }
+    } else if (!clientModuleBlobs.hasOwnProperty(data.id)) {
+      if (DEBUG) { console.error('No client module ' + data.id + ' not found.'); }
+      if (typeof errorCallback === 'function') { errorCallback('No client module ' + data.id + ' not found.'); }
+    } else {
+      data.callback(clientModuleBlobs[data.id]);
+    }
   };
 
   /**
@@ -252,11 +298,11 @@ var Interface = function (data) {
     if (!assets.hasOwnProperty(data.symbol)) { // if assets has not been iniated, retrieve and initialize
       this.call({host: data.host, query: '/asset/' + data.symbol + '/details', channel: data.channel}, (asset) => {
         var mode = asset.mode.split('.')[0];
-        if (deterministic.hasOwnProperty(asset['keygen-base'])) { // Deterministic blob was already retrieved
-          this.initAsset({assetDetails: asset, deterministicCodeBlob: deterministic[asset['keygen-base']]}, dataCallback, errorCallback);
+        if (clientModules.hasOwnProperty(asset['keygen-base'])) { // Client Module was already retrieved
+          this.initAsset({assetDetails: asset}, dataCallback, errorCallback);
         } else {
           this.call({host: data.host, query: '/source/deterministic/code/' + mode, channel: data.channel}, (blob) => {
-            this.initAsset({assetDetails: asset, deterministicCodeBlob: blob}, dataCallback, errorCallback);
+            this.initAsset({assetDetails: asset, clientModuleCodeBlob: blob}, dataCallback, errorCallback);
           }, errorCallback);
         }
       }, errorCallback);
@@ -278,16 +324,16 @@ var Interface = function (data) {
   };
 
   /**
- * Execute a function in a deterministic blob.
+ * Execute a function in a client module.
  * @param {Object} data
  * @param {string} [data.symbol] - The asset symbol . Either this or the id needs to be defined.
- * @param {string} [data.id] - id of the deterministic blob. (For assets this is the keygen-base)
- * @param {string} data.func - The deterministic function to be called
- * @param {string} data.data - The data to be passed to the deterministic function
+ * @param {string} [data.id] - id of the client module. (For assets this is the keygen-base)
+ * @param {string} data.func - The client module function to be called
+ * @param {string} data.data - The data to be passed to the client module function
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
-  this.deterministic = function (data, dataCallback, errorCallback) {
+  this.client = function (data, dataCallback, errorCallback) {
     var id;
     var displayId;
     if (data.hasOwnProperty('id')) {
@@ -312,10 +358,10 @@ var Interface = function (data) {
     }
 
     var execute = () => {
-      if (deterministic[id].hasOwnProperty(data.func) &amp;&amp; typeof deterministic[id][data.func] === 'function') {
+      if (clientModules[id].hasOwnProperty(data.func) &amp;&amp; typeof clientModules[id][data.func] === 'function') {
         var result;
         try {
-          result = deterministic[id][data.func](data.data, dataCallback, errorCallback);
+          result = clientModules[id][data.func](data.data, dataCallback, errorCallback);
         } catch (e) {
           if (DEBUG) { console.error(e); }// todo more descriptive error
           if (typeof errorCallback === 'function') {
@@ -327,19 +373,20 @@ var Interface = function (data) {
           dataCallback(result);
         }
       } else {
-        if (DEBUG) { console.error('Deterministic function ' + data.func + ' for ' + displayId + ' not defined or not a function.'); }
+        if (DEBUG) { console.error('Client module function ' + data.func + ' for ' + displayId + ' not defined or not a function.'); }
         if (typeof errorCallback === 'function') {
-          errorCallback('Deterministic function ' + data.func + ' for ' + displayId + ' not defined or not a function.');
+          errorCallback('Client module function ' + data.func + ' for ' + displayId + ' not defined or not a function.');
         }
       }
     };
-    if (deterministic.hasOwnProperty(id)) {
+    if (clientModules.hasOwnProperty(id)) {
       execute();
     } else { // if blob not yet available, get it.
       this.call({host: data.host, query: '/source/deterministic/code/' + id, channel: data.channel}, (blob) => {
         var code = LZString.decompressFromEncodedURIComponent(blob);
         try {
-          deterministic[id] = CommonUtils.activate(code);
+          clientModules[id] = CommonUtils.activate(code);
+          clientModuleBlobs[id] = code;
         } catch (e) {
           if (DEBUG) { console.error(e); }
           if (typeof errorCallback === 'function') {
@@ -430,7 +477,7 @@ var Interface = function (data) {
       return;
     }
     var asset = assets[data.symbol];
-    if (!deterministic.hasOwnProperty(asset['keygen-base'])) {
+    if (!clientModules.hasOwnProperty(asset['keygen-base'])) {
       if (DEBUG) { console.error('Asset ' + data.symbol + ' not initialized'); }
       if (typeof errorCallback === 'function') {
         errorCallback('Asset ' + data.symbol + ' not initialized.');// TODO error message
@@ -480,7 +527,7 @@ var Interface = function (data) {
 
     var checkTransaction;
     try {
-      checkTransaction = deterministic[asset['keygen-base']].transaction(transactionData, dataCallback);// TODO errorCallback
+      checkTransaction = clientModules[asset['keygen-base']].transaction(transactionData, dataCallback);// TODO errorCallback
     } catch (e) {
       if (DEBUG) { console.error(e); }
       if (typeof errorCallback === 'function') {
@@ -558,8 +605,29 @@ var Interface = function (data) {
     } else {
       var hybriddNode = new HybriddNode.HybriddNode(data.host);
       hybriddNodes[data.host] = hybriddNode;
-      // TODO only login to node if a session is available
-      hybriddNode.init({userKeys: user_keys, connector: connector}, dataCallback, errorCallback);
+      dataCallback(data.host);
+    }
+  };
+  /**
+ * Create an encrypted session with a host
+ * @param {Object} data
+ * @param {string} data.host - The hostname TODO  multiple in array?
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ */
+  this.login = function (data, dataCallback, errorCallback) {
+    if (!user_keys) {
+      if (DEBUG) { console.error('No session available.'); }
+      if (typeof errorCallback === 'function') { errorCallback('No session available.'); }
+    } else if (!data.hasOwnProperty('host')) {
+      if (DEBUG) { console.error('No host provided.'); }
+      if (typeof errorCallback === 'function') { errorCallback('No host provided.'); }
+    } else if (hybriddNodes.hasOwnProperty(data.host)) {
+
+    } else { // host still  needs to be added
+      this.addHost(data.host, () => {
+        hybriddNodes[data.host].init({userKeys: user_keys, connector: connector}, dataCallback, errorCallback);
+      }, errorCallback);
     }
   };
 
@@ -666,6 +734,19 @@ var Interface = function (data) {
    */
   this.id = (data, dataCallback, errorCallback) => {
     dataCallback(data);
+  };
+
+  /**
+   * Execute a custom function with callbacks. Usefull for sequential and parallel.
+   * @param {Object} data
+   * @param {Function} data.func - A function expecting a dataCallback, errorCallback and optional progressCallback.
+   * @param {Function} data.data - The data to be passed to the function.
+   * @param {Function} dataCallback - Called with data provided.
+   * @param {Function} errorCallback - Called when an error occurs.
+   * @param {Function} progressCallback - Called whenever there is a progress updated. Passes a number between 0 and 1.
+   */
+  this.callback = (data, dataCallback, errorCallback, progressCallback) => {
+    data.func(data, data, dataCallback, errorCallback, progressCallback);
   };
 
   /**

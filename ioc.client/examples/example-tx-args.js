@@ -20,7 +20,8 @@ var ops = stdio.getopt({
   'quiet': {key: 'q', args: 0, description: 'No extra output'},
   'eth_forcenonce': {key: 'E', args: 1, description: 'Force nonce transaction number for Ethereum [argument: integer]'}
 });
-
+var userid;
+var passwd;
 if (ops.userid) { userid = ops.userid; }
 if (ops.passwd) { passwd = ops.passwd; }
 
@@ -44,7 +45,7 @@ if (ops.rawtransaction) {
 
   ioc.sequential([
     'init',
-    {username: userid, password: passwd}, 'login',
+    {username: userid, password: passwd}, 'session',
     {host: hostname}, 'addHost',
     {symbol: symbol, amount: Number(amount), target: target }, 'rawTransaction'
   ]
