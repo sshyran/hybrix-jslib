@@ -56,14 +56,14 @@ function testAsset (symbol) {
   };
 }
 
-var validStatus = status => typeof status === 'object';
-var validDetails = details => typeof details === 'object';
+var validStatus = status => typeof status === 'object' && status !== null;
+var validDetails = details => typeof details === 'object' && details !== null;
 var validValid = valid => typeof valid === 'string' && valid.startsWith('valid');
 var validBalance = (balance, factor) => typeof balance !== 'undefined' && balance !== null && !isNaN(balance) && balance.toString().indexOf('.') !== -1 && balance.toString().split('.')[1].length === Number(factor);
-var validUnspent = unspent => typeof unspent !== 'undefined';
-var validHistory = history => typeof history !== 'undefined';
-var validSample = sample => typeof sample === 'object';
-var validTransaction = transaction => typeof transaction === 'object';
+var validUnspent = unspent => typeof unspent !== 'undefined' && unspent !== null;
+var validHistory = history => typeof history === 'object' && history !== null;
+var validSample = sample => typeof sample === 'object' && sample !== null;
+var validTransaction = transaction => typeof transaction === 'object' && transaction !== null;
 var validSign = sign => typeof sign !== 'undefined' && sign !== false && sign !== '' && sign !== null && sign !== 'false' && sign !== '[UNDER MAINTENANCE]';
 
 var renderCellCLI = (valid, data, counter) => {
@@ -186,7 +186,7 @@ function go (mode) {
   }
   ioc.sequential([
     'init',
-    {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'login',
+    {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'session',
     {host: 'http://localhost:1111/'}, 'addHost',
     //    {}, 'createAccount',
     //    data => { console.log(data); },

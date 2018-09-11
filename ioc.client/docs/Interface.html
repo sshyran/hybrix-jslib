@@ -298,7 +298,7 @@ ioc.init(null, onSucces, onError);
     <pre class="prettyprint"><code>ioc.sequential([
   'init', // Initialize ioc
   {username: '****************', password: '****************'}, // Define credentials
-  'login', // Do the login
+  'session', // Create a local deterministic session
   {host: 'http://localhost:1111/'}, // Define the host
   'addHost', // Add and initialize the host
   {symbol: 'dummy'}, // Define the asset
@@ -580,7 +580,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line225">line 225</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line271">line 271</a>
     </li></ul></dd>
     
 
@@ -810,7 +810,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line520">line 520</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line567">line 567</a>
     </li></ul></dd>
     
 
@@ -1149,7 +1149,620 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line551">line 551</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line619">line 619</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="callback"><span class="type-signature"></span>callback<span class="signature">(data, dataCallback, errorCallback, progressCallback)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Execute a custom function with callbacks. Usefull for sequential and parallel.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>func</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A function expecting a dataCallback, errorCallback and optional progressCallback.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The data to be passed to the function.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dataCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called with data provided.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>errorCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called when an error occurs.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>progressCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called whenever there is a progress updated. Passes a number between 0 and 1.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line723">line 723</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="client"><span class="type-signature"></span>client<span class="signature">(data, dataCallback, errorCallback)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Execute a function in a client module.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>symbol</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The asset symbol . Either this or the id needs to be defined.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">id of the client module. (For assets this is the keygen-base)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>func</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The client module function to be called</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The data to be passed to the client module function</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dataCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called when the method is succesful.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>errorCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called when an error occurs.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line311">line 311</a>
     </li></ul></dd>
     
 
@@ -1424,7 +2037,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line581">line 581</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line649">line 649</a>
     </li></ul></dd>
     
 
@@ -1458,7 +2071,7 @@ ioc.init(null, onSucces, onError);
     
 
     
-    <h4 class="name" id="deterministic"><span class="type-signature"></span>deterministic<span class="signature">(data, dataCallback, errorCallback)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="export"><span class="type-signature"></span>export<span class="signature">(data, dataCallback, errorCallback)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1466,7 +2079,7 @@ ioc.init(null, onSucces, onError);
 
 
 <div class="description">
-    Execute a function in a deterministic blob.
+    Export a client module code blob.
 </div>
 
 
@@ -1532,8 +2145,6 @@ ioc.init(null, onSucces, onError);
         <th>Type</th>
 
         
-        <th>Attributes</th>
-        
 
         
 
@@ -1542,39 +2153,6 @@ ioc.init(null, onSucces, onError);
     </thead>
 
     <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>symbol</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The asset symbol . Either this or the id needs to be defined.</td>
-        </tr>
-
     
 
         <tr>
@@ -1592,82 +2170,10 @@ ioc.init(null, onSucces, onError);
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">id of the deterministic blob. (For assets this is the keygen-base)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>func</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The deterministic function to be called</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The data to be passed to the deterministic function</td>
+            <td class="description last">id of the client code blob.</td>
         </tr>
 
     
@@ -1761,7 +2267,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line265">line 265</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line251">line 251</a>
     </li></ul></dd>
     
 
@@ -1991,7 +2497,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line337">line 337</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line384">line 384</a>
     </li></ul></dd>
     
 
@@ -2221,7 +2727,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line355">line 355</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line402">line 402</a>
     </li></ul></dd>
     
 
@@ -2451,7 +2957,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line373">line 373</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line420">line 420</a>
     </li></ul></dd>
     
 
@@ -2632,7 +3138,260 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line642">line 642</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line710">line 710</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="import"><span class="type-signature"></span>import<span class="signature">(data, dataCallback, errorCallback)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Import a client module code blob.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">id of the client code blob.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>blob</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The client code blob</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dataCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called when the method is succesful.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>errorCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called when an error occurs.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line230">line 230</a>
     </li></ul></dd>
     
 
@@ -2813,7 +3572,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line122">line 122</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line125">line 125</a>
     </li></ul></dd>
     
 
@@ -2956,7 +3715,7 @@ ioc.init(null, onSucces, onError);
 
         <tr>
             
-                <td class="name"><code>deterministicCodeBlob</code></td>
+                <td class="name"><code>clientModuleCodeBlob</code></td>
             
 
             <td class="type">
@@ -2972,7 +3731,7 @@ ioc.init(null, onSucces, onError);
 
             
 
-            <td class="description last">A string containing the deterministic code blob.</td>
+            <td class="description last">A string containing the client module code blob.</td>
         </tr>
 
     
@@ -3066,7 +3825,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line185">line 185</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line188">line 188</a>
     </li></ul></dd>
     
 
@@ -3108,7 +3867,7 @@ ioc.init(null, onSucces, onError);
 
 
 <div class="description">
-    Create a new session and - if required - log out of current session.
+    Create an encrypted session with a host
 </div>
 
 
@@ -3186,7 +3945,7 @@ ioc.init(null, onSucces, onError);
 
         <tr>
             
-                <td class="name"><code>username</code></td>
+                <td class="name"><code>host</code></td>
             
 
             <td class="type">
@@ -3202,30 +3961,7 @@ ioc.init(null, onSucces, onError);
 
             
 
-            <td class="description last">The username for the deterministic session</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>password</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The password for the deterministic session</td>
+            <td class="description last">The hostname TODO  multiple in array?</td>
         </tr>
 
     
@@ -3319,7 +4055,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line158">line 158</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line593">line 593</a>
     </li></ul></dd>
     
 
@@ -3500,7 +4236,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line144">line 144</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line147">line 147</a>
     </li></ul></dd>
     
 
@@ -3825,7 +4561,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line713">line 713</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line794">line 794</a>
     </li></ul></dd>
     
 
@@ -4098,7 +4834,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line251">line 251</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line297">line 297</a>
     </li></ul></dd>
     
 
@@ -4520,7 +5256,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line484">line 484</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line531">line 531</a>
     </li></ul></dd>
     
 
@@ -4724,7 +5460,260 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line653">line 653</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line734">line 734</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="session"><span class="type-signature"></span>session<span class="signature">(data, dataCallback, errorCallback)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Create a local deterministic session and - if required - log out of current session.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>username</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The username for the deterministic session</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>password</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The password for the deterministic session</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dataCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called when the method is succesful.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>errorCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called when an error occurs.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line161">line 161</a>
     </li></ul></dd>
     
 
@@ -5046,7 +6035,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line396">line 396</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line443">line 443</a>
     </li></ul></dd>
     
 
@@ -5468,7 +6457,7 @@ ioc.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line506">line 506</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line553">line 553</a>
     </li></ul></dd>
     
 

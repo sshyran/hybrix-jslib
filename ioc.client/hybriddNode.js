@@ -321,6 +321,7 @@ var HybriddNode = function (host_) {
        connector
        }
     */
+    // TODO error if already logged in
     nonce = nacl.crypto_box_random_nonce();
     initial_session_data = CommonUtils.generateInitialSessionData(nonce);
     this.call({query: this.xAuthStep0Request(), connector: data.connector, meta: true}, (response) => {
