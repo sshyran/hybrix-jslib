@@ -1,3 +1,5 @@
+var bitprt;
+
 function hexToBase32 (inputval) {
   // define rfc4648 alphabet array (32 bits)
   var RFC4648 = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '2', '3', '4', '5', '6', '7'];

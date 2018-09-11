@@ -1,4 +1,5 @@
-// TODO var UrlBase64 = require('./crypto/UrlBase64');
+var UrlBase64 = require('./crypto/UrlBase64');
+var sjcl = require('./crypto/sjcl');
 
 // returns array of double public/secret keypairs
 // one for encrypting (boxPk/boxSk) and one for signing (signPk/signSk)

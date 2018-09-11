@@ -8,7 +8,6 @@ ioc.sequential([
   {username: '*****', password: '****'}, 'login',
   {host: 'http://localhost:1111/'}, 'addHost',
   {symbol: 'dummy', amount: 100, channel: 'y'}, 'rawTransaction'
-
 ]
   , (data) => { console.log(JSON.stringify(data)); }
   , (error) => { console.error(error); }
