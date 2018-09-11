@@ -103,8 +103,8 @@ var Interface = function (data) {
      }
   */
   var clientModules = {};
-  /*  per id/keygen-base:
-      {$KEYGEN-BASE :
+  /*  per id/mode:
+      {$ID/MODE :
       {
       keys()
       sign()
@@ -113,7 +113,7 @@ var Interface = function (data) {
       }
   */
   var clientModuleBlobs = {};
-  //  per id/keygen-base: a string containing the code
+  //  per id/mode: a string containing the code
 
   var hybriddNodes = {};
   /**
@@ -186,7 +186,7 @@ var Interface = function (data) {
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.initAsset = function (data, dataCallback, errorCallback) {
-    if (!clientModules.hasOwnProperty(data.assetDetails['keygen-base'])) { //  blob was not yet initialized
+    if (!clientModules.hasOwnProperty(data.assetDetails['mode'].split('.')[0])) { //  blob was not yet initialized
       // TODO Error if no data.clientModuleCodeBlob was provided
       try {
         var code = LZString.decompressFromEncodedURIComponent(data.clientModuleCodeBlob);
@@ -203,13 +203,17 @@ var Interface = function (data) {
     }
     assets[data.assetDetails.symbol] = data.assetDetails;
     assets[data.assetDetails.symbol].data = {};
-    assets[data.assetDetails.symbol].data.seed = CommonUtils.seedGenerator(user_keys, data.assetDetails['keygen-base']);
+    var mode = data.assetDetails['mode'].split('.');
+    var baseMode = mode[0];
+
+    var subMode = mode[1];
+    var symbol = data.assetDetails.symbol;
+    assets[symbol].data.seed = CommonUtils.seedGenerator(user_keys, baseMode);
     try {
-      var mode = data.assetDetails.mode.split('.')[1]; // (here submode is named mode confusingly enough)
-      assets[data.assetDetails.symbol].data.mode = mode;
-      assets[data.assetDetails.symbol].data.keys = clientModules[data.assetDetails['keygen-base']].keys(assets[data.assetDetails.symbol].data);
-      assets[data.assetDetails.symbol].data.keys.mode = mode;
-      assets[data.assetDetails.symbol].data.address = clientModules[data.assetDetails['keygen-base']].address(assets[data.assetDetails.symbol].data.keys);
+      assets[symbol].data.mode = subMode;
+      assets[symbol].data.keys = clientModules[baseMode].keys(assets[symbol].data);
+      assets[symbol].data.keys.mode = subMode;
+      assets[symbol].data.address = clientModules[baseMode].address(assets[symbol].data.keys);
     } catch (e) {
       if (DEBUG) { console.error(e); }
       if (typeof errorCallback === 'function') {
@@ -283,7 +287,7 @@ var Interface = function (data) {
     if (!assets.hasOwnProperty(data.symbol)) { // if assets has not been iniated, retrieve and initialize
       this.call({host: data.host, query: '/asset/' + data.symbol + '/details', channel: data.channel}, (asset) => {
         var mode = asset.mode.split('.')[0];
-        if (clientModules.hasOwnProperty(asset['keygen-base'])) { // Client Module was already retrieved
+        if (clientModules.hasOwnProperty(mode)) { // Client Module was already retrieved
           this.initAsset({assetDetails: asset}, dataCallback, errorCallback);
         } else {
           this.call({host: data.host, query: '/source/deterministic/code/' + mode, channel: data.channel}, (blob) => {
@@ -312,7 +316,7 @@ var Interface = function (data) {
  * Execute a function in a client module.
  * @param {Object} data
  * @param {string} [data.symbol] - The asset symbol . Either this or the id needs to be defined.
- * @param {string} [data.id] - id of the client module. (For assets this is the keygen-base)
+ * @param {string} [data.id] - id of the client module. (For assets this is the first part of the mode)
  * @param {string} data.func - The client module function to be called
  * @param {string} data.data - The data to be passed to the client module function
  * @param {Function} dataCallback - Called when the method is succesful.
@@ -326,7 +330,7 @@ var Interface = function (data) {
       displayId = id;
     } else if (data.hasOwnProperty('symbol')) {
       if (assets.hasOwnProperty(data.symbol) && typeof dataCallback === 'function') {
-        id = assets[data.symbol]['keygen-base'];
+        id = assets[data.symbol]['mode'].split('.')[0];
         displayId = id + '(' + data.symbol + ')';
       } else {
         if (DEBUG) { console.error('Asset ' + data.symbol + ' not initialized.'); }
@@ -462,7 +466,7 @@ var Interface = function (data) {
       return;
     }
     var asset = assets[data.symbol];
-    if (!clientModules.hasOwnProperty(asset['keygen-base'])) {
+    if (!clientModules.hasOwnProperty(asset['mode'].split('.')[0])) {
       if (DEBUG) { console.error('Asset ' + data.symbol + ' not initialized'); }
       if (typeof errorCallback === 'function') {
         errorCallback('Asset ' + data.symbol + ' not initialized.');// TODO error message
@@ -512,7 +516,7 @@ var Interface = function (data) {
 
     var checkTransaction;
     try {
-      checkTransaction = clientModules[asset['keygen-base']].transaction(transactionData, dataCallback);// TODO errorCallback
+      checkTransaction = clientModules[asset['mode'].split('.')[0]].transaction(transactionData, dataCallback);// TODO errorCallback
     } catch (e) {
       if (DEBUG) { console.error(e); }
       if (typeof errorCallback === 'function') {

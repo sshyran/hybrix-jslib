@@ -209,7 +209,7 @@ function go (mode) {
       lsk: testAsset('lsk'),
       ltc: testAsset('ltc'), //  Error: Invalid network version
       nxt: testAsset('nxt'), // unspents not working properly ERROR
-      omni: testAsset('omni'), // TypeError: undefined is not an object (evaluating 'n.unspent.unspents') */
+      omni: testAsset('omni'), // TypeError: undefined is not an object (evaluating 'n.unspent.unspents')
       rise: testAsset('rise'),
       shift: testAsset('shift'),
       ubq: testAsset('ubq'), // details.fee =null>
