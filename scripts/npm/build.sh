@@ -55,7 +55,7 @@ if [ ! -e "$INTERFACE/common" ];then
 fi
 
 # Generate API documentation
-if [ "$INTERFACE/docs/interface.js.html" -ot "$INTERFACE/lib/schedulerinterface.js" ]; then
+if [ "$INTERFACE/docs/interface.js.html" -ot "$INTERFACE/lib/interface.js" ]; then
   echo "[.] Generate hybridd.Interface documentation."
   mkdir -p "$INTERFACE/docs"
   jsdoc "$INTERFACE/lib/interface.js" -t "$INTERFACE/jsdoc-template" -d "$INTERFACE/docs"

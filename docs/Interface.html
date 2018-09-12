@@ -265,9 +265,9 @@
     <h5>Examples</h5>
     
     <pre class="prettyprint"><code>// Node JS
-var IoC = require('./ioc.nodejs.client');
+var Hybridd = require('./hybridd.interface.nodejs');
 
-var ioc = new IoC.Interface({http:require('http')});
+var hybridd = new Hybridd.Interface({http:require('http')});
 
 function onSucces(){
  console.error('Done.');
@@ -277,12 +277,12 @@ function onError(){
   console.error('Oops, something went wrong!');
 }
 
-ioc.init(null, onSucces, onError);</code></pre>
+hybridd.init(null, onSucces, onError);</code></pre>
 
     <pre class="prettyprint"><code>&lt;!-- Webpage -->
-&lt;script src="./ioc.web.client.js">&lt;/script> to html header
+&lt;script src="./hybridd.interface.web.js">&lt;/script> to html header
 &lt;script>
-var ioc = new IoC.Interface({XMLHttpRequest:XMLHttpRequest});
+var hybridd = new Hybridd.Interface({XMLHttpRequest:XMLHttpRequest});
 
 function onSucces(){
  console.error('Done.');
@@ -292,11 +292,11 @@ function onError(){
   console.error('Oops, something went wrong!');
 }
 
-ioc.init(null, onSucces, onError);
+hybridd.init(null, onSucces, onError);
 &lt;/script></code></pre>
 
-    <pre class="prettyprint"><code>ioc.sequential([
-  'init', // Initialize ioc
+    <pre class="prettyprint"><code>hybridd.sequential([
+  'init', // Initialize hybridd
   {username: '****************', password: '****************'}, // Define credentials
   'session', // Create a local deterministic session
   {host: 'http://localhost:1111/'}, // Define the host

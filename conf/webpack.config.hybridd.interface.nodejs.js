@@ -9,7 +9,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, '.'),
     filename: '../dist/hybridd.interface.nodejs.js',
-    library: 'IoC',
+    library: 'Hybridd',
     libraryTarget: 'commonjs2'
   }
 };

@@ -24,17 +24,17 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>DEBUG = false;
-LZString = require('../crypto/lz-string'); // TODO required globally by UrlBase64
+LZString = require('../common/crypto/lz-string'); // TODO required globally by UrlBase64
 var HybriddNode = require('./hybriddNode');
-UrlBase64 = require('../crypto/urlbase64'); // TODO make non global as soon as index.js can do require
-var Decimal = require('../crypto/decimal-light');
+UrlBase64 = require('../common/crypto/urlbase64'); // TODO make non global as soon as index.js can do require
+var Decimal = require('../common/crypto/decimal-light');
 
-var CommonUtils = require('../index');
-var sjcl = require('../crypto/sjcl');
-var hexToBase32 = require('../crypto/hex2base32').hexToBase32;
-var proof = require('../crypto/proof');
+var CommonUtils = require('../common/index');
+var sjcl = require('../common/crypto/sjcl');
+var hexToBase32 = require('../common/crypto/hex2base32').hexToBase32;
+var proof = require('../common/crypto/proof');
 
-var DJB2 = require('../crypto/hashDJB2');
+var DJB2 = require('../common/crypto/hashDJB2');
 
 // create window and/or crypto globals if they do not exist
 if (typeof window === 'undefined') {
@@ -62,9 +62,9 @@ if (typeof FormData === 'undefined') {
  * @param {Function} data.custom - a custom connector method which receives a hostname, query, dataCallback and errorCallback parameters and returns a string.
  * @example
  * // Node JS
- * var IoC = require('./ioc.nodejs.client');
+ * var Hybridd = require('./hybridd.interface.nodejs');
  *
- * var ioc = new IoC.Interface({http:require('http')});
+ * var hybridd = new Hybridd.Interface({http:require('http')});
  *
  * function onSucces(){
  *  console.error('Done.');
@@ -74,12 +74,12 @@ if (typeof FormData === 'undefined') {
  *   console.error('Oops, something went wrong!');
  * }
  *
- * ioc.init(null, onSucces, onError);
+ * hybridd.init(null, onSucces, onError);
  * @example
  * &lt;!-- Webpage -->
- * &lt;script src="./ioc.web.client.js">&lt;/script> to html header
+ * &lt;script src="./hybridd.interface.web.js">&lt;/script> to html header
  * &lt;script>
- * var ioc = new IoC.Interface({XMLHttpRequest:XMLHttpRequest});
+ * var hybridd = new Hybridd.Interface({XMLHttpRequest:XMLHttpRequest});
  *
  * function onSucces(){
  *  console.error('Done.');
@@ -89,11 +89,11 @@ if (typeof FormData === 'undefined') {
  *   console.error('Oops, something went wrong!');
  * }
  *
- * ioc.init(null, onSucces, onError);
+ * hybridd.init(null, onSucces, onError);
  * &lt;/script>
  * @example
- * ioc.sequential([
- *   'init', // Initialize ioc
+ * hybridd.sequential([
+ *   'init', // Initialize hybridd
  *   {username: '****************', password: '****************'}, // Define credentials
  *   'session', // Create a local deterministic session
  *   {host: 'http://localhost:1111/'}, // Define the host

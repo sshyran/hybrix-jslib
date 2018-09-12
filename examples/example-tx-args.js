@@ -1,4 +1,7 @@
-nacl_factory = require('../../crypto/nacl.js');
+nacl_factory = require('../common/crypto/nacl.js');
+
+var Hybridd = require('..dist/hybridd.interface.nodejs.js');
+var hybridd = new Hybridd.Interface({http: require('http')});
 
 var hostname = 'http://wallet-uat.internetofcoins.org/api/';
 
@@ -36,14 +39,11 @@ if(base === 'xcp' || base === 'omni') {
   base = 'btc';
 } */
 
-var IoC = require('../ioc.nodejs.client.js');
-var ioc = new IoC.Interface({http: require('http')});
-
 if (ops.rawtransaction) {
   var amount = ops.rawtransaction[1];
   var target = ops.rawtransaction[2];
 
-  ioc.sequential([
+  hybridd.sequential([
     'init',
     {username: userid, password: passwd}, 'session',
     {host: hostname}, 'addHost',

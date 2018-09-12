@@ -1,9 +1,9 @@
-nacl_factory = require('../../crypto/nacl.js');
+nacl_factory = require('../common/crypto/nacl.js');
 
-var IoC = require('../ioc.nodejs.client.js');
-var ioc = new IoC.Interface({http: require('http')});
+var Hybridd = require('..dist/hybridd.interface.nodejs.js');
+var hybridd = new Hybridd.Interface({http: require('http')});
 
-ioc.sequential([
+hybridd.sequential([
   'init',
   {username: '*****', password: '****'}, 'login',
   {host: 'http://localhost:1111/'}, 'addHost',
