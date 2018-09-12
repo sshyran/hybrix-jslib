@@ -215,7 +215,6 @@ var Interface = function (data) {
       // TODO Error if no data.clientModuleCodeBlob was provided
       try {
         var code = LZString.decompressFromEncodedURIComponent(data.clientModuleCodeBlob);
-        console.log(code.substr(300));
         var mode = data.assetDetails['mode'].split('.')[0];
         clientModules[mode] = CommonUtils.activate(code);
         clientModuleBlobs[mode] = data.clientModuleCodeBlob;
@@ -234,7 +233,6 @@ var Interface = function (data) {
 
     var subMode = mode[1];
     var symbol = data.assetDetails.symbol;
-    console.warn(symbol, data.assetDetails['mode'], mode, baseMode, subMode);
     assets[symbol].data.seed = CommonUtils.seedGenerator(user_keys, baseMode);
     try {
       assets[symbol].data.mode = subMode;
