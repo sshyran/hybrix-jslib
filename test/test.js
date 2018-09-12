@@ -196,7 +196,7 @@ function go (mode) {
     // TODO filter tokens
 
     {
-     /* dummy: testAsset('dummy'),
+      dummy: testAsset('dummy'),
       eth: testAsset('eth'),
       ark: testAsset('ark'),
       bch: testAsset('bch'),
@@ -214,10 +214,10 @@ function go (mode) {
       shift: testAsset('shift'),
       ubq: testAsset('ubq'), // details.fee =null>*/
       waves: testAsset('waves'),
-     /* xcp: testAsset('xcp'), // Error: Expected property "1" of type Satoshi, got Number -546
+      xcp: testAsset('xcp'), // Error: Expected property "1" of type Satoshi, got Number -546
       xel: testAsset('xel'), // unspents not working properly ERROR
       xem: testAsset('xem'),
-      zec: testAsset('zec')*/
+      zec: testAsset('zec')
     },
     'parallel'
 
@@ -235,7 +235,7 @@ function go (mode) {
 
 if (typeof window === 'undefined') {
   // add NACL in your favourite flavour
-  nacl_factory = require('../../crypto/nacl.js');
+  nacl_factory = require('../common/crypto/nacl.js');
   // run the tests
   go('node');
 }
