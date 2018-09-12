@@ -1,10 +1,9 @@
 #!/bin/sh
 OLDPATH=$PATH
 WHEREAMI=`pwd`
-export PATH=$WHEREAMI/../node/bin:"$PATH"
 NODEINST=`which node`
 
-HYBRIDD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/../../../"
+HYBRIDD="`cd "$WHEREAMI/.." && pwd`"
 INTERFACE="$HYBRIDD/interface"
 NODE="$HYBRIDD/node"
 DETERMINISTIC="$HYBRIDD/deterministic"
@@ -12,17 +11,18 @@ NODEJS="$HYBRIDD/nodejs-v8-lts"
 COMMON="$HYBRIDD/common"
 WEB_WALLET="$HYBRIDD/web-wallet"
 
-if [ $(uname) == "Darwin" ]; then
+if [ "`uname`" = "Darwin" ]; then
     SYSTEM="darwin-x64"
-elif [ $(uname -m) == "i386" ] || [ $(uname -m) == "i686" ]; then
+elif [ "`uname -m`" = "i386" ] || [ "`uname -m`" = "i686" ]; then
     SYSTEM="x86"
-elif [ $(uname -m) == "x86_64" ]; then
+elif [ "`uname -m`" = "x86_64" ]; then
     SYSTEM="x86_64"
 else
     echo "[!] Unknown Architecture (or incomplete implementation)"
     exit 1;
 fi
 
+export PATH=$NODEJS/$SYSTEM/bin:$WHEREAMI/../node/bin:"$PATH"
 
 
 # NODE
