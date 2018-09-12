@@ -4,7 +4,7 @@ WHEREAMI=`pwd`
 NODEINST=`which node`
 
 SCRIPTDIR="`dirname \"$0\"`"
-HYBRIDD="`cd \"$SCRIPTDIR\/../../.." && pwd`"
+HYBRIDD="`cd \"$SCRIPTDIR/../../..\" && pwd`"
 
 INTERFACE="$HYBRIDD/interface"
 NODE="$HYBRIDD/node"
