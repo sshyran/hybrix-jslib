@@ -241,11 +241,11 @@ function increaseSessionStep (step) {
 }
 
 function validatePasswordLength (pass) {
-  return typeof pass !== 'undefined' && (pass.length === 16 || pass.length === 48);
+  return typeof pass === 'string' && (pass.length === 16 || pass.length === 48);
 }
 
 function validateUserIDLength (userid) {
-  return typeof userid !== 'undefined' && userid.length === 16;
+  return typeof userid === 'string' && userid.length === 16;
 }
 
 exports.commonUtils = {
