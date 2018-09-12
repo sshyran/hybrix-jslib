@@ -1,4 +1,4 @@
-var UrlBase64 = require('./crypto/UrlBase64');
+var UrlBase64 = require('./crypto/urlbase64');
 var sjcl = require('./crypto/sjcl');
 
 // returns array of double public/secret keypairs
