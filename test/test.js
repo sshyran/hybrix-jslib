@@ -176,7 +176,7 @@ function go (mode) {
   var renderTable;
   if (mode === 'node') {
     // create IoC interface object
-    IoC = require('../ioc.nodejs.client.js');
+    IoC = require('../dist/hybridd.interface.nodejs.js');
     ioc = new IoC.Interface({http: require('http')});
     renderTable = renderTableCLI;
   } else {
