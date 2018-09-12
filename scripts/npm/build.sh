@@ -3,7 +3,9 @@ OLDPATH=$PATH
 WHEREAMI=`pwd`
 NODEINST=`which node`
 
-HYBRIDD="`cd "$WHEREAMI/.." && pwd`"
+SCRIPTDIR="`dirname \"$0\"`"
+HYBRIDD="`cd \"$SCRIPTDIR\/../../.." && pwd`"
+
 INTERFACE="$HYBRIDD/interface"
 NODE="$HYBRIDD/node"
 DETERMINISTIC="$HYBRIDD/deterministic"
@@ -22,7 +24,7 @@ else
     exit 1;
 fi
 
-export PATH=$NODEJS/$SYSTEM/bin:$WHEREAMI/../node/bin:"$PATH"
+export PATH="$NODEJS/$SYSTEM/bin:$PATH"
 
 
 # NODE
