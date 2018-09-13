@@ -186,13 +186,13 @@ var Interface = function (data) {
   this.session = function (data, dataCallback, errorCallback) {
     if (!CommonUtils.validateUserIDLength(data.username)) {
       if (typeof errorCallback === 'function') {
-        errorCallback('Invalid username.');
+        errorCallback('Invalid username: '+JSON.stringify(data.username));
       }
       return;
     }
     if (!CommonUtils.validatePasswordLength(data.password)) {
       if (typeof errorCallback === 'function') {
-        errorCallback('Invalid password.');
+        errorCallback('Invalid password: [Not shown for privacy reasons]');
       }
       return;
     }
@@ -606,16 +606,15 @@ var Interface = function (data) {
   this.addHost = function (data, dataCallback, errorCallback) {
     if (typeof data === 'string') { data = {host: data}; }
     if (
-      false &amp;&amp;
-      !/^(http|https):\/\/[a-z\d]([a-z\d\-]{0,61}[a-z\d])?(\.[a-z\d]([a-z\d\-]{0,61}[a-z\d])?)*:\d*\/$/i.test(data.host) &amp;&amp; // hostnames
-      !/^(http|https):\/\/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):\d*\/$/i.test(data.host) // ipv4 address
+      !/^(http|https):\/\/[a-z\d]([a-z\d\-]{0,61}[a-z\d])?(\.[a-z\d]([a-z\d\-]{0,61}[a-z\d])?)*(:\d*)?\/([-a-z\d%@_.~+&amp;:]*\/)?$/i.test(data.host) &amp;&amp; // hostnames
+      !/^(http|https):\/\/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(:\d*)?\/([-a-z\d%@_.~+&amp;:]*\/)?$/i.test(data.host) // ipv4 address
       // TODO ipv6
     ) { //  check if valid hostname is valid
       if (DEBUG) {
-        console.error('Host not valid hostname or IPv4 : "' + data.host + '"  expectected: "protocol://hostnameOrIPv4Address:portnumber/"');
+        console.error('Host not valid hostname or IPv4 : "' + data.host + '"  expectected: "protocol://hostnameOrIPv4Address:portnumber/path/"');
       }
       if (typeof errorCallback === 'function') {
-        errorCallback('Host not valid hostname or IPv4 : "' + data.host + '"  expectected: "protocol://hostnameOrIPv4Address:portnumber/"');
+        errorCallback('Host not valid hostname or IPv4 : "' + data.host + '"  expectected: "protocol://hostnameOrIPv4Address:portnumber/path/"');
       }
     } else {
       var hybriddNode = new HybriddNode.HybriddNode(data.host);
@@ -730,7 +729,7 @@ var Interface = function (data) {
                                    DJB2.hash(entropy.substr(offset, 12).toUpperCase()).substr(0, 4) +
                                    DJB2.hash(entropy.substr(offset, 12).toLowerCase() + passwd.toUpperCase()).substr(4, 4));
 
-          dataCallback({userid, passwd});
+          dataCallback({username, password});
         }
       } else {
         entropy = pool(numberList[index]);
