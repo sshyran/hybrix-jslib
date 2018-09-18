@@ -1,7 +1,7 @@
 nacl_factory = require('../common/crypto/nacl.js');
 
 var Hybridd = require('../dist/hybridd.interface.nodejs.js');
-var hybridd = new Hybridd.Interface({http: require('https')});
+var hybridd = new Hybridd.Interface({http: require('http')});
 
 hybridd.sequential([
   'init',
