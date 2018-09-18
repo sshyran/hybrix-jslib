@@ -722,7 +722,7 @@ var Interface = function (data) {
       if (DEBUG) { console.error('Expected \'value\' property.'); }
       if (typeof errorCallback === 'function') { errorCallback('Expected \'value\' property.'); }
     }else if(data.encrypted===false){
-      this.call({host:data.host,query:'/e/storage/get/'+data.key+'/'+JSON.stringify(data.value),channel:data.channel}, errorCallback,progressCallback);
+      this.call({host:data.host,query:'/e/storage/set/'+data.key+'/'+JSON.stringify(data.value),channel:data.channel}, errorCallback,progressCallback);
     }else{
       this.sequential([
         {data:data.value}, 'encrypt',
