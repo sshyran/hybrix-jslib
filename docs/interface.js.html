@@ -604,7 +604,6 @@ var Interface = function (data) {
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.addHost = function (data, dataCallback, errorCallback) {
-    if (typeof data === 'string') { data = {host: data}; }
     if (
       !/^(http|https):\/\/[a-z\d]([a-z\d\-]{0,61}[a-z\d])?(\.[a-z\d]([a-z\d\-]{0,61}[a-z\d])?)*(:\d*)?\/([-a-z\d%@_.~+&amp;:]*\/)?$/i.test(data.host) &amp;&amp; // hostnames
       !/^(http|https):\/\/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(:\d*)?\/([-a-z\d%@_.~+&amp;:]*\/)?$/i.test(data.host) // ipv4 address
@@ -658,6 +657,13 @@ var Interface = function (data) {
   this.call = function (data, dataCallback, errorCallback) {
     var host;
     if (typeof data.host === 'undefined') {
+      if(Object.keys(hybriddNodes).length===0){
+        if (DEBUG) { console.error('No hosts added.'); }
+        if (typeof errorCallback === 'function') {
+          errorCallback('No hosts added.');
+        }
+        return;
+      }
       host = Object.keys(hybriddNodes)[0]; // todo select random
     } else {
       host = data.host;
@@ -677,21 +683,224 @@ var Interface = function (data) {
       }
     }
   };
+
+  // creates a unique user storage key for storing information and settings
+//  var encrupt = function  (key) {
+  //  return nacl.to_hex(sha256(user_keys.boxPk)) + '-' + String(key);
+//  };
+
+  /**
+   * Stringify and encrypt data with user keys.
+   * @param {Object} data
+   * @param {String} data.key - TODO
+   * @param {Object} data.value - A string, array or object.
+   * @param {Boolean} [data.encrypted] - whether to encrypt the data with the user key, true by default.
+   * @param {String} [data.host] - TODO
+   * @param {String} [data.channel] - TODO
+   * @param {Boolean} [data.meta] - TODO
+   * @param {Function} dataCallback - Called when the method is succesful.
+   * @param {Function} errorCallback - Called when an error occurs.
+   * @example
+   * hybridd.sequential([
+   * 'init',
+   * {username: '*****', password: '****'}, 'session',
+   * {host: 'http://localhost:1111/'}, 'addHost',
+   * {key:'Hello', value:'World!'}, 'save'
+   * {key:'Hello'}, 'load'
+   * ]
+   *   , (data) => { console.log(JSON.stringify(data)); } // Outputs "World!"
+   *   , (error) => { console.error(error); }
+   */
+  this.save = function(data, dataCallback, errorCallback,progressCallback){
+    if(typeof data !== 'object'){
+      if (DEBUG) { console.error('Expected an object.'); }
+      if (typeof errorCallback === 'function') { errorCallback('Expected an object.'); }
+    }else if(!data.hasOwnProperty('key') || typeof data.key !=='string'){
+      if (DEBUG) { console.error('Expected \'key\' property of string type.'); }
+      if (typeof errorCallback === 'function') { errorCallback('Expected \'key\' property of string type.'); }
+    }else if(!data.hasOwnProperty('value')){
+      if (DEBUG) { console.error('Expected \'value\' property.'); }
+      if (typeof errorCallback === 'function') { errorCallback('Expected \'value\' property.'); }
+    }else if(data.encrypted===false){
+      this.call({host:data.host,query:'/e/storage/get/'+data.key+'/'+JSON.stringify(data.value),channel:data.channel}, errorCallback,progressCallback);
+    }else{
+      this.sequential([
+        {data:data.value}, 'encrypt',
+        result => {return {host:data.host,query:'/e/storage/set/'+data.key+'/'+result,channel:data.channel,meta:data.meta};}, 'call'
+      ],dataCallback, errorCallback,progressCallback);
+    }
+  }
+
+  /**
+   * Stringify and encrypt data with user keys.
+   * @param {Object} data
+   * @param {String} data.key - TODO
+   * @param {Boolean} [data.encrypted] - whether to encrypt the data with the user key, true by default.
+   * @param {String} [data.host] - TODO
+   * @param {String} [data.channel] - TODO
+   * @param {Boolean} [data.meta] - TODO
+   * @param {Function} dataCallback - Called when the method is succesful.
+   * @param {Function} errorCallback - Called when an error occurs.
+   * @example
+   * hybridd.sequential([
+   * 'init',
+   * {username: '*****', password: '****'}, 'session',
+   * {host: 'http://localhost:1111/'}, 'addHost',
+   * {key:'Hello', value:'World!'}, 'save'
+   * {key:'Hello'}, 'load'
+   * ]
+   *   , (data) => { console.log(JSON.stringify(data)); } // Outputs "World!"
+   *   , (error) => { console.error(error); }
+   */
+  this.load = function(data, dataCallback, errorCallback,progressCallback){
+    if(typeof data !== 'object'){
+      if (DEBUG) { console.error('Expected an object.'); }
+      if (typeof errorCallback === 'function') { errorCallback('Expected an object.'); }
+    }else if(!data.hasOwnProperty('key') || typeof data.key !=='string'){
+      if (DEBUG) { console.error('Expected \'key\' property of string type.'); }
+      if (typeof errorCallback === 'function') { errorCallback('Expected \'key\' property of string type.'); }
+    }else if(data.encrypted===false){
+      this.call({host:data.host,query:'/e/storage/get/'+data.key,channel:data.channel,meta:data.meta}, errorCallback,progressCallback);
+    }else{
+      this.sequential([
+        {host:data.host,query:'/e/storage/get/'+data.key,channel:data.channel}, 'call',
+        result => {return {data: result};}, 'decrypt'
+      ],dataCallback, errorCallback,progressCallback);
+    }
+  }
+
+  /**
+   * Retrieve the meta data for a storage key
+   * @param {Object} data
+   * @param {String} data.key - TODO
+   * @param {String} [data.host] - TODO
+   * @param {String} [data.channel] - TODO
+   * @param {Boolean} [data.meta] - TODO
+   * @param {Function} dataCallback - Called when the method is succesful.
+   * @param {Function} errorCallback - Called when an error occurs.
+   * @example
+   * hybridd.sequential([
+   * 'init',
+   * {username: '*****', password: '****'}, 'session',
+   * {host: 'http://localhost:1111/'}, 'addHost',
+   * {key:'Hello', value:'World!'}, 'save'
+   * {key:'Hello'}, 'meta'
+   * ]
+   *   , (data) => { console.log(JSON.stringify(data)); } // Outputs {time,hash,size,pow,res,n,read}
+   *   , (error) => { console.error(error); }
+   */
+  this.meta = function(data, dataCallback, errorCallback,progressCallback){
+    if(typeof data !== 'object'){
+      if (DEBUG) { console.error('Expected an object.'); }
+      if (typeof errorCallback === 'function') { errorCallback('Expected an object.'); }
+    }else if(!data.hasOwnProperty('key') || typeof data.key !=='string'){
+      if (DEBUG) { console.error('Expected \'key\' property of string type.'); }
+      if (typeof errorCallback === 'function') { errorCallback('Expected \'key\' property of string type.'); }
+    }else{
+      this.call({host:data.host,query:'/e/storage/meta/'+data.key,channel:data.channel,meta:data.meta}, errorCallback,progressCallback);
+    }
+  }
+
+  /**
+ * Stringify and encrypt data with user keys.
+ * @param {Object} data
+ * @param {Object} data.data - A string, array or object.
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ * @example
+ * hybridd.sequential([
+ * 'init',
+ * {username: '***', password: '***'}, 'session',
+ * {data:'Hello World!'}, 'encrypt'
+ * ]
+ * , (data) => { console.log(JSON.stringify(data)); }  // Outputs something like "T3dRd3pUUmdaZ3BnYkFSZ01ZQllBTVNDc01LWWVL3kFKaVFFNDBJMHdSVG9RSUFURUZBRGlwVXpSU0E="
+ * , (error) => { console.error(error); }
+* );
+ */
+  this.encrypt = function(data, dataCallback, errorCallbac) {
+    if (!user_keys) {
+      if (DEBUG) { console.error('No session available.'); }
+      if (typeof errorCallback === 'function') { errorCallback('No session available.'); }
+    }else{
+      var result;
+      try{
+        var nonce_salt = nacl.from_hex('F4E5D5C0B3A4FC83F4E5D5C0B3A4AC83F4E5D000B9A4FC83');
+        var crypt_utf8 = nacl.encode_utf8(JSON.stringify(data.data));
+        var crypt_bin = nacl.crypto_box(crypt_utf8, nonce_salt, user_keys.boxPk, user_keys.boxSk);
+        result = UrlBase64.safeCompress(nacl.to_hex(crypt_bin));
+      }catch(e){
+        if (DEBUG) { console.error(e); } // TODO better error message
+        if (typeof errorCallback === 'function') { errorCallback(e); } // TODO better error message
+        return;
+      }
+      dataCallback(result);
+    }
+};
+
+    /**
+ * Decrypt and parse data with user keys.
+ * @param {Object} data
+ * @param {String} data.data - An encrypted and stringified string, array or object.
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ * @example
+ * hybridd.sequential([
+ * 'init',
+ * {username: '***', password: '***'}, 'session',
+ * {data:'Hello World!'}, 'encrypt',
+ * data=>{return {data:data}}, 'decrypt'
+ * ]
+ * , (data) => { console.log(JSON.stringify(data)); } // Outputs "Hello World!"
+ * , (error) => { console.error(error); }
+* );
+ */
+this.decrypt = function (data, dataCallback, errorCallback) {
+  if (!user_keys) {
+    if (DEBUG) { console.error('No session available.'); }
+    if (typeof errorCallback === 'function') { errorCallback('No session available.'); }
+  }else if(typeof data.data !== 'string'){
+    if (DEBUG) { console.error('Expected a string.'); }
+    if (typeof errorCallback === 'function') { errorCallback('Expected a string.'); }
+  }else{
+    var result;
+    try {
+      var nonce_salt = nacl.from_hex('F4E5D5C0B3A4FC83F4E5D5C0B3A4AC83F4E5D000B9A4FC83');
+      var crypt_hex = nacl.from_hex(UrlBase64.safeDecompress(data.data));
+      // use nacl to create a crypto box containing the data
+      var crypt_bin = nacl.crypto_box_open(crypt_hex, nonce_salt, user_keys.boxPk, user_keys.boxSk);
+      result = JSON.parse(nacl.decode_utf8(crypt_bin));
+    } catch (err) {
+      if (DEBUG) { console.error(e); } // TODO better error message
+      if (typeof errorCallback === 'function') { errorCallback(e); } // TODO better error message
+      return;
+    }
+    dataCallback(result);
+  }
+};
+
+
+
   /**
  * TODO   WIP Create a new deterministic account with the entropy provided.
  * @param {Object} data
- * @param {string} [data.entropy] - Optional: must be a random string of at least 482 bytes, else taken from crypto.randomBytes.
+ * @param {string} [data.entropy] - Not Yet working! Optional: must be a random string of at least 482 bytes, else taken from crypto.randomBytes.
  * @param {Function} [data.pool] - Optional: pool function can be overridden by a custom 1600 byte pool generator.
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.createAccount = function (data, dataCallback, errorCallback) {
+    var minimalEntropyLength = 411 + 20 + 60;
+
     if (!typeof data.entropy === 'string') {
-      if (data.entropy.length &lt; 482) {
+      if (data.entropy.length &lt;= minimalEntropyLength) { //TODO huh?
         data.entropy = crypto.randomBytes(482).toString();
       } else {
         if (DEBUG) { console.error('Not enough entropy provided to function createAccount!'); }
-        return false;
+
+        if (typeof errorCallback === 'function') {
+          errorCallback('Not enough entropy provided to function createAccount!');
+        }
+        return;
       }
     }
 
@@ -715,19 +924,18 @@ var Interface = function (data) {
 
     var iterate = index => {
       if (index === maxIndex) {
-        entropy.required = 411 + 20 + 60;
-        if (entropy.length &lt; entropy.required) {
-          if (DEBUG) { console.error('Entropy is of insufficient length. Required > ' + entropy.required); }
+        if (entropy.length &lt;= minimalEntropyLength) {
+          if (DEBUG) { console.error('Entropy is of insufficient length. Required > ' + minimalEntropyLength); }
           if (typeof errorCallback === 'function') {
-            errorCallback('Entropy is of insufficient length. Required > ' + entropy.required);
+            errorCallback('Entropy is of insufficient length. Required > ' + minimalEntropyLength);
           }
         } else {
           var offset = Math.floor(Math.random() * 411);
           // 411+20+60 -> entropy.required
-          var passwd = hexToBase32(entropy.substr(offset + 20, 60));
-          var userid = hexToBase32(entropy.substr(offset, 12) +
+          var password = hexToBase32(entropy.substr(offset + 20, 60));
+          var username = hexToBase32(entropy.substr(offset, 12) +
                                    DJB2.hash(entropy.substr(offset, 12).toUpperCase()).substr(0, 4) +
-                                   DJB2.hash(entropy.substr(offset, 12).toLowerCase() + passwd.toUpperCase()).substr(4, 4));
+                                   DJB2.hash(entropy.substr(offset, 12).toLowerCase() + password.toUpperCase()).substr(4, 4));
 
           dataCallback({username, password});
         }
