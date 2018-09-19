@@ -805,10 +805,10 @@ var Interface = function (data) {
   }
 
   /**
- * Stringify and hash.
+ * Stringify and create a DJB2 hash.
  * @param {Object} data
  * @param {Object} data.data - A string, array or object.
- * @param {String} data.salt - A string.
+ * @param {String} [data.salt] - A string.
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
 */
