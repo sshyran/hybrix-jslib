@@ -1448,7 +1448,7 @@ hybridd.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line948">line 948</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line959">line 959</a>
     </li></ul></dd>
     
 
@@ -1827,7 +1827,7 @@ hybridd.init(null, onSucces, onError);
 
 
 <div class="description">
-    TODO   WIP Create a new deterministic account with the entropy provided.
+    TODO  Create a new deterministic account with the entropy provided.
 </div>
 
 
@@ -1933,7 +1933,40 @@ hybridd.init(null, onSucces, onError);
 
             
 
-            <td class="description last">Not Yet working! Optional: must be a random string of at least 482 bytes, else taken from crypto.randomBytes.</td>
+            <td class="description last">CAREFUL! Using this feature incorrectly can reduce your security and privacy. Only use when you know what you're doing. Entropy can be provided. Must be a sufficient random string of at least 482 bytes.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>offset</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">CAREFUL! Using this feature incorrectly can reduce your security and privacy. Only use when you know what you're doing. Use an offset to create multiple accounts from same entropy.</td>
         </tr>
 
     
@@ -1966,7 +1999,8 @@ hybridd.init(null, onSucces, onError);
 
             
 
-            <td class="description last">Optional: pool function can be overridden by a custom 1600 byte pool generator.</td>
+            <td class="description last">CAREFUL! Using this feature incorrectly can reduce your security and privacy. Only use when you know what you're doing. Pool function can be overridden by a custom 1600 byte pool generator.
+deterministic</td>
         </tr>
 
     
@@ -2060,7 +2094,7 @@ hybridd.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line869">line 869</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line883">line 883</a>
     </li></ul></dd>
     
 
@@ -2290,7 +2324,7 @@ hybridd.init(null, onSucces, onError);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line835">line 835</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line847">line 847</a>
     </li></ul></dd>
     
 
@@ -2533,7 +2567,7 @@ data=>{return {data:data}}, 'decrypt'
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line798">line 798</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line810">line 810</a>
     </li></ul></dd>
     
 
@@ -3499,6 +3533,259 @@ data=>{return {data:data}}, 'decrypt'
     
 
     
+    <h4 class="name" id="hash"><span class="type-signature"></span>hash<span class="signature">(data, dataCallback, errorCallback)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Stringify and hash.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A string, array or object.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>salt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A string.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dataCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called when the method is succesful.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>errorCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called when an error occurs.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line790">line 790</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="id"><span class="type-signature"></span>id<span class="signature">(data, dataCallback, errorCallback)</span><span class="type-signature"></span></h4>
     
 
@@ -3646,7 +3933,7 @@ data=>{return {data:data}}, 'decrypt'
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line935">line 935</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line946">line 946</a>
     </li></ul></dd>
     
 
@@ -5987,7 +6274,7 @@ data=>{return {data:data}}, 'decrypt'
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line1019">line 1019</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line1030">line 1030</a>
     </li></ul></dd>
     
 
@@ -7302,7 +7589,7 @@ data=>{return {data:data}}, 'decrypt'
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line959">line 959</a>
+        <a href="interface.js.html">interface.js</a>, <a href="interface.js.html#line970">line 970</a>
     </li></ul></dd>
     
 

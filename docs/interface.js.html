@@ -805,6 +805,18 @@ var Interface = function (data) {
   }
 
   /**
+ * Stringify and hash.
+ * @param {Object} data
+ * @param {Object} data.data - A string, array or object.
+ * @param {String} data.salt - A string.
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+*/
+  this.hash = function(data, dataCallback, errorCallback) {
+    dataCallback(DJB2.hash(JSON.stringify(data.data)+JSON.stringify(data.salt)));
+  }
+
+  /**
  * Stringify and encrypt data with user keys.
  * @param {Object} data
  * @param {Object} data.data - A string, array or object.
@@ -820,7 +832,7 @@ var Interface = function (data) {
  * , (error) => { console.error(error); }
 * );
  */
-  this.encrypt = function(data, dataCallback, errorCallbac) {
+  this.encrypt = function(data, dataCallback, errorCallback) {
     if (!user_keys) {
       if (DEBUG) { console.error('No session available.'); }
       if (typeof errorCallback === 'function') { errorCallback('No session available.'); }
@@ -884,71 +896,70 @@ this.decrypt = function (data, dataCallback, errorCallback) {
 
 
   /**
- * TODO   WIP Create a new deterministic account with the entropy provided.
+ * TODO  Create a new deterministic account with the entropy provided.
  * @param {Object} data
- * @param {string} [data.entropy] - Not Yet working! Optional: must be a random string of at least 482 bytes, else taken from crypto.randomBytes.
- * @param {Function} [data.pool] - Optional: pool function can be overridden by a custom 1600 byte pool generator.
+ * @param {string} [data.entropy] - CAREFUL! Using this feature incorrectly can reduce your security and privacy. Only use when you know what you're doing. Entropy can be provided. Must be a sufficient random string of at least 482 bytes.
+ * @param {Function} [data.offset] - CAREFUL! Using this feature incorrectly can reduce your security and privacy. Only use when you know what you're doing. Use an offset to create multiple accounts from same entropy.
+ * @param {Function} [data.pool] -  CAREFUL! Using this feature incorrectly can reduce your security and privacy. Only use when you know what you're doing. Pool function can be overridden by a custom 1600 byte pool generator.
+ * deterministic
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.createAccount = function (data, dataCallback, errorCallback) {
-    var minimalEntropyLength = 411 + 20 + 60;
 
-    if (!typeof data.entropy === 'string') {
-      if (data.entropy.length &lt;= minimalEntropyLength) { //TODO huh?
-        data.entropy = crypto.randomBytes(482).toString();
-      } else {
-        if (DEBUG) { console.error('Not enough entropy provided to function createAccount!'); }
+    var create = function(entropy, offset){
+      var minimalEntropyLength = 411 + 20 + 60;
+      if (data.entropy.length &lt;= minimalEntropyLength) {
 
+        if (DEBUG) { console.error('Entropy is of insufficient length. Required > ' + minimalEntropyLength); }
         if (typeof errorCallback === 'function') {
-          errorCallback('Not enough entropy provided to function createAccount!');
+          errorCallback('Entropy is of insufficient length. Required > ' + minimalEntropyLength);
         }
         return;
       }
+
+      var password = hexToBase32(entropy.substr(offset + 20, 60));
+      var username = hexToBase32(entropy.substr(offset, 12) +
+                                 DJB2.hash(entropy.substr(offset, 12).toUpperCase()).substr(0, 4) +
+                                 DJB2.hash(entropy.substr(offset, 12).toLowerCase() + password.toUpperCase()).substr(4, 4));
+
+      dataCallback({username, password});
     }
 
-    var pool;
-    if (typeof data.pool === 'function') {
-      pool = data.pool;
-    } else {
-      pool = function (randomNumber) {
-        // randomNumber not used by pool in this instance
-        // DEPRECATED: return 'ABCDEF1234567890'.repeat(100); // FIXME
-        return crypto.randomBytes(1600).toString('hex');
-      };
-    }
 
-    var entropy = '';
-    var maxIndex = 1000 + Math.floor(Math.random() * 256);
+    if (typeof data.entropy === 'string'){
+      create(data.entropy, data.offset||0);
+    }else{
 
-    var numberList = new Array(maxIndex).fill(0).map(() => {
-      return Math.floor(Math.random() * Math.pow(8, 16));
-    });
-
-    var iterate = index => {
-      if (index === maxIndex) {
-        if (entropy.length &lt;= minimalEntropyLength) {
-          if (DEBUG) { console.error('Entropy is of insufficient length. Required > ' + minimalEntropyLength); }
-          if (typeof errorCallback === 'function') {
-            errorCallback('Entropy is of insufficient length. Required > ' + minimalEntropyLength);
-          }
-        } else {
-          var offset = Math.floor(Math.random() * 411);
-          // 411+20+60 -> entropy.required
-          var password = hexToBase32(entropy.substr(offset + 20, 60));
-          var username = hexToBase32(entropy.substr(offset, 12) +
-                                   DJB2.hash(entropy.substr(offset, 12).toUpperCase()).substr(0, 4) +
-                                   DJB2.hash(entropy.substr(offset, 12).toLowerCase() + password.toUpperCase()).substr(4, 4));
-
-          dataCallback({username, password});
-        }
+      var pool;
+      if (typeof data.pool === 'function') {
+        pool = data.pool;
       } else {
-        entropy = pool(numberList[index]);
-        ++index;
-        iterate(index);
+        pool = function (randomNumber) {
+          // randomNumber not used by pool in this instance
+          return crypto.randomBytes(1600).toString('hex');
+        };
       }
-    };
-    iterate(0);
+
+      var entropy = '';
+      var maxIndex = 1000 + Math.floor(Math.random() * 256);
+
+      var numberList = new Array(maxIndex).fill(0).map(() => {
+        return Math.floor(Math.random() * Math.pow(8, 16));
+      });
+
+      var iterate = index => {
+        if (index === maxIndex) {
+          var offset = Math.floor(Math.random() * 411);
+          create(entropy,offset);
+        } else {
+          entropy = pool(numberList[index]);
+          ++index;
+          iterate(index);
+        }
+      };
+      iterate(0);
+    }
   };
 
   /**
