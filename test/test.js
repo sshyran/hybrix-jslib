@@ -212,7 +212,7 @@ function go (mode) {
       omni: testAsset('omni'), // TypeError: undefined is not an object (evaluating 'n.unspent.unspents')
       rise: testAsset('rise'),
       shift: testAsset('shift'),
-      ubq: testAsset('ubq'), // details.fee =null>*/
+      ubq: testAsset('ubq'), // details.fee =null>
       waves: testAsset('waves'),
       xcp: testAsset('xcp'), // Error: Expected property "1" of type Satoshi, got Number -546
       xel: testAsset('xel'), // unspents not working properly ERROR

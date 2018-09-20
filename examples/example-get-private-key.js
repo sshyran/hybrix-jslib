@@ -1,6 +1,6 @@
 nacl_factory = require('../common/crypto/nacl.js');
 
-var Hybridd = require('..dist/hybridd.interface.nodejs.js');
+var Hybridd = require('../dist/hybridd.interface.nodejs.js');
 var hybridd = new Hybridd.Interface({http: require('http')});
 
 var username = '';
