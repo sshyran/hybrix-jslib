@@ -43,7 +43,7 @@ if (typeof window === 'undefined') {
 if (typeof window.crypto === 'undefined') { //Needed to make waves work
  window.crypto = require('crypto');
 }
-if (typeof crypto === 'undefined') { //Needed to make waves work
+if (typeof crypto === 'undefined') { //Needed to make ethereum work
  crypto = require('crypto');
 }
 
@@ -648,7 +648,7 @@ var Interface = function (data) {
         dataCallback(data.host);
       }
     } else { // host still  needs to be added
-      this.addHost(data.host, () => {
+      this.addHost({host:data.host}, () => {
         hybriddNodes[data.host].init({userKeys: user_keys, connector: connector}, dataCallback, errorCallback);
       }, errorCallback);
     }
