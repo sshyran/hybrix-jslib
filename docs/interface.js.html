@@ -343,10 +343,27 @@ var Interface = function (data) {
           }, errorCallback);
         }
       }, errorCallback);
-    } else if (typeof dataCallback !== 'undefined') {
+    } else if (typeof dataCallback === 'function') {
       dataCallback(data.symbol);
     }
   };
+
+  /**
+   * Remove an asset (crypto currency or token) from the session.
+   * @param {Object} data
+   * @param {string} data.symbol - The symbol of the asset
+   * @param {Function} dataCallback - Called when the method is succesful.
+   * @param {Function} errorCallback - Called when an error occurs.
+   */
+  this.removeAsset = function (data, dataCallback, errorCallback) {
+    if (assets.hasOwnProperty(data.symbol)) { // if assets has not been iniated, retrieve and initialize
+      delete assets[data.symbol];
+      //TODO check if the determistic client code blob is still used, if not remove it.
+      dataCallback(data.symbol);
+    } else if (typeof dataCallback === 'function') {
+      dataCallback(data.symbol);
+    }
+  }
 
   /**
  * Perform proof or work.
