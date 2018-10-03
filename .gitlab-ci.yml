@@ -1,5 +1,6 @@
 common:
   script:
+    - echo "As it is..."
   artifacts:
     paths:
     - ./
