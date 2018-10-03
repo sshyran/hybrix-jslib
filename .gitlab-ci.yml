@@ -1,0 +1,7 @@
+interface:
+  stage: build
+  script:
+    - ./scripts/npm/build.sh
+  artifacts:
+    paths:
+    - ./
