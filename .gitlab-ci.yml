@@ -1,6 +1,9 @@
 common:
+  stage:
+    - build
   script:
-    - echo "As it is..."
+    # don't include hidden files and folders
+    - rm -rf .[^.]*
   artifacts:
     paths:
     - ./
