@@ -1,6 +1,5 @@
 common:
-  stage:
-    - build
+  stage: build
   script:
     # don't include hidden files and folders
     - rm -rf .[^.]*
