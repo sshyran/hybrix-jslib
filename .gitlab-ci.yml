@@ -1,9 +1,9 @@
 interface:
-  stage: build
+  stage: deploy
   script:
-    - "curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/iochq/hybridd/common/-/jobs/104274327/artifacts/download\""
+    - "curl --location --header \"JOB-TOKEN: ${CI_JOB_TOKEN}\" \"https://gitlab.com/iochq/hybridd/common/-/jobs/104274327/artifacts/download\""
     - "./scripts/npm/build.sh"
     - "./node_modules/webpack/bin/webpack.js --help"
-  artifacts:
-    paths:
-    - ./dist/
+  #artifacts:
+    #paths:
+    #- ./dist/
