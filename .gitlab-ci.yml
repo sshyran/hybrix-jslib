@@ -1,10 +1,10 @@
 interface:
   stage: build
   script:
-    - apt-get install npm
-    - npm install -g webpack-cli
-    - curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/iochq/hybridd/common/-/jobs/104274327/artifacts/download\"
-    - ./scripts/npm/build.sh
+    - "apt-get install npm"
+    - "npm install -g webpack-cli"
+    - "curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/iochq/hybridd/common/-/jobs/104274327/artifacts/download\""
+    - "./scripts/npm/build.sh"
   artifacts:
     paths:
     - ./dist/
