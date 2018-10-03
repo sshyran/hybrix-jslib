@@ -1,8 +1,9 @@
 interface:
   stage: build
   script:
+    - sudo apt-get install npm
     - npm install -g webpack-cli
     - ./scripts/npm/build.sh
   artifacts:
     paths:
-    - ./dist
+    - ./dist/
