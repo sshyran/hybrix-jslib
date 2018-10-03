@@ -172,19 +172,19 @@ var renderTableWeb = (data) => {
 };
 
 function go (mode) {
-  var ioc;
+  var hybridd;
   var renderTable;
   if (mode === 'node') {
     // create IoC interface object
-    IoC = require('../dist/hybridd.interface.nodejs.js');
-    ioc = new IoC.Interface({http: require('http')});
+    Hybridd = require('../dist/hybridd.interface.nodejs.js');
+    hybridd = new Hybridd.Interface({http: require('http')});
     renderTable = renderTableCLI;
   } else {
     //    DEBUG = true;
-    ioc = new IoC.Interface({XMLHttpRequest: XMLHttpRequest});
+    hybridd = new Hybridd.Interface({XMLHttpRequest: XMLHttpRequest});
     renderTable = renderTableWeb;
   }
-  ioc.sequential([
+  hybridd.sequential([
     'init',
     {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'session',
     {host: 'http://localhost:1111/'}, 'addHost',
