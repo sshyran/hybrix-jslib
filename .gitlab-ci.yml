@@ -27,7 +27,11 @@ interface:
     # run the build-script of the interface
     - ./scripts/npm/build.sh
     
-    #- ./node_modules/webpack/bin/webpack.js --help
+    # clean up and prepare the artifacts (instead of having a dist)
+    - rm -rf !(dist) || true
+    - mv ./dist/* ./
+    - rm -rf ./dist || true
+    
   artifacts:
     paths:
-    - ./dist/
+    - ./
