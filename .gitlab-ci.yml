@@ -30,12 +30,11 @@ interface:
     
     # clean up and prepare the artifacts (instead of having a dist) 
     # remove everything except () is extglob syntax, which should be enabled first
-    #- shopt -s extglob
-    #- rm -rf !(dist) || true
-    #- mv ./dist/* ./
-    #- rm -rf ./dist || true
-    - cd dist
+    - shopt -s extglob
+    - rm -rf !(dist) || true
+    - mv ./dist/* ./
+    - rm -rf ./dist || true
     
   artifacts:
     paths:
-    - ./
+    - ./*.js
