@@ -2,8 +2,8 @@ interface:
   stage: build
   script:
     #- 'curl --location --header JOB-TOKEN: $CI_JOB_TOKEN https://gitlab.com/iochq/hybridd/common/-/jobs/104274327/artifacts/download'
-    - curl --request POST --form 'token=$CI_JOB_TOKEN' --form ref=master https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/trigger/pipeline
-    - curl --location --header 'JOB-TOKEN: $CI_JOB_TOKEN' https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/jobs/artifacts/master/download?job=common
+    - "curl --request POST --form \"token=$CI_JOB_TOKEN\" --form ref=master https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/trigger/pipeline"
+    - "curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/jobs/artifacts/master/download?job=common\""
     - unzip artifacts.zip
     - ./scripts/npm/build.sh
     #- ./node_modules/webpack/bin/webpack.js --help
