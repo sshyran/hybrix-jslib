@@ -11,8 +11,8 @@ interface:
     # download [common] artifact
     - "curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/jobs/artifacts/master/download?job=common\" -o artifacts-common.zip"
     
-    # create directory for [common] and unzip the downloaded artifact to that
-    - mkdir -p common
+    # create directory for [common] and unzip the downloaded artifact to that (|| true --> on error, no problem)
+    - mkdir -p common || true
     - unzip -o artifacts-common.zip -d common
     
     # remove the zip-file (|| true --> on error, no problem)
