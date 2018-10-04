@@ -20,8 +20,9 @@ interface:
     # remove the zip-file (|| true --> on error, no problem)
     - rm -rf  artifacts-common.zip || true
     
-    # download git clone https://github.com/internetofcoins/nodejs-v8-lts.git
+    # remove symbolic link to node
     - rm -rf  node || true
+    # don't download git clone https://github.com/internetofcoins/nodejs-v8-lts.git, refer to docker pre installed nodejs as defined in the first line of this file
     - "ln -s \"$(which nodejs)\" node"
     
     # run the build-script of the interface
@@ -29,10 +30,11 @@ interface:
     
     # clean up and prepare the artifacts (instead of having a dist) 
     # remove everything except () is extglob syntax, which should be enabled first
-    - shopt -s extglob
-    - rm -rf !(dist) || true
-    - mv ./dist/* ./
-    - rm -rf ./dist || true
+    #- shopt -s extglob
+    #- rm -rf !(dist) || true
+    #- mv ./dist/* ./
+    #- rm -rf ./dist || true
+    - cd dist
     
   artifacts:
     paths:
