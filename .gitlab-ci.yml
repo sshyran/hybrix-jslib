@@ -12,5 +12,3 @@ interface:
   artifacts:
     paths:
     - ./dist/
-  only:
-    - tags
