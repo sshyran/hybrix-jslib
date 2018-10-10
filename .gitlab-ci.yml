@@ -1,5 +1,12 @@
 image: node:8
 
+
+common:
+  stage: build
+  script: 
+  # trigger pipeline common
+  - "curl --request POST --form \"token=$CI_JOB_TOKEN\" --form ref=master https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/trigger/pipeline"
+
 interface:
   stage: build
   script:
