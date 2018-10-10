@@ -39,9 +39,9 @@ interface:
     # remove everything except () is extglob syntax, which should be enabled first
     - shopt -s extglob
     - rm -rf !(dist) || true
-    - mv ./dist/* ./
-    - rm -rf ./dist || true
+    #- mv ./dist/* ./
+    #- rm -rf ./dist || true
     
   artifacts:
     paths:
-    - ./*.js
+    - ./dist/
