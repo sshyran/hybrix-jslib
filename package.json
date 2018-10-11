@@ -11,7 +11,11 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "sh ./scripts/npm/build.sh"
+    "setup": "sh ./scripts/npm/setup.sh",
+    "compile": "sh ./scripts/npm/compile.sh",
+    "dist": "sh ./scripts/npm/dist.sh",
+    "build": "sh ./scripts/npm/setup.sh; sh ./scripts/npm/compile.sh; sh ./scripts/npm/dist.sh",
+    "clean" : "rm -rf dist/*"
   },
   "repository": {
     "type": "git",
