@@ -33,7 +33,7 @@ interface:
     - "ln -s \"$(which nodejs)\" node"
     
     # run the build-script of the interface
-    - ./scripts/npm/build.sh
+    - ./scripts/npm/compile.sh
     
     # clean up and prepare the artifacts (instead of having a dist) 
     # remove everything except () is extglob syntax, which should be enabled first
