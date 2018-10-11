@@ -82,4 +82,8 @@ rm "$INTERFACE/dist/hybridd.interface.nacl.js.tmp"
 rm "$INTERFACE/dist/hybridd.interface.web.js.tmp"
 rm "$INTERFACE/dist/hybridd.interface.web.js.min.tmp"
 
+echo "[.] Copy interface distributables to node."
+rsync -aK "$INTERFACE/dist/" "$NODE/interface/"
+
+
 PATH=$OLDPATH
