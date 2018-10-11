@@ -1,9 +1,10 @@
 #!/bin/sh
 OLDPATH=$PATH
 WHEREAMI=`pwd`
-export PATH=$WHEREAMI/node/bin:"$PATH"
+export PATH=$WHEREAMI/node_binaries/bin:"$PATH"
 NPMINST=`which npm`
 
 node $WHEREAMI/node/bin/npm $@
 
-export PATH=$OLDPATH
+export PATH="$OLDPATH"
+cd "$WHEREAMI"

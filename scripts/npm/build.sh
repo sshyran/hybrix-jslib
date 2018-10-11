@@ -24,7 +24,6 @@ else
     exit 1;
 fi
 
-export PATH="$NODEJS/$SYSTEM/bin:$PATH"
 
 
 # NODE
@@ -40,6 +39,8 @@ if [ ! -e "$INTERFACE/node_binaries" ];then
     echo " [i] Link NODEJS files"
     ln -sf "$NODEJS/$SYSTEM" "$INTERFACE/node_binaries"
 fi
+export PATH="$INTERFACE/node_binaries/bin:$PATH"
+
 
 # COMMON
 if [ ! -e "$INTERFACE/common" ];then
@@ -87,4 +88,5 @@ mkdir -p "$NODE/interface"
 rsync -aK "$INTERFACE/dist/" "$NODE/interface/"
 
 
-PATH=$OLDPATH
+export PATH="$OLDPATH"
+cd "$WHEREAMI"
