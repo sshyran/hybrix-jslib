@@ -28,9 +28,9 @@ export PATH="$NODEJS/$SYSTEM/bin:$PATH"
 
 
 # NODE
-if [ ! -e "$INTERFACE/node" ];then
+if [ ! -e "$INTERFACE/node_binaries" ];then
 
-    echo " [!] interface/node not found."
+    echo " [!] interface/node_binaries not found."
 
     if [ ! -e "$NODEJS" ];then
         cd "$HYBRIDD"
@@ -38,7 +38,7 @@ if [ ! -e "$INTERFACE/node" ];then
         git clone https://github.com/internetofcoins/nodejs-v8-lts.git
     fi
     echo " [i] Link NODEJS files"
-    ln -sf "$NODEJS/$SYSTEM" "$INTERFACE/node"
+    ln -sf "$NODEJS/$SYSTEM" "$INTERFACE/node_binaries"
 fi
 
 # COMMON
