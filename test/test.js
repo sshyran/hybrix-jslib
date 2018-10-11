@@ -1,3 +1,14 @@
+var ProgressBar = require('progress');
+
+function makeProgressBar(title) {
+  bar = new ProgressBar(' [.] '+title+': [:bar] :percent, eta: :etas', {
+    complete: '▓',
+    incomplete: '░',
+    width: 76-title.length,
+    total: 100
+  });  
+}
+
 function testAsset (symbol) {
   var testAmount = 0.0001;
   return { data: [
@@ -172,8 +183,11 @@ var renderTableWeb = (data) => {
 };
 
 function go (mode) {
+  makeProgressBar('test progress');
+  
   var ioc;
   var renderTable;
+
   if (mode === 'node') {
     // create IoC interface object
     IoC = require('../dist/hybridd.interface.nodejs.js');
@@ -224,7 +238,7 @@ function go (mode) {
   ]
     , renderTable
     , (error) => { console.error(error); }
-    , (progress) => { console.log(progress); }
+    , (progress) => { bar.update(progress); }
 
   );
 }
