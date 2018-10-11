@@ -43,7 +43,7 @@ interface:
     - rm -rf ./dist || true
     
     # remove .git directory and .* files
-    - rm -rf ./.* || true
+    - rm -rf ./.git* || true
     
   artifacts:
     paths:
