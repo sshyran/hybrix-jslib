@@ -11,7 +11,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "sh ./scripts/npm/build.sh"
+    "build": "sh ./scripts/npm/build.sh",
+    "clean:build" : "rm -rf dist; sh scripts/npm/build.sh",
+    "clean" : "rm -rf dist/*"
   },
   "repository": {
     "type": "git",
