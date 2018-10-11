@@ -3,6 +3,7 @@ OLDPATH=$PATH
 WHEREAMI=`pwd`
 NODEINST=`which node`
 
+# $HYBRIDD/interface/scripts/npm  => $HYBRIDD
 SCRIPTDIR="`dirname \"$0\"`"
 HYBRIDD="`cd \"$SCRIPTDIR/../../..\" && pwd`"
 
