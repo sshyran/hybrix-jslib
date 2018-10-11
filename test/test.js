@@ -1,4 +1,4 @@
-var ProgressBar = require('progress');
+var ProgressBar;
 
 function makeProgressBar(title) {
   bar = new ProgressBar(' [.] '+title+': [:bar] :percent, eta: :etas', {
@@ -6,7 +6,7 @@ function makeProgressBar(title) {
     incomplete: '░',
     width: 76-title.length,
     total: 100
-  });  
+  });
 }
 
 function testAsset (symbol) {
@@ -99,11 +99,12 @@ var renderTableCLI = (data) => {
 
   var r = '\n';
   r += ' #     SAMPLE                                       GENERATED                       ' + '\n';
-  r += '      ┌────┬──────┬─────┬────┬──────┬──────┬────┬──┬────┬──────┬──────┬────┬────┐' + '\n';
-  r += '      │Stat│Detail│Sampl│Vald│Balnce│Unspnt│Hist│TX│Vald│Balnce│Unspnt│Hist│Sign│' + '\n';
+//DISABELD  r += '      │Stat│Detail│Sampl│Vald│Balnce│Unspnt│Hist│TX│Vald│Balnce│Unspnt│Hist│Sign│' + '\n';
 
+  r += '      ┌────┬──────┬─────┬────┬──────┬──────┬────┬──────┬──────┬────┬────┐' + '\n';
+  r += '      │Stat│Detail│Sampl│Vald│Balnce│Unspnt│Vald│Balnce│Unspnt│Sign│' + '\n';
   for (var symbol in data) {
-    r += '      ├────┼──────┼─────┼────┼──────┼──────┼────┼──┼────┼──────┼──────┼────┼────┤' + '\n';
+  r += '      ├────┼──────┼─────┼────┼──────┼──────┼────┼──────┼──────┼────┼────┤' + '\n';
     r += symbol.substr(0, 5) + '     '.substr(0, 5 - symbol.length) + ' │';
     if (typeof data[symbol] !== 'undefined') {
       r += renderCellCLI(validStatus(data[symbol].status), data[symbol].status, counter) + '   │';
@@ -112,19 +113,20 @@ var renderTableCLI = (data) => {
       r += renderCellCLI(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter) + '   │';
       r += renderCellCLI(validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter) + '     │';
       r += renderCellCLI(validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter) + '     │';
-      r += renderCellCLI(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter) + '   │';
-      r += renderCellCLI(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter) + ' │';
+//      r += renderCellCLI(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter) + '   │';
+//      r += renderCellCLI(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter) + ' │';
       r += renderCellCLI(validValid(data[symbol].seedValid), data[symbol].seedValid, counter) + '   │';
       r += renderCellCLI(validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter) + '     │';
       r += renderCellCLI(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter) + '     │';
-      r += renderCellCLI(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter) + '   │';
+//      r += renderCellCLI(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter) + '   │';
       r += renderCellCLI(validSign(data[symbol].seedSign), data[symbol].seedSign, counter) + '   │';
       r += '\n';
     } else {
-      r += 'X   │X     │X    │X   │X     │X     │X   │X │X   │X     │X     │X   │X   │ !' + '\n';
+         r += 'X   │X     │X    │X   │X     │X     │X   │X     │X     │X   │X   │ !' + '\n';
     }
+  r += '      └────┴──────┴─────┴────┴──────┴──────┴────┴──────┴──────┴────┴────┘' + '\n';
+
   }
-  r += '      └────┴──────┴─────┴────┴──────┴──────┴────┴──┴────┴──────┴──────┴────┴────┘' + '\n';
   r += '\n';
   r += '      SUCCESS RATE: ' + (counter.valid / counter.total * 100) + '%' + '\n';
   // console.log(data);
@@ -152,7 +154,11 @@ var renderTableWeb = (data) => {
   var counter = {valid: 0, total: 0};
 
   var r = '<table><tr><td>Symbol</td><td colspan="2"></td><td colspan="6">Sample</td><td colspan="5">Generated</td></tr>';
-  r += '<tr><td></td><td>Status</td><td>Details</td><td>Sample</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Transaction</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Sign</td></tr>';
+  r += '<tr><td></td><td>Status</td><td>Details</td><td>Sample</td><td>Valid</td><td>Balance</td><td>Unspent</td>';
+  //r+='<td>History</td><td>Transaction</td>';
+  r+='<td>Valid</td><td>Balance</td><td>Unspent</td>';
+// r+='<td>History</td>'
+  r+='<td>Sign</td></tr>';
   for (var symbol in data) {
     r += '<tr>';
     r += '<td>' + symbol + '</td>';
@@ -163,13 +169,13 @@ var renderTableWeb = (data) => {
       r += renderCellWeb(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter);
       r += renderCellWeb(validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter);
       r += renderCellWeb(validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter);
-      r += renderCellWeb(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter);
-      r += renderCellWeb(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter);
+//DISABLED      r += renderCellWeb(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter);
+//DISABLED      r += renderCellWeb(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter);
 
       r += renderCellWeb(validValid(data[symbol].seedValid), data[symbol].seedValid, counter);
       r += renderCellWeb(validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter);
       r += renderCellWeb(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter);
-      r += renderCellWeb(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter);
+//DISABLED      r += renderCellWeb(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter);
       r += renderCellWeb(validSign(data[symbol].seedSign), data[symbol].seedSign, counter);
     } else {
       r += '<td colspan="13" style="background-color:red">Fail</td>';
@@ -182,12 +188,17 @@ var renderTableWeb = (data) => {
   document.body.innerHTML = r;
 };
 
+
+
 function go (mode) {
-  makeProgressBar('test progress');
   var hybridd;
   var renderTable;
+  var progressCallback;
 
   if (mode === 'node') {
+    ProgressBar = require('progress');
+    makeProgressBar('test progress')
+    progressCallback = progress => {bar.update(progress)};
     // create IoC interface object
     Hybridd = require('../dist/hybridd.interface.nodejs.js');
     hybridd = new Hybridd.Interface({http: require('http')});
@@ -196,7 +207,11 @@ function go (mode) {
     //    DEBUG = true;
     hybridd = new Hybridd.Interface({XMLHttpRequest: XMLHttpRequest});
     renderTable = renderTableWeb;
+    progressCallback = progress => {console.log(progress);}
   }
+
+
+
   hybridd.sequential([
     'init',
     {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'session',
@@ -237,7 +252,7 @@ function go (mode) {
   ]
     , renderTable
     , (error) => { console.error(error); }
-    , (progress) => { bar.update(progress); }
+    , progressCallback
 
   );
 }
