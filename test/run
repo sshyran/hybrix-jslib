@@ -1,10 +1,13 @@
 #!/bin/sh
 OLDPATH=$PATH
 WHEREAMI=`pwd`
-export PATH=$WHEREAMI/../node/bin:"$PATH"
+SCRIPTDIR="`dirname \"$0\"`"
+RUN="`cd \"$SCRIPTDIR\" && pwd`"
+export PATH="$RUN/../node_binaries/bin:$PATH"
 NODEINST=`which node`
 
-	echo " [i] using node executable $NODEINST"
-	node $@
+        echo " [i] using node executable $NODEINST"
+        node $@
 
-PATH=$OLDPATH
+PATH="$OLDPATH"
+cd "$WHEREAMI"

@@ -209,12 +209,12 @@ var Interface = function (data) {
     });
   };
   /**
- * TDOO
- * @param {Object} data
+ * Get detailed information about assets
+ * @param {Object} data - An array of symbols. For example: ['eth','btc','nxt']
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
-  this.assets = function(data, dataCallback, errorCallback){
+  this.asset = function(data, dataCallback, errorCallback){
     var result = {};
     for(var symbol in assets){
       var asset = assets[symbol];
@@ -370,9 +370,9 @@ var Interface = function (data) {
 
   /**
  * Perform proof or work.
- * @param {Object} data
- * @param {string} data.hash - TODO
- * @param {string} [data.difficulty] - TODO
+ * @param {Object} data - Contains hash to solve and difficulty level to use.
+ * @param {string} data.hash - Hash to solve by proof of work.
+ * @param {string} [data.difficulty] - Optional: Difficulty level to use.
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
@@ -638,7 +638,26 @@ var Interface = function (data) {
       tx => { return { query: '/asset/' + data.symbol + '/push/' + tx, channel: data.channel, host: data.host }; }, 'call'
     ]}, dataCallback, errorCallback, progressCallback);
   };
-
+  /**
+ * TODO
+ * @param {Object} data
+ * @param {string} [data.symbol] - TODO
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+ * @param {Function} progressCallback - Called whenever there is a progress updated. Passes a number between 0 and 1.
+ */
+  this.refreshAsset = function (data, dataCallback, errorCallback,progressCallback) {
+    var steps = {};
+    for(var symbol in assets){
+      var asset = assets[symbol];
+      steps[symbol] = {data:
+                       [
+                         {query:'/asset/'+symbol+'/balance/'+asset.data.address},'call',
+                         balance => {asset['balance']=balance; return balance;}
+                       ], step:'sequential'};
+    }
+    this.parallel(steps, (data)=>{this.asset(undefined,dataCallback,errorCallback,progressCallback)}, errorCallback,progressCallback);
+  }
   /**
  * Add a hybridd node as host.
  * @param {Object} data
@@ -920,6 +939,8 @@ var Interface = function (data) {
  * @param {Function} errorCallback - Called when an error occurs.
 */
   this.hash = function(data, dataCallback, errorCallback) {
+    //TODO only add salt if salt
+    //TODO add sha option
     dataCallback(DJB2.hash(JSON.stringify(data.data)+JSON.stringify(data.salt)));
   }
 

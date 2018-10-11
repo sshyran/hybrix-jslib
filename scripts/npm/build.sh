@@ -3,6 +3,7 @@ OLDPATH=$PATH
 WHEREAMI=`pwd`
 NODEINST=`which node`
 
+# $HYBRIDD/interface/scripts/npm  => $HYBRIDD
 SCRIPTDIR="`dirname \"$0\"`"
 HYBRIDD="`cd \"$SCRIPTDIR/../../..\" && pwd`"
 
@@ -24,13 +25,12 @@ else
     exit 1;
 fi
 
-export PATH="$NODEJS/$SYSTEM/bin:$PATH"
 
 
 # NODE
-if [ ! -e "$INTERFACE/node" ];then
+if [ ! -e "$INTERFACE/node_binaries" ];then
 
-    echo " [!] interface/node not found."
+    echo " [!] interface/node_binaries not found."
 
     if [ ! -e "$NODEJS" ];then
         cd "$HYBRIDD"
@@ -38,8 +38,10 @@ if [ ! -e "$INTERFACE/node" ];then
         git clone https://github.com/internetofcoins/nodejs-v8-lts.git
     fi
     echo " [i] Link NODEJS files"
-    ln -sf "$NODEJS/$SYSTEM" "$INTERFACE/node"
+    ln -sf "$NODEJS/$SYSTEM" "$INTERFACE/node_binaries"
 fi
+export PATH="$INTERFACE/node_binaries/bin:$PATH"
+
 
 # COMMON
 if [ ! -e "$INTERFACE/common" ];then
@@ -82,4 +84,10 @@ rm "$INTERFACE/dist/hybridd.interface.nacl.js.tmp"
 rm "$INTERFACE/dist/hybridd.interface.web.js.tmp"
 rm "$INTERFACE/dist/hybridd.interface.web.js.min.tmp"
 
-PATH=$OLDPATH
+echo "[.] Copy interface distributables to node."
+mkdir -p "$NODE/interface"
+rsync -aK "$INTERFACE/dist/" "$NODE/interface/"
+
+
+export PATH="$OLDPATH"
+cd "$WHEREAMI"
