@@ -42,6 +42,9 @@ interface:
     - mv ./dist/* ./
     - rm -rf ./dist || true
     
+    # remove .git directory and .* files
+    - rm -rf ./.* || true
+    
   artifacts:
     paths:
     - ./*
