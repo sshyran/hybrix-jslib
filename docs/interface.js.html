@@ -258,7 +258,7 @@ var Interface = function (data) {
     var baseMode = mode[0];
     var subMode = mode[1];
     var symbol = data.assetDetails.symbol;
-    var baseSymbol = symbol.split('.')[0];
+    var baseSymbol = data.assetDetails['keygen-base'];
     assets[symbol].data.seed = CommonUtils.seedGenerator(user_keys, baseSymbol);
     try {
       assets[symbol].data.mode = subMode;
@@ -584,11 +584,11 @@ var Interface = function (data) {
 
     var checkTransaction;
     try {
-      checkTransaction = clientModules[asset['mode'].split('.')[0]].transaction(transactionData, dataCallback);// TODO errorCallback
+      checkTransaction = clientModules[asset['mode'].split('.')[0]].transaction(transactionData, dataCallback); // TODO errorCallback
     } catch (e) {
       if (DEBUG) { console.error(e); }
       if (typeof errorCallback === 'function') {
-        errorCallback(e);// TODO prepend error message
+        errorCallback(e); // TODO prepend error message
       }
       return;
     }
@@ -653,7 +653,9 @@ var Interface = function (data) {
       steps[symbol] = {data:
                        [
                          {query:'/asset/'+symbol+'/balance/'+asset.data.address},'call',
-                         balance => {asset['balance']=balance; return balance;}
+                         function(symbol){
+                           return balance => {this.assets[symbol]['balance']=balance; return balance;}
+                         }.bind({assets})(symbol)
                        ], step:'sequential'};
     }
     this.parallel(steps, (data)=>{this.asset(undefined,dataCallback,errorCallback,progressCallback)}, errorCallback,progressCallback);
