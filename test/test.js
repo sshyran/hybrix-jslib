@@ -24,7 +24,6 @@ function testAsset (symbol) {
     (result) => {
       return {
         sample: {data: result.sample, step: 'id'},
-        status: {data: result.status, step: 'id'},
         details: {data: result.details, step: 'id'},
         address: {data: result.address, step: 'id'},
 
@@ -44,7 +43,6 @@ function testAsset (symbol) {
     (result) => {
       return {
         sample: {data: result.sample, step: 'id'},
-        status: {data: result.status, step: 'id'},
         details: {data: result.details, step: 'id'},
         sampleValid: {data: result.sampleValid + ' ' + result.sample.address, step: 'id'},
         sampleBalance: {data: result.sampleBalance, step: 'id'},
@@ -67,7 +65,6 @@ function testAsset (symbol) {
   };
 }
 
-var validStatus = status => typeof status === 'object' && status !== null;
 var validDetails = details => typeof details === 'object' && details !== null;
 var validValid = valid => typeof valid === 'string' && valid.startsWith('valid');
 var validBalance = (balance, factor) => typeof balance !== 'undefined' && balance !== null && !isNaN(balance) && balance.toString().indexOf('.') !== -1 && balance.toString().split('.')[1].length === Number(factor);
@@ -99,14 +96,13 @@ var renderTableCLI = (data) => {
 
   var r = '\n';
   r += ' #     SAMPLE                                       GENERATED                       ' + '\n';
-  r += '      ┌────┬──────┬─────┬────┬──────┬──────┬────┬──┬────┬──────┬──────┬────┬────┐' + '\n';
-  r += '      │Stat│Detail│Sampl│Vald│Balnce│Unspnt│Hist│TX│Vald│Balnce│Unspnt│Hist│Sign│' + '\n';
+  r += '      ┌──────┬─────┬────┬──────┬──────┬────┬──┬────┬──────┬──────┬────┬────┐' + '\n';
+  r += '      │Detail│Sampl│Vald│Balnce│Unspnt│Hist│TX│Vald│Balnce│Unspnt│Hist│Sign│' + '\n';
 
   for (var symbol in data) {
-    r += '      ├────┼──────┼─────┼────┼──────┼──────┼────┼──┼────┼──────┼──────┼────┼────┤' + '\n';
+    r += '      ├──────┼─────┼────┼──────┼──────┼────┼──┼────┼──────┼──────┼────┼────┤' + '\n';
     r += symbol.substr(0, 5) + '     '.substr(0, 5 - symbol.length) + ' │';
     if (typeof data[symbol] !== 'undefined') {
-      r += renderCellCLI(validStatus(data[symbol].status), data[symbol].status, counter) + '   │';
       r += renderCellCLI(validDetails(data[symbol].details), data[symbol].details, counter) + '     │';
       r += renderCellCLI(validSample(data[symbol].sample), data[symbol].sample, counter) + '    │';
       r += renderCellCLI(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter) + '   │';
@@ -121,10 +117,10 @@ var renderTableCLI = (data) => {
       r += renderCellCLI(validSign(data[symbol].seedSign), data[symbol].seedSign, counter) + '   │';
       r += '\n';
     } else {
-      r += 'X   │X     │X    │X   │X     │X     │X   │X │X   │X     │X     │X   │X   │ !' + '\n';
+      r += 'X     │X    │X   │X     │X     │X   │X │X   │X     │X     │X   │X   │ !' + '\n';
     }
   }
-  r += '      └────┴──────┴─────┴────┴──────┴──────┴────┴──┴────┴──────┴──────┴────┴────┘' + '\n';
+  r += '      └──────┴─────┴────┴──────┴──────┴────┴──┴────┴──────┴──────┴────┴────┘' + '\n';
   r += '\n';
   r += '      SUCCESS RATE: ' + (counter.valid / counter.total * 100) + '%' + '\n';
   // console.log(data);
@@ -152,12 +148,11 @@ var renderTableWeb = (data) => {
   var counter = {valid: 0, total: 0};
 
   var r = '<table><tr><td>Symbol</td><td colspan="2"></td><td colspan="6">Sample</td><td colspan="5">Generated</td></tr>';
-  r += '<tr><td></td><td>Status</td><td>Details</td><td>Sample</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Transaction</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Sign</td></tr>';
+  r += '<tr><td></td><td>Details</td><td>Sample</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Transaction</td><td>Valid</td><td>Balance</td><td>Unspent</td><td>History</td><td>Sign</td></tr>';
   for (var symbol in data) {
     r += '<tr>';
     r += '<td>' + symbol + '</td>';
     if (typeof data[symbol] !== 'undefined') {
-      r += renderCellWeb(validStatus(data[symbol].status), data[symbol].status, counter);
       r += renderCellWeb(validDetails(data[symbol].details), data[symbol].details, counter);
       r += renderCellWeb(validSample(data[symbol].sample), data[symbol].sample, counter);
       r += renderCellWeb(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter);
