@@ -16,7 +16,6 @@ function testAsset (symbol) {
     {
       sample: {data: {query: '/asset/' + symbol + '/sample'}, step: 'call'},
       details: {data: {query: '/asset/' + symbol + '/details'}, step: 'call'},
-      status: {data: {query: '/asset/' + symbol + '/status'}, step: 'call'},
       address: {data: {symbol: symbol}, step: 'getAddress'},
       publicKey: {data: {symbol: symbol}, step: 'getPublicKey'}
     },
