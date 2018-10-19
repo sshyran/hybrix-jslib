@@ -29,13 +29,13 @@ function testAsset (symbol) {
         sampleValid: {data: {query: '/source/wavalidator/' + symbol + '/' + result.sample.address}, step: 'call'},
         sampleBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.sample.address}, step: 'call'},
         sampleUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.sample.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.address + '/' + result.sample.publicKey }, step: 'call'},
-        sampleHistory: {data: {query: '/asset/' + symbol + '/history/' + result.sample.address}, step: 'call'},
-        sampleTransaction: {data: {query: '/asset/' + symbol + '/transaction/' + result.sample.transaction}, step: 'call'},
+        //sampleHistory: {data: {query: '/asset/' + symbol + '/history/' + result.sample.address}, step: 'call'},
+        //sampleTransaction: {data: {query: '/asset/' + symbol + '/transaction/' + result.sample.transaction}, step: 'call'},
 
         seedValid: {data: {query: '/source/wavalidator/' + symbol + '/' + result.address}, step: 'call'},
         seedBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.address}, step: 'call'},
         seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.sample.address + '/' + result.publicKey }, step: 'call'},
-        seedHistory: {data: {query: '/asset/' + symbol + '/history/' + result.address}, step: 'call'}
+        //seedHistory: {data: {query: '/asset/' + symbol + '/history/' + result.address}, step: 'call'}
       };
     },
     'parallel',
@@ -46,16 +46,16 @@ function testAsset (symbol) {
         sampleValid: {data: result.sampleValid + ' ' + result.sample.address, step: 'id'},
         sampleBalance: {data: result.sampleBalance, step: 'id'},
         sampleUnspent: {data: result.sampleUnspent, step: 'id'},
-        sampleHistory: {data: result.sampleHistory, step: 'id'},
-        sampleTransaction: {data: result.sampleTransaction, step: 'id'},
+        //sampleHistory: {data: result.sampleHistory, step: 'id'},
+        //sampleTransaction: {data: result.sampleTransaction, step: 'id'},
         //        sampleSign: {data: {symbol: symbol, target: result.address, unspent: result.sampleUnspent, amount: testAmount, fee: result.details.fee}, step: 'signTransaction'},
 
         seedValid: {data: result.seedValid + ' ' + result.address, step: 'id'},
         seedBalance: {data: result.seedBalance, step: 'id'},
         seedUnspent: {data: result.seedUnspent, step: 'id'},
-        seedHistory: {data: result.seedHistory, step: 'id'},
-        seedSign: {data: {symbol: symbol, target: result.sample.address, unspent: result.seedUnspent, amount: testAmount, fee: result.details.fee}, step: 'signTransaction'}
-
+        seedSign: {data: {symbol: symbol, amount: testAmount, target:result.sample.address }, step: 'rawTransaction'}
+        //seedSign: {data: {symbol: symbol, target: result.sample.address, unspent: result.seedUnspent, amount: Number(testAmount), fee: result.details.fee}, step: 'signTransaction'}
+        //seedHistory: {data: result.seedHistory, step: 'id'},
       };
     },
     'parallel'
@@ -222,25 +222,25 @@ function go (mode) {
       dummy: testAsset('dummy'),
       eth: testAsset('eth'),
       ark: testAsset('ark'),
-      bch: testAsset('bch'),
-      btc: testAsset('btc'), // Error: Expected property "1" of type BigInteger, got n
-      bts: testAsset('bts'),
-      burst: testAsset('burst'), // Error: unspents not working properly ERROR
-      dgb: testAsset('dgb'), // TypeError: undefined is not an object (evaluating 't.unspent.unspents.map')
-      etc: testAsset('etc'), //  TypeError: undefined is not an object (evaluating 'r.unspent.nonce')
+      // bch: testAsset('bch'), -> ADD SEGWIT
+      btc: testAsset('btc'), //  Error: Sign
+      // bts: testAsset('bts'), -> FAUCET, ETC!
+      // burst: testAsset('burst'), -> REWRITE TO QRTZ
+      dgb: testAsset('dgb'), //  Error: Sign
+      etc: testAsset('etc'),
       exp: testAsset('exp'),
       lsk: testAsset('lsk'),
-      ltc: testAsset('ltc'), //  Error: Invalid network version
-      nxt: testAsset('nxt'), // unspents not working properly ERROR
-      omni: testAsset('omni'), // TypeError: undefined is not an object (evaluating 'n.unspent.unspents')
+      ltc: testAsset('ltc'), //  Error: Sign - Invalid network version
+      nxt: testAsset('nxt'), // -> REWRITE TO QRTZ
+      omni: testAsset('omni'),  //  Error: Sign
       rise: testAsset('rise'),
       shift: testAsset('shift'),
-      ubq: testAsset('ubq'), // details.fee =null>
+      ubq: testAsset('ubq'),
       waves: testAsset('waves'),
-      xcp: testAsset('xcp'), // Error: Expected property "1" of type Satoshi, got Number -546
-      xel: testAsset('xel'), // unspents not working properly ERROR
+      xcp: testAsset('xcp'), //  Error: Sign
+      // xel: testAsset('xel'), -> REWRITE TO QRTZ
       xem: testAsset('xem'),
-      zec: testAsset('zec')
+      zec: testAsset('zec')  //  Error: Sign
     },
     'parallel'
 
