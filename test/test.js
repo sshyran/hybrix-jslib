@@ -211,36 +211,34 @@ function go (mode) {
     'init',
     {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'session',
     {host: 'http://localhost:1111/'}, 'addHost',
-    //    {}, 'createAccount',
-    //    data => { console.log(data); },
-    //    {symbol: 'dummy', amount: 100, channel: 'y'}, 'transaction',
 
-    // TODO retrieve all asset sddd
+    // TODO retrieve all asset
     // TODO filter tokens
 
     {
+      dash: testAsset('dash'), //  Error: Sign (maybe need coins)
       dummy: testAsset('dummy'),
       eth: testAsset('eth'),
       ark: testAsset('ark'),
       // bch: testAsset('bch'), -> ADD SEGWIT
-      btc: testAsset('btc'), //  Error: Sign
+      btc: testAsset('btc'), //  Error: Sign (maybe need coins)
       // bts: testAsset('bts'), -> FAUCET, ETC!
       // burst: testAsset('burst'), -> REWRITE TO QRTZ
-      dgb: testAsset('dgb'), //  Error: Sign
+      dgb: testAsset('dgb'), //  Error: Sign (maybe need coins)
       etc: testAsset('etc'),
       exp: testAsset('exp'),
       lsk: testAsset('lsk'),
       ltc: testAsset('ltc'), //  Error: Sign - Invalid network version
       nxt: testAsset('nxt'), // -> REWRITE TO QRTZ
-      omni: testAsset('omni'),  //  Error: Sign
+      omni: testAsset('omni'),  //  Error: Sign (maybe need coins)
       rise: testAsset('rise'),
       shift: testAsset('shift'),
       ubq: testAsset('ubq'),
       waves: testAsset('waves'),
-      xcp: testAsset('xcp'), //  Error: Sign
+      xcp: testAsset('xcp'), //  Error: Sign (maybe need coins)
       // xel: testAsset('xel'), -> REWRITE TO QRTZ
       xem: testAsset('xem'),
-      zec: testAsset('zec')  //  Error: Sign
+      zec: testAsset('zec')  //  Error: Sign (maybe need coins)
     },
     'parallel'
 
