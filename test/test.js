@@ -216,14 +216,10 @@ function go (mode) {
     // TODO filter tokens
 
     {
-      dash: testAsset('dash'), //  Error: TypeError: Address buffers must be exactly 22 bytes.
       dummy: testAsset('dummy'),
       eth: testAsset('eth'),
       ark: testAsset('ark'),
-      // bch: testAsset('bch'), -> ADD SEGWIT
       btc: testAsset('btc'),
-      // bts: testAsset('bts'), -> FAUCET, ETC!
-      // burst: testAsset('burst'), -> REWRITE TO QRTZ
       dgb: testAsset('dgb'), //  Error: ReferenceError: toSatoshis is not defined
       etc: testAsset('etc'),
       exp: testAsset('exp'),
@@ -236,9 +232,13 @@ function go (mode) {
       ubq: testAsset('ubq'),
       waves: testAsset('waves'),
       xcp: testAsset('xcp'),
-      // xel: testAsset('xel'), -> REWRITE TO QRTZ
       xem: testAsset('xem'),
       zec: testAsset('zec')  //  (also happens with coins!) Error: bitcore.ErrorAbstractMethodInvoked: Abstract Method Invocation: Input#clearSignatures
+      //bts: testAsset('bts'), -> FAUCET, ETC!
+      //bch: testAsset('bch'), -> ADD SEGWIT
+      //dash: testAsset('dash'), //  Error: TypeError: Address buffers must be exactly 22 bytes.
+      //burst: testAsset('burst'), //-> REWRITE TO QRTZ
+      //xel: testAsset('xel'), //-> REWRITE TO QRTZ
     },
     'parallel'
 
