@@ -10,7 +10,7 @@ function makeProgressBar(title) {
 }
 
 function testAsset (symbol) {
-  var testAmount = 0.0001;
+  var testAmount = 0.00001;
   return { data: [
     {symbol: symbol}, 'addAsset',
     {
@@ -216,29 +216,29 @@ function go (mode) {
     // TODO filter tokens
 
     {
-      dash: testAsset('dash'), //  Error: Sign (maybe need coins)
+      dash: testAsset('dash'), //  Error: TypeError: Address buffers must be exactly 22 bytes.
       dummy: testAsset('dummy'),
       eth: testAsset('eth'),
       ark: testAsset('ark'),
       // bch: testAsset('bch'), -> ADD SEGWIT
-      btc: testAsset('btc'), //  Error: Sign (maybe need coins)
+      btc: testAsset('btc'),
       // bts: testAsset('bts'), -> FAUCET, ETC!
       // burst: testAsset('burst'), -> REWRITE TO QRTZ
-      dgb: testAsset('dgb'), //  Error: Sign (maybe need coins)
+      dgb: testAsset('dgb'), //  Error: ReferenceError: toSatoshis is not defined
       etc: testAsset('etc'),
       exp: testAsset('exp'),
       lsk: testAsset('lsk'),
       ltc: testAsset('ltc'), //  Error: Sign - Invalid network version
-      nxt: testAsset('nxt'), // -> REWRITE TO QRTZ
-      omni: testAsset('omni'),  //  Error: Sign (maybe need coins)
+      nxt: testAsset('nxt'),
+      omni: testAsset('omni'),
       rise: testAsset('rise'),
       shift: testAsset('shift'),
       ubq: testAsset('ubq'),
       waves: testAsset('waves'),
-      xcp: testAsset('xcp'), //  Error: Sign (maybe need coins)
+      xcp: testAsset('xcp'),
       // xel: testAsset('xel'), -> REWRITE TO QRTZ
       xem: testAsset('xem'),
-      zec: testAsset('zec')  //  Error: Sign (maybe need coins)
+      zec: testAsset('zec')  //  (also happens with coins!) Error: bitcore.ErrorAbstractMethodInvoked: Abstract Method Invocation: Input#clearSignatures
     },
     'parallel'
 
