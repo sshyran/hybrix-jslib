@@ -671,16 +671,20 @@ var Interface = function (data) {
  * @param {Function} progressCallback - Called whenever there is a progress updated. Passes a number between 0 and 1.
  */
   this.rawTransaction = function (data, dataCallback, errorCallback, progressCallback) {
+    function calcUnspentAmount(data) {
+      return new Decimal(data.amount).plus( (data.hasOwnProperty('fee')?data.fee:assets[data.symbol].fee) ).toString();
+    }
     this.sequential({steps: [
       {symbol: data.symbol, channel: data.channel, host: data.host}, 'addAsset',
       {
         address: {data: {symbol: data.symbol}, step: 'getAddress'},
         publicKey: {data: {symbol: data.symbol}, step: 'getPublicKey'}
       }, 'parallel',
-      result => { return {query: '/asset/' + data.symbol + '/unspent/' + result.address + '/' + new Decimal(data.amount).plus( (data.hasOwnProperty('fee')?data.fee:assets[data.symbol].fee) ).toString() + '/' + data.target + (result.publicKey?'/'+result.publicKey:''), channel: data.channel, host: data.host}; }, 'rout',
+      result => { return {query: '/asset/' + data.symbol + '/unspent/' + result.address + '/' + calcUnspentAmount(data) + '/' + data.target + (result.publicKey?'/'+result.publicKey:''), channel: data.channel, host: data.host}; }, 'rout',
       unspent => { return {symbol: data.symbol, target: data.target, amount: data.amount, fee: data.fee, unspent: unspent}; }, 'signTransaction'
     ]}, dataCallback, errorCallback, progressCallback);
   };
+
   /**
  * Create and execute a transaction
  * @param {Object} data
@@ -864,7 +868,8 @@ var Interface = function (data) {
       if (DEBUG) { console.error('Expected \'value\' property.'); }
       if (typeof errorCallback === 'function') { errorCallback('Expected \'value\' property.'); }
     }else if(data.encrypted===false){
-      this.rout({host:data.host,query:'/e/storage/set/'+encodeURIComponent(data.key)+'/'+encodeURIComponent(JSON.stringify(data.value)),channel:data.channel},dataCallback , errorCallback,progressCallback);
+      // stringify, escape quotes, and encode
+      this.rout({host:data.host,query:'/e/storage/set/'+encodeURIComponent(data.key)+'/'+encodeURIComponent(JSON.stringify(data.value).replace(/"/g, '\\\"')),channel:data.channel},dataCallback , errorCallback,progressCallback);
     }else if(data.legacy===true){
       this.sequential([
         {data:data.value}, 'encrypt',
@@ -876,6 +881,18 @@ var Interface = function (data) {
         result => {return {host:data.host,query:'/e/storage/set/'+encodeURIComponent(data.key)+'/'+result,channel:data.channel,meta:data.meta};}, 'rout'
       ],dataCallback, errorCallback,progressCallback);
     }
+  }
+
+
+   /**
+ * Perform Proof of Work
+ * @param {Object} data
+ * @param {Object} data.hash - The hash that needs to be worked.
+ * @param {Function} dataCallback - Called when the method is succesful.
+ * @param {Function} errorCallback - Called when an error occurs.
+*/
+  this.work = function(data, dataCallback, errorCallback) {
+    proof.solve(data.hash,dataCallback, errorCallback);
   }
 
   /**
@@ -925,7 +942,7 @@ var Interface = function (data) {
   }
 
     /**
-   * Stringify and encrypt data with user keys.
+   * Check if data is associated to key
    * @param {Object} data
    * @param {String} data.key - TODO
    * @param {Boolean} [data.legacy] - TODO
