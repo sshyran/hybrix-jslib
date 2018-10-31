@@ -1,6 +1,14 @@
 var UrlBase64 = require('./crypto/urlbase64');
 var sjcl = require('./crypto/sjcl');
 
+function clean (dirty) {
+  if (typeof dirty !== 'undefined') {
+    var dirty_str = dirty.toString();
+    var clean_str = dirty_str.replace(/[^A-Za-z0-9]/g, '');
+  } else { clean_str = ''; }
+  return clean_str;
+}
+
 // returns array of double public/secret keypairs
 // one for encrypting (boxPk/boxSk) and one for signing (signPk/signSk)
 function generateKeys (secret, salt, position) {
@@ -32,14 +40,6 @@ function generateKeys (secret, salt, position) {
   var new_key = nacl.crypto_box_keypair_from_seed(final_key_seed);
   // animation possible here
   return new_key;
-}
-
-function clean (dirty) {
-  if (typeof dirty !== 'undefined') {
-    var dirty_str = dirty.toString();
-    var clean_str = dirty_str.replace(/[^A-Za-z0-9]/g, '');
-  } else { clean_str = ''; }
-  return clean_str;
 }
 
 function seedGenerator (user_keys, asset) {
