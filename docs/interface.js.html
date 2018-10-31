@@ -382,12 +382,12 @@ var Interface = function (data) {
   this.addAsset = function (data, dataCallback, errorCallback) {
     // TODO symbol as array of strings to load multiple?
     if (!assets.hasOwnProperty(data.symbol)) { // if assets has not been iniated, retrieve and initialize
-      this.call({host: data.host, query: '/asset/' + data.symbol + '/details', channel: data.channel}, (asset) => {
+      this.rout({host: data.host, query: '/asset/' + data.symbol + '/details', channel: data.channel}, (asset) => {
         var mode = asset.mode.split('.')[0];
         if (clientModules.hasOwnProperty(mode)) { // Client Module was already retrieved
           this.initAsset({assetDetails: asset}, dataCallback, errorCallback);
         } else {
-          this.call({host: data.host, query: '/source/deterministic/code/' + mode, channel: data.channel}, (blob) => {
+          this.rout({host: data.host, query: '/source/deterministic/code/' + mode, channel: data.channel}, (blob) => {
             this.initAsset({assetDetails: asset, clientModuleCodeBlob: blob}, dataCallback, errorCallback);
           }, errorCallback);
         }
@@ -396,7 +396,6 @@ var Interface = function (data) {
       dataCallback(data.symbol);
     }
   };
-
   /**
    * Remove an asset (crypto currency or token) from the session.
    * @param {Object} data
@@ -413,7 +412,6 @@ var Interface = function (data) {
       dataCallback(data.symbol);
     }
   }
-
   /**
  * Perform proof or work.
  * @param {Object} data - Contains hash to solve and difficulty level to use.
@@ -425,7 +423,6 @@ var Interface = function (data) {
   this.proofOfWork = function (data, dataCallback, errorCallback) {
     proof(data.hash, dataCallback, errorCallback, data.difficulty);
   };
-
   /**
  * Execute a function in a client module.
  * @param {Object} data
@@ -485,7 +482,7 @@ var Interface = function (data) {
     if (clientModules.hasOwnProperty(id)) {
       execute();
     } else { // if blob not yet available, get it.
-      this.call({host: data.host, query: '/source/deterministic/code/' + id, channel: data.channel}, (blob) => {
+      this.rout({host: data.host, query: '/source/deterministic/code/' + id, channel: data.channel}, (blob) => {
         try {
           var code = LZString.decompressFromEncodedURIComponent(blob);
           clientModules[id] = CommonUtils.activate(code);
@@ -501,7 +498,6 @@ var Interface = function (data) {
       }, errorCallback);
     }
   };
-
   /**
  * Get the address associated to a specific asset for current session.
  * @param {Object} data
@@ -519,7 +515,6 @@ var Interface = function (data) {
       }
     }
   };
-
   /**
  * Get the keys associated to a specific asset for current session. Important: handle your private keys confidentially.
  * @param {Object} data
@@ -537,7 +532,6 @@ var Interface = function (data) {
       }
     }
   };
-
   /**
  * Get the publick key associated to a specific asset for current session.
  * @param {Object} data
@@ -556,7 +550,6 @@ var Interface = function (data) {
       errorCallback('Asset ' + data.symbol + ' not initialized.');
     }
   };
-
   /**
  * Create a signed transaction
  * @param {Object} data
@@ -569,6 +562,7 @@ var Interface = function (data) {
  * @param {Function} errorCallback - Called when an error occurs.
  */
   this.signTransaction = function (data, dataCallback, errorCallback) {
+    // Error checking:
     // TODO check symbol
     // TODO check amount
     // TODO check target
@@ -591,12 +585,28 @@ var Interface = function (data) {
     var toInt = function (input, factor) {
       var f = Number(factor);
       var x = new Decimal(String(input));
-      return x.times('1' + (f > 1 ? '0'.repeat(f + 1) : '')).toString();
+      return x.times('1' + (f > 1 ? '0'.repeat(f) : '')).toString();
     };
+
+    // helper function to make unspents contain atomic units
+    var unspentAtomic = function (input,factor) {
+      var unspentsTable = [];
+      var changeAtoms;
+      if(Object.prototype.toString.call(input.unspents) === '[object Array]') {
+        for(var i=0;i&lt;input.unspents.length;i++) {
+          unspentsTable[i] = input.unspents[i];
+          unspentsTable[i].amount = toInt(unspentsTable[i].amount,factor);
+        }
+        changeAtoms = toInt(input.change,factor);
+      } else {
+        changeAtoms = toInt(0,factor);
+      }
+      return {"unspents":unspentsTable,"change":changeAtoms};
+    }
 
     var fee;
     try {
-      fee = toInt(Number(data.fee || asset.fee), asset.factor);
+      fee = toInt((data.fee || asset.fee), asset.factor);
     } catch (e) {
       if (DEBUG) { console.error(e); }
       if (typeof errorCallback === 'function') {
@@ -606,14 +616,19 @@ var Interface = function (data) {
     }
     var amount;
     try {
-      amount = toInt(Number(data.amount), asset.factor);
+      amount = toInt(data.amount, asset.factor);
     } catch (e) {
       if (DEBUG) { console.error(e); }
       if (typeof errorCallback === 'function') {
-        errorCallback(e);// TODO error message
+        errorCallback(e); // TODO error message
       }
       return;
     }
+    var unspentOutput = data.unspent
+    if(data.unspent &amp;&amp; data.unspent.unspents &amp;&amp; data.unspent.change) {
+      unspentOutput = unspentAtomic(data.unspent,asset.factor);
+    }
+    // DEBUG: console.log(JSON.stringify(unspentOutput) + ' ' + asset.factor);
     var transactionData = {
       mode: asset.data.keys.mode,
       symbol: asset.symbol,
@@ -625,9 +640,9 @@ var Interface = function (data) {
       contract: asset.contract,
       keys: asset.data.keys,
       seed: asset.data.seed,
-      unspent: data.unspent
+      unspent: unspentOutput
     };
-
+    // DEBUG: console.log(JSON.stringify(transactionData));
     var checkTransaction;
     try {
       checkTransaction = clientModules[asset['mode'].split('.')[0]].transaction(transactionData, dataCallback); // TODO errorCallback
@@ -642,29 +657,30 @@ var Interface = function (data) {
       dataCallback(checkTransaction);
     }
   };
-
   /**
  * Creates a raw transaction
  * @param {Object} data
  * @param {string} data.symbol - The symbol of the asset
  * @param {string} data.target - The target address
  * @param {Number} data.amount - The amount that should be transferred
- * @param {Number} data.fee - The fee.
+ * @param {Number} data.fee    - The fee.
  * @param {string} [data.host] - The host that should be used.
- * @param {string} [data.channel] - Indicate the channel 'y' for encryption, 'z' for both encryption and compression
- * @param {Function} dataCallback - Called when the method is succesful. Passes result data.
+ * @param {string} [data.channel]  - Indicate the channel 'y' for encryption, 'z' for both encryption and compression
+ * @param {Function} dataCallback  - Called when the method is succesful. Passes result data.
  * @param {Function} errorCallback - Called when an error occurs. Passes error.
  * @param {Function} progressCallback - Called whenever there is a progress updated. Passes a number between 0 and 1.
  */
   this.rawTransaction = function (data, dataCallback, errorCallback, progressCallback) {
     this.sequential({steps: [
       {symbol: data.symbol, channel: data.channel, host: data.host}, 'addAsset',
-      {symbol: data.symbol}, 'getAddress',
-      address => {return {query: '/asset/' + data.symbol + '/unspent/' + address + '/' + data.amount + '/' + data.target + '/public_key', channel: data.channel, host: data.host}; }, 'call',
+      {
+        address: {data: {symbol: data.symbol}, step: 'getAddress'},
+        publicKey: {data: {symbol: data.symbol}, step: 'getPublicKey'}
+      }, 'parallel',
+      result => { return {query: '/asset/' + data.symbol + '/unspent/' + result.address + '/' + new Decimal(data.amount).plus( (data.hasOwnProperty('fee')?data.fee:assets[data.symbol].fee) ).toString() + '/' + data.target + (result.publicKey?'/'+result.publicKey:''), channel: data.channel, host: data.host}; }, 'rout',
       unspent => { return {symbol: data.symbol, target: data.target, amount: data.amount, fee: data.fee, unspent: unspent}; }, 'signTransaction'
     ]}, dataCallback, errorCallback, progressCallback);
   };
-
   /**
  * Create and execute a transaction
  * @param {Object} data
@@ -681,7 +697,7 @@ var Interface = function (data) {
   this.transaction = function (data, dataCallback, errorCallback, progressCallback) {
     this.sequential({steps: [
       data, 'rawTransaction',
-      tx => { return { query: '/asset/' + data.symbol + '/push/' + tx, channel: data.channel, host: data.host }; }, 'call'
+      tx => { return { query: '/asset/' + data.symbol + '/push/' + tx, channel: data.channel, host: data.host }; }, 'rout'
     ]}, dataCallback, errorCallback, progressCallback);
   };
   /**
@@ -698,7 +714,7 @@ var Interface = function (data) {
       var asset = assets[symbol];
       steps[symbol] = {data:
                        [
-                         {query:'/asset/'+symbol+'/balance/'+asset.data.address},'call',
+                         {query:'/asset/'+symbol+'/balance/'+asset.data.address},'rout',
                          function(symbol){
                            return balance => {this.assets[symbol]['balance']=balance; return balance;}
                          }.bind({assets})(symbol)
@@ -760,7 +776,7 @@ var Interface = function (data) {
   };
 
   /**
- * Make a call to hybridd node
+ * Make a routing call to hybridd node
  * @param {Object} data
  * @param {string} data.query - The query path. For reference: [Hybridd API]{@link https://wallet1.internetofcoins.org/api/help}
  * @param {string} [data.channel] - Indicate the channel 'y' for encryption, 'z' for both encryption and compression
@@ -769,7 +785,7 @@ var Interface = function (data) {
  * @param {Function} dataCallback - Called when the method is succesful.
  * @param {Function} errorCallback - Called when an error occurs.
  */
-  this.call = function (data, dataCallback, errorCallback) {
+  this.rout = function (data, dataCallback, errorCallback) {
     var encrypted =  data.channel === 'y' || data.channel === 'z';
     if( encrypted &amp;&amp; typeof user_keys === 'undefined' ){
       if (DEBUG) { console.error('No session available.'); }
@@ -848,16 +864,16 @@ var Interface = function (data) {
       if (DEBUG) { console.error('Expected \'value\' property.'); }
       if (typeof errorCallback === 'function') { errorCallback('Expected \'value\' property.'); }
     }else if(data.encrypted===false){
-      this.call({host:data.host,query:'/e/storage/set/'+encodeURIComponent(data.key)+'/'+encodeURIComponent(JSON.stringify(data.value)),channel:data.channel},dataCallback , errorCallback,progressCallback);
+      this.rout({host:data.host,query:'/e/storage/set/'+encodeURIComponent(data.key)+'/'+encodeURIComponent(JSON.stringify(data.value)),channel:data.channel},dataCallback , errorCallback,progressCallback);
     }else if(data.legacy===true){
       this.sequential([
         {data:data.value}, 'encrypt',
-        result => {return {host:data.host,query:'/e/storage/set/'+encodeURIComponent(legacy(data.key))+'/'+result,channel:data.channel,meta:data.meta};}, 'call'
+        result => {return {host:data.host,query:'/e/storage/set/'+encodeURIComponent(legacy(data.key))+'/'+result,channel:data.channel,meta:data.meta};}, 'rout'
       ],dataCallback, errorCallback,progressCallback);
     }else{
       this.sequential([
         {data:data.value}, 'encrypt',
-        result => {return {host:data.host,query:'/e/storage/set/'+encodeURIComponent(data.key)+'/'+result,channel:data.channel,meta:data.meta};}, 'call'
+        result => {return {host:data.host,query:'/e/storage/set/'+encodeURIComponent(data.key)+'/'+result,channel:data.channel,meta:data.meta};}, 'rout'
       ],dataCallback, errorCallback,progressCallback);
     }
   }
@@ -892,17 +908,17 @@ var Interface = function (data) {
       if (DEBUG) { console.error('Expected \'key\' property of string type.'); }
       if (typeof errorCallback === 'function') { errorCallback('Expected \'key\' property of string type.'); }
     }else if(data.encrypted===false){
-      this.call({host:data.host,query:'/e/storage/get/'+encodeURIComponent(data.key),channel:data.channel,meta:data.meta}, (data)=>{
+      this.rout({host:data.host,query:'/e/storage/get/'+encodeURIComponent(data.key),channel:data.channel,meta:data.meta}, (data)=>{
         dataCallback(decodeURIComponent(data));
       },errorCallback,progressCallback);
     }else if(data.legacy===true){
       this.sequential([
-        {host:data.host,query:'/e/storage/get/'+encodeURIComponent(legacy(data.key)),channel:data.channel}, 'call',
+        {host:data.host,query:'/e/storage/get/'+encodeURIComponent(legacy(data.key)),channel:data.channel}, 'rout',
         result => {return {data: result};}, 'decrypt'
       ],dataCallback, errorCallback,progressCallback);
     }else{
       this.sequential([
-        {host:data.host,query:'/e/storage/get/'+encodeURIComponent(data.key),channel:data.channel}, 'call',
+        {host:data.host,query:'/e/storage/get/'+encodeURIComponent(data.key),channel:data.channel}, 'rout',
         result => {return {data: result};}, 'decrypt'
       ],dataCallback, errorCallback,progressCallback);
     }
@@ -937,11 +953,11 @@ var Interface = function (data) {
       if (DEBUG) { console.error('Expected \'key\' property of string type.'); }
       if (typeof errorCallback === 'function') { errorCallback('Expected \'key\' property of string type.'); }
     }else if(data.legacy===true){
-      this.call({host:data.host,query:'/e/storage/seek/'+encodeURIComponent(legacy(data.key)),channel:data.channel,meta:data.meta}, (data)=>{
+      this.rout({host:data.host,query:'/e/storage/seek/'+encodeURIComponent(legacy(data.key)),channel:data.channel,meta:data.meta}, (data)=>{
         dataCallback(decodeURIComponent(data));
       },errorCallback,progressCallback);
     }else{
-      this.call({host:data.host,query:'/e/storage/seek/'+encodeURIComponent(data.key),channel:data.channel,meta:data.meta}, (data)=>{
+      this.rout({host:data.host,query:'/e/storage/seek/'+encodeURIComponent(data.key),channel:data.channel,meta:data.meta}, (data)=>{
         dataCallback(decodeURIComponent(data));
       },errorCallback,progressCallback);
     }
@@ -975,7 +991,7 @@ var Interface = function (data) {
       if (DEBUG) { console.error('Expected \'key\' property of string type.'); }
       if (typeof errorCallback === 'function') { errorCallback('Expected \'key\' property of string type.'); }
     }else{
-      this.call({host:data.host,query:'/e/storage/meta/'+encodeURIComponent(data.key),channel:data.channel,meta:data.meta}, errorCallback,progressCallback);
+      this.rout({host:data.host,query:'/e/storage/meta/'+encodeURIComponent(data.key),channel:data.channel,meta:data.meta}, errorCallback,progressCallback);
     }
   }
 
@@ -1158,7 +1174,7 @@ this.decrypt = function (data, dataCallback, errorCallback) {
    * @param {Function} errorCallback - Called when an error occurs.
    * @param {Function} progressCallback - Called whenever there is a progress updated. Passes a number between 0 and 1.
    */
-  this.callback = (data, dataCallback, errorCallback, progressCallback) => {
+  this.call = (data, dataCallback, errorCallback, progressCallback) => {
     data.func(data.data, dataCallback, errorCallback, progressCallback);
   };
 

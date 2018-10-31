@@ -14,8 +14,8 @@ function testAsset (symbol) {
   return { data: [
     {symbol: symbol}, 'addAsset',
     {
-      sample: {data: {query: '/asset/' + symbol + '/sample'}, step: 'call'},
-      details: {data: {query: '/asset/' + symbol + '/details'}, step: 'call'},
+      sample: {data: {query: '/asset/' + symbol + '/sample'}, step: 'rout'},
+      details: {data: {query: '/asset/' + symbol + '/details'}, step: 'rout'},
       address: {data: {symbol: symbol}, step: 'getAddress'},
       publicKey: {data: {symbol: symbol}, step: 'getPublicKey'}
     },
@@ -26,16 +26,16 @@ function testAsset (symbol) {
         details: {data: result.details, step: 'id'},
         address: {data: result.address, step: 'id'},
 
-        sampleValid: {data: {query: '/source/wavalidator/' + symbol + '/' + result.sample.address}, step: 'call'},
-        sampleBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.sample.address}, step: 'call'},
-        sampleUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.sample.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.address + '/' + result.sample.publicKey }, step: 'call'},
-        //sampleHistory: {data: {query: '/asset/' + symbol + '/history/' + result.sample.address}, step: 'call'},
-        //sampleTransaction: {data: {query: '/asset/' + symbol + '/transaction/' + result.sample.transaction}, step: 'call'},
+        sampleValid: {data: {query: '/source/wavalidator/' + symbol + '/' + result.sample.address}, step: 'rout'},
+        sampleBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.sample.address}, step: 'rout'},
+        sampleUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.sample.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.address + '/' + result.sample.publicKey }, step: 'rout'},
+        //sampleHistory: {data: {query: '/asset/' + symbol + '/history/' + result.sample.address}, step: 'rout'},
+        //sampleTransaction: {data: {query: '/asset/' + symbol + '/transaction/' + result.sample.transaction}, step: 'rout'},
 
-        seedValid: {data: {query: '/source/wavalidator/' + symbol + '/' + result.address}, step: 'call'},
-        seedBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.address}, step: 'call'},
-        seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.sample.address + '/' + result.publicKey }, step: 'call'},
-        //seedHistory: {data: {query: '/asset/' + symbol + '/history/' + result.address}, step: 'call'}
+        seedValid: {data: {query: '/source/wavalidator/' + symbol + '/' + result.address}, step: 'rout'},
+        seedBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.address}, step: 'rout'},
+        seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.sample.address + '/' + result.publicKey }, step: 'rout'},
+        //seedHistory: {data: {query: '/asset/' + symbol + '/history/' + result.address}, step: 'rout'}
       };
     },
     'parallel',

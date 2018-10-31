@@ -23,9 +23,9 @@ hybridd.sequential([
   }, 'parallel',
   (result) => {
     return { amount: {data: amount, step: 'id'},
-      token: {data: {query: '/asset/' + token + '/details'}, step: 'call'},
+      token: {data: {query: '/asset/' + token + '/details'}, step: 'rout'},
 
-      nonce: {data: {query: '/engine/idex/getNextNonce/' + result.address}, step: 'call'},
+      nonce: {data: {query: '/engine/idex/getNextNonce/' + result.address}, step: 'rout'},
       address: {data: result.address, step: 'id'},
       privateKey: {data: {symbol: 'eth'}, step: 'getKeys'}};
   }, 'parallel',
@@ -35,7 +35,7 @@ hybridd.sequential([
   (result) => {
     return {query: '/engine/idex/push/withdraw/' + JSON.stringify(result)};
   },
-  'call'
+  'rout'
 ]
   , (data) => { console.log(data); }
   , (error) => { console.error(error); }

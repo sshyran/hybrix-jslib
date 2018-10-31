@@ -14,7 +14,7 @@ hybridd.sequential([
   {host: 'http://localhost:1111/'}, 'addHost',
   {symbol: symbol}, 'addAsset',
   {
-    details: {data: {query: '/asset/' + symbol + '/details'}, step: 'call'},
+    details: {data: {query: '/asset/' + symbol + '/details'}, step: 'rout'},
     address: {data: {symbol: symbol}, step: 'getAddress'}
   }, 'parallel',
   (result) => {
@@ -23,7 +23,7 @@ hybridd.sequential([
     return {
       details: {data: result.details, step: 'id'},
       address: {data: result.address, step: 'id'},
-      unspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(amount) + Number(result.details.fee)) + '/' + result.address }, step: 'call'} //   TODO add public key
+      unspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(amount) + Number(result.details.fee)) + '/' + result.address }, step: 'rout'} //   TODO add public key
     };
   }, 'parallel',
   (result) => {
