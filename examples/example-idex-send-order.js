@@ -27,9 +27,9 @@ hybridd.sequential([
     return { amountETH: {data: amountETH, step: 'id'},
       amountToken: {data: amountToken, step: 'id'},
       isBuyOrder: {data: isOrderToBuyToken, step: 'id'},
-      token: {data: {query: '/asset/' + token + '/details'}, step: 'call'},
+      token: {data: {query: '/asset/' + token + '/details'}, step: 'rout'},
 
-      nonce: {data: {query: '/engine/idex/getNextNonce/' + result.address}, step: 'call'},
+      nonce: {data: {query: '/engine/idex/getNextNonce/' + result.address}, step: 'rout'},
       address: {data: result.address, step: 'id'},
       privateKey: {data: {symbol: 'eth'}, step: 'getKeys'}};
   }, 'parallel',
@@ -39,7 +39,7 @@ hybridd.sequential([
   (result) => {
     return {query: '/engine/idex/push/order/' + JSON.stringify(result)};
   },
-  'call'
+  'rout'
 ]
   , (data) => { console.log(data); }
   , (error) => { console.error(error); }

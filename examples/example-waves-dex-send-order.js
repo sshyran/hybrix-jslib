@@ -24,15 +24,15 @@ hybridd.sequential([
   {symbol: 'waves'}, 'addAsset',
   {symbol: 'waves'}, 'getKeys',
   (result) => {
-    return { 
+    return {
     spendAmount:   {data: sendAmount, step: 'id'},
     receiveAmount: {data: receiveAmount, step: 'id'},
-    spendAsset:    {data: {query: '/asset/' + sendAsset    + '/details'}, step: 'call'},
-    receiveAsset:  {data: {query: '/asset/' + receiveAsset + '/details'}, step: 'call'},
-    
+    spendAsset:    {data: {query: '/asset/' + sendAsset    + '/details'}, step: 'rout'},
+    receiveAsset:  {data: {query: '/asset/' + receiveAsset + '/details'}, step: 'rout'},
+
     matcherFee: {data: matcherFee, step: 'id'},
     maxLifetime: {data: maxLifetimeInSeconds, step: 'id'},
-    matcherPublicKey: {data: {query: '/engine/dex_waves/getMatcherPublicKey'}, step: 'call'},
+    matcherPublicKey: {data: {query: '/engine/dex_waves/getMatcherPublicKey'}, step: 'rout'},
     address: {data: {symbol: 'waves'}, step: 'getAddress'},
     publickey: {data: result.keyPair.publicKey, step: 'id'},
     privKey:   {data: result.keyPair.privateKey, step: 'id'}}
@@ -45,7 +45,7 @@ hybridd.sequential([
   }, 'parallel',
   (result) => {
     return {
-      response: {data: {query: '/engine/dex_waves/push/' + JSON.stringify(result.signedTransaction)}, step: 'call'},
+      response: {data: {query: '/engine/dex_waves/push/' + JSON.stringify(result.signedTransaction)}, step: 'rout'},
       parameters: {data: result.parameters, step: 'id'}
     };
   },
@@ -67,7 +67,7 @@ hybridd.sequential([
   (result) => {
     if(result.hasOwnProperty('signedTransaction')) {
       return {
-        response: {data: {query: '/engine/dex_waves/push/' + JSON.stringify(result.signedTransaction)}, step: 'call'}
+        response: {data: {query: '/engine/dex_waves/push/' + JSON.stringify(result.signedTransaction)}, step: 'rout'}
       };
     } else {
       return {
