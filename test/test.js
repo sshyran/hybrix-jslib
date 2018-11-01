@@ -220,11 +220,12 @@ function go (mode) {
       eth: testAsset('eth'),
       ark: testAsset('ark'),
       btc: testAsset('btc'),
-      dgb: testAsset('dgb'), //  Error: ReferenceError: toSatoshis is not defined
+      dash: testAsset('dash'),
+      dgb: testAsset('dgb'),
       etc: testAsset('etc'),
       exp: testAsset('exp'),
       lsk: testAsset('lsk'),
-      ltc: testAsset('ltc'), //  Error: Sign - Invalid network version
+      ltc: testAsset('ltc'),
       nxt: testAsset('nxt'),
       omni: testAsset('omni'),
       rise: testAsset('rise'),
@@ -233,10 +234,9 @@ function go (mode) {
       waves: testAsset('waves'),
       xcp: testAsset('xcp'),
       xem: testAsset('xem'),
-      zec: testAsset('zec')  //  (also happens with coins!) Error: bitcore.ErrorAbstractMethodInvoked: Abstract Method Invocation: Input#clearSignatures
+      zec: testAsset('zec')
       //bts: testAsset('bts'), -> FAUCET, ETC!
       //bch: testAsset('bch'), -> ADD SEGWIT
-      //dash: testAsset('dash'), //  Error: TypeError: Address buffers must be exactly 22 bytes.
       //burst: testAsset('burst'), //-> REWRITE TO QRTZ
       //xel: testAsset('xel'), //-> REWRITE TO QRTZ
     },
