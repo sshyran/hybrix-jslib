@@ -33,7 +33,7 @@ interface:
     - "ln -s \"$(which nodejs)\" node"
     
     # run the build-script of the interface, consider DEBUG_ENABLED-flag
-    - if [ "$DEBUG_ENABLED" == "1" ]; then ./scripts/npm/compile.sh debug; else ./scripts/npm/compile.sh fi
+    - if [ "$DEBUG_ENABLED" == "1" ]; then ./scripts/npm/compile.sh debug; else ./scripts/npm/compile.sh; fi
     
     # clean up and prepare the artifacts (instead of having a dist) 
     # remove everything except () is extglob syntax, which should be enabled first
