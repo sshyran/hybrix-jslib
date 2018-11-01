@@ -1,5 +1,4 @@
-image: node:8.11.2
-
+image: node:8.12.0
 
 #common:
 #  stage: build
@@ -11,7 +10,7 @@ interface:
   stage: build
   script:
     - init
-        # install unzip
+    # install unzip
     - apt-get update
     - apt-get install unzip
     
@@ -33,8 +32,16 @@ interface:
     # don't download git clone https://github.com/internetofcoins/nodejs-v8-lts.git, refer to docker pre installed nodejs as defined in the first line of this file
     - ln -s "$(which nodejs)" node
     
-    - ./scripts/npm/compile.sh
-    - dist
+    - ./scripts/npm/compile.sh debug
+    # clean up and prepare the artifacts (instead of having a dist) 
+    # remove everything except () is extglob syntax, which should be enabled first
+    - shopt -s extglob
+    - rm -rf !(dist) || true
+    - mv ./dist/* ./
+    - rm -rf ./dist || true
+    
+    # remove .git directory and .* files
+    - rm -rf ./.git* || true
   artifacts:
     paths:
     - ./*
@@ -52,21 +59,10 @@ interface:
 # ---------------------------------------------------------------------------
 
 .auto_devops: &auto_devops |
-
+# Auto DevOps variables and functions
+ 
   function init() {
     echo "init"
-  }
-
-  function dist() {
-    # clean up and prepare the artifacts (instead of having a dist) 
-    # remove everything except () is extglob syntax, which should be enabled first
-    shopt -s extglob
-    rm -rf !(dist) || true
-    mv ./dist/* ./
-    rm -rf ./dist || true
-    
-    # remove .git directory and .* files
-    rm -rf ./.git* || true
   }
 
 before_script:
