@@ -121,7 +121,7 @@ var renderTableCLI = (data) => {
   }
   r += '      └──────┴─────┴────┴──────┴──────┴────┴──────┴──────┴────┘' + '\n';
   r += '\n';
-  r += '      SUCCESS RATE: ' + (counter.valid / counter.total * 100) + '%' + '\n';
+  r += '      SUCCESS RATE: ' + (((counter.valid / counter.total) || 0) * 100) + '%' + '\n';
   // console.log(data);
   console.log(r);
 };
