@@ -56,14 +56,3 @@ interface:
     #paths:
 #    - ./*
     
-# ---------------------------------------------------------------------------
-
-.auto_devops: &auto_devops |
-# Auto DevOps variables and functions
- 
-  function init() {
-    echo "init"
-  }
-
-before_script:
-  - *auto_devops
