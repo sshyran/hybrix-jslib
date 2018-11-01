@@ -85,11 +85,9 @@ interface-debug:
   # Auto DevOps variables and functions
 
   function init() {
-    # install unzip
     apt-get update
     apt-get install unzip
-    
-    "curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/jobs/artifacts/master/download?job=common\" -o artifacts-common.zip"
+    curl --location --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/jobs/artifacts/master/download?job=common" -o artifacts-common.zip
   }
 
 before_script:
