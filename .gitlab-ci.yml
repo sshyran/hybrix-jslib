@@ -26,15 +26,7 @@ interface:
     # compile in debug
     - ./scripts/npm/compile.sh
     
-    # clean up and prepare the artifacts (instead of having a dist) 
-    # remove everything except () is extglob syntax, which should be enabled first
-    - shopt -s extglob
-    - rm -rf !(dist) || true
-    - mv ./dist/* ./
-    - rm -rf ./dist || true
-    
-    # remove .git directory and .* files
-    - rm -rf ./.git* || true
+    - dist
   artifacts:
     paths:
     - ./*
@@ -65,15 +57,7 @@ interface-debug:
     # compile in debug
     - ./scripts/npm/compile.sh debug
     
-    # clean up and prepare the artifacts (instead of having a dist) 
-    # remove everything except () is extglob syntax, which should be enabled first
-    - shopt -s extglob
-    - rm -rf !(dist) || true
-    - mv ./dist/* ./
-    - rm -rf ./dist || true
-    
-    # remove .git directory and .* files
-    - rm -rf ./.git* || true
+    - dist
   artifacts:
     paths:
     - ./*
@@ -88,6 +72,18 @@ interface-debug:
     apt-get update
     apt-get install unzip
     curl --location --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/jobs/artifacts/master/download?job=common" -o artifacts-common.zip
+  }
+  
+  function dist() {
+    # clean up and prepare the artifacts (instead of having a dist) 
+    # remove everything except () is extglob syntax, which should be enabled first
+    shopt -s extglob
+    rm -rf !(dist) || true
+    mv ./dist/* ./
+    rm -rf ./dist || true
+    
+    # remove .git directory and .* files
+    rm -rf ./.git* || true
   }
 
 before_script:
