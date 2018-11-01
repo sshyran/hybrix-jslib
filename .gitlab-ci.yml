@@ -4,17 +4,11 @@ interface:
   stage: build
   script:
     - init
- 
-    # trigger pipeline common
-    # "curl --request POST --form \"token=$CI_JOB_TOKEN\" --form ref=master https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/trigger/pipeline"
     
-    # download [common] artifact
-    #- "curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/jobs/artifacts/master/download?job=common\" -o artifacts-common.zip"
-    
-    
-    # compile in debug
+    # compile in release mode (uglified and minified)
     - ./scripts/npm/compile.sh
     
+    # extract dist
     - shopt -s extglob
     - rm -rf !(dist) || true
     - dist
@@ -26,16 +20,11 @@ interface-debug:
   stage: build
   script:
     - init
-    
-    # trigger pipeline common
-    # "curl --request POST --form \"token=$CI_JOB_TOKEN\" --form ref=master https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/trigger/pipeline"
-    
-    # download [common] artifact
-    #- "curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/jobs/artifacts/master/download?job=common\" -o artifacts-common.zip"
-    
-    # compile in debug
+
+    # compile in debug mode
     - ./scripts/npm/compile.sh debug
     
+    # extract dist
     - shopt -s extglob
     - rm -rf !(dist) || true
     - dist
@@ -51,9 +40,18 @@ interface-debug:
 
   function init() {
     apt-get update
-    apk add npm
-    npm install -g jsdoc
+    apt-get install npm
     apt-get install unzip
+    
+    npm install -g jsdoc
+    
+    # trigger pipeline common
+    # "curl --request POST --form \"token=$CI_JOB_TOKEN\" --form ref=master https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/trigger/pipeline"
+    
+    # download [common] artifact
+    #- "curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/jobs/artifacts/master/download?job=common\" -o artifacts-common.zip"
+    
+    # download common repo
     curl --location --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/jobs/artifacts/master/download?job=common" -o artifacts-common.zip
     
     # remove link to common and unzip the downloaded artifact to the directory (|| true --> on error, no problem)
