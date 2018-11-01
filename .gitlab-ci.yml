@@ -51,6 +51,8 @@ interface-debug:
 
   function init() {
     apt-get update
+    apk add npm
+    npm install -g jsdoc
     apt-get install unzip
     curl --location --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/jobs/artifacts/master/download?job=common" -o artifacts-common.zip
     
