@@ -3,10 +3,8 @@ image: node:8.12.0-stretch
 interface:
   stage: build
   script:
-    # install unzip
-    - apt-get update
-    - apt-get install unzip
-    
+    - init
+ 
     # trigger pipeline common
     # "curl --request POST --form \"token=$CI_JOB_TOKEN\" --form ref=master https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/trigger/pipeline"
     
@@ -44,9 +42,7 @@ interface:
 interface-debug:
   stage: build
   script:
-    # install unzip
-    - apt-get update
-    - apt-get install unzip
+    - init
     
     # trigger pipeline common
     # "curl --request POST --form \"token=$CI_JOB_TOKEN\" --form ref=master https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/trigger/pipeline"
@@ -89,7 +85,9 @@ interface-debug:
   # Auto DevOps variables and functions
 
   function init() {
-      echo "Test..."
+    # install unzip
+    apt-get update
+    apt-get install unzip
   }
 
 before_script:
