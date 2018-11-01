@@ -11,21 +11,12 @@ interface:
     # download [common] artifact
     #- "curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/jobs/artifacts/master/download?job=common\" -o artifacts-common.zip"
     
-    # remove link to common and unzip the downloaded artifact to the directory (|| true --> on error, no problem)
-    - rm -rf  common || true
-    - unzip -o artifacts-common.zip -d common
-    
-    # remove the zip-file (|| true --> on error, no problem)
-    - rm -rf  artifacts-common.zip || true
-    
-    # remove symbolic link to node
-    - rm -rf  node || true
-    # don't download git clone https://github.com/internetofcoins/nodejs-v8-lts.git, refer to docker pre installed nodejs as defined in the first line of this file
-    - ln -s "$(which nodejs)" node
     
     # compile in debug
     - ./scripts/npm/compile.sh
     
+    - shopt -s extglob
+    - rm -rf !(dist) || true
     - dist
   artifacts:
     paths:
@@ -42,21 +33,11 @@ interface-debug:
     # download [common] artifact
     #- "curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/jobs/artifacts/master/download?job=common\" -o artifacts-common.zip"
     
-    # remove link to common and unzip the downloaded artifact to the directory (|| true --> on error, no problem)
-    - rm -rf  common || true
-    - unzip -o artifacts-common.zip -d common
-    
-    # remove the zip-file (|| true --> on error, no problem)
-    - rm -rf  artifacts-common.zip || true
-    
-    # remove symbolic link to node
-    - rm -rf  node || true
-    # don't download git clone https://github.com/internetofcoins/nodejs-v8-lts.git, refer to docker pre installed nodejs as defined in the first line of this file
-    - ln -s "$(which nodejs)" node
-    
     # compile in debug
     - ./scripts/npm/compile.sh debug
     
+    - shopt -s extglob
+    - rm -rf !(dist) || true
     - dist
   artifacts:
     paths:
@@ -72,13 +53,22 @@ interface-debug:
     apt-get update
     apt-get install unzip
     curl --location --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://gitlab.com/api/v4/projects/iochq%2Fhybridd%2Fcommon/jobs/artifacts/master/download?job=common" -o artifacts-common.zip
+    
+    # remove link to common and unzip the downloaded artifact to the directory (|| true --> on error, no problem)
+    rm -rf  common || true
+    unzip -o artifacts-common.zip -d common
+    
+    # remove the zip-file (|| true --> on error, no problem)
+    rm -rf  artifacts-common.zip || true
+    
+    # remove symbolic link to node
+    rm -rf  node || true
+    # don't download git clone https://github.com/internetofcoins/nodejs-v8-lts.git, refer to docker pre installed nodejs as defined in the first line of this file
+    ln -s "$(which nodejs)" node
   }
   
   function dist() {
     # clean up and prepare the artifacts (instead of having a dist)
-    
-    shopt -s extglob
-    rm -rf !(dist) || true
     mv ./dist/* ./
     rm -rf ./dist || true
     
