@@ -81,3 +81,16 @@ interface-debug:
   artifacts:
     paths:
     - ./*
+    
+
+# ---------------------------------------------------------------------------
+
+.auto_devops: &auto_devops |
+  # Auto DevOps variables and functions
+
+  function init() {
+      echo "Test..."
+  }
+
+before_script:
+  - *auto_devops
