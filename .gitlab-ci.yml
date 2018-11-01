@@ -40,7 +40,7 @@ interface-debug:
 
   function init() {
     apt-get update
-    apt-get install npm
+    
     apt-get install unzip
     
     npm install -g jsdoc
