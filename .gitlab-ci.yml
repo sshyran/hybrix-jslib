@@ -1,4 +1,4 @@
-image: node:8.12.0
+image: node:8.12.0-stretch
 
 #common:
 #  stage: build
@@ -56,3 +56,14 @@ interface:
     #paths:
 #    - ./*
     
+# ---------------------------------------------------------------------------
+
+.auto_devops: &auto_devops |
+# Auto DevOps variables and functions
+ 
+  function init() {
+  # echo "init"
+  }
+
+before_script:
+  - *auto_devops
