@@ -5,11 +5,11 @@ var hybridd = new Hybridd.Interface({http: require('http')});
 
 hybridd.sequential([
   'init',
-  {username: '***', password: '***'}, 'session',
   {host: 'http://localhost:1111/'}, 'addHost',
-  {symbol: 'dummy', amount: 100, channel: 'y'}, 'rawTransaction'
+//  {query:'/e/storage/set/r/g'} ,'rout'
+  {key:'kersen', value:{a:"b"}, encrypted:false, work:true}, 'save',
 ]
-  , (data) => { console.log(JSON.stringify(data)); }
+  , (data) => { console.log(data); }
   , (error) => { console.error(error); }
   , (progress) => { console.log(progress); }
 );
