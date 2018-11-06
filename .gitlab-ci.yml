@@ -5,8 +5,8 @@ common:
     - rm -rf .[^.]*
     
     # create a version/origin
-    - timestamp=$(date -u '+%Y-%m-%d %H:%M:%S')
-    - echo "{\"name\":\"common\", \"ref_slug\":\"${CI_COMMIT_REF_SLUG}\", \"ref_name\":\"${CI_COMMIT_REF_NAME}\", \"commit_sha\":\"${CI_COMMIT_SHA}\", \"packaged\":\"${timestamp}\"}" > .version
+    - timestamp=$(date -u '+%Y-%m-%dT%H:%M:%S+00:00')
+    - echo "{\"project_name\":\"${CI_PROJECT_NAME}\", \"repository_url\":\"${CI_REPOSITORY_URL}\", \"commit_ref_name\":\"${CI_COMMIT_REF_NAME}\", \"commit_ref_slug\":\"${CI_COMMIT_REF_SLUG}\", \"commit_sha\":\"${CI_COMMIT_SHA}\", \"commit_title\":\"${CI_COMMIT_TITLE}\", \"gitlab_user_login\":\"${GITLAB_USER_LOGIN}\", \"packaged\":\"${timestamp}\"}" > .version
   artifacts:
     paths:
     - ./
