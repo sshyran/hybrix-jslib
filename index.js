@@ -61,12 +61,11 @@ function seedGenerator (user_keys, asset) {
 }
 
 function activate (code) {
-  if (typeof code === 'string') {
+  try {
     eval('window.deterministic = (function(){})(); ' + code); // interpret deterministic library into an object
     return window.deterministic;
-  } else {
-    console.log('Cannot activate deterministic code!');
-    return function () {};
+  } catch (e) {
+    return null;
   }
 }
 
