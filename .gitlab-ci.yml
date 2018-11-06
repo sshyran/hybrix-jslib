@@ -16,7 +16,7 @@ interface:
     # create a .version file
     - timestamp=$(date -u '+%Y-%m-%dT%H:%M:%S+00:00')
     - mode=release
-    - echo "{\"mode\":\"${mode}\",\"project_name\":\"${CI_PROJECT_NAME}\", \"project_path\":\"${CI_PROJECT_PATH}\", \"project_path_slug\":\"${CI_PROJECT_PATH_SLUG}\", \"commit_ref_name\":\"${CI_COMMIT_REF_NAME}\", \"commit_ref_slug\":\"${CI_COMMIT_REF_SLUG}\", \"commit_sha\":\"${CI_COMMIT_SHA}\", \"pipeline_url\":\"${CI_PIPELINE_URL}\", \"commit_title\":\"${CI_COMMIT_TITLE}\", \"gitlab_user_login\":\"${GITLAB_USER_LOGIN}\", \"packaged\":\"${timestamp}\"}" > .version
+    - echo "{\"${CI_PROJECT_PATH_SLUG}\":{\"mode\":\"${mode}\", \"project_path\":\"${CI_PROJECT_PATH}\", \"commit_ref_name\":\"${CI_COMMIT_REF_NAME}\", \"commit_ref_slug\":\"${CI_COMMIT_REF_SLUG}\", \"commit_sha\":\"${CI_COMMIT_SHA}\", \"pipeline_url\":\"${CI_PIPELINE_URL}\", \"commit_title\":\"${CI_COMMIT_TITLE}\", \"gitlab_user_login\":\"${GITLAB_USER_LOGIN}\", \"packaged\":\"${timestamp}\"}}" > .version
 
   artifacts:
     paths:
@@ -38,7 +38,7 @@ interface-debug:
     # create a .version file
     - timestamp=$(date -u '+%Y-%m-%dT%H:%M:%S+00:00')
     - mode=debug
-    - echo "{\"mode\":\"${mode}\",\"project_name\":\"${CI_PROJECT_NAME}\", \"project_path\":\"${CI_PROJECT_PATH}\", \"project_path_slug\":\"${CI_PROJECT_PATH_SLUG}\", \"commit_ref_name\":\"${CI_COMMIT_REF_NAME}\", \"commit_ref_slug\":\"${CI_COMMIT_REF_SLUG}\", \"commit_sha\":\"${CI_COMMIT_SHA}\", \"pipeline_url\":\"${CI_PIPELINE_URL}\", \"commit_title\":\"${CI_COMMIT_TITLE}\", \"gitlab_user_login\":\"${GITLAB_USER_LOGIN}\", \"packaged\":\"${timestamp}\"}" > .version
+    - echo "{\"${CI_PROJECT_PATH_SLUG}\":{\"mode\":\"${mode}\", \"project_path\":\"${CI_PROJECT_PATH}\", \"commit_ref_name\":\"${CI_COMMIT_REF_NAME}\", \"commit_ref_slug\":\"${CI_COMMIT_REF_SLUG}\", \"commit_sha\":\"${CI_COMMIT_SHA}\", \"pipeline_url\":\"${CI_PIPELINE_URL}\", \"commit_title\":\"${CI_COMMIT_TITLE}\", \"gitlab_user_login\":\"${GITLAB_USER_LOGIN}\", \"packaged\":\"${timestamp}\"}}" > .version
 
   artifacts:
     paths:
