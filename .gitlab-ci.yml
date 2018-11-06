@@ -3,6 +3,10 @@ common:
   script:
     # don't include hidden files and folders
     - rm -rf .[^.]*
+    
+    # create a version/origin
+    - timestamp=$(date -u '+%Y-%m-%d %H:%M:%S')
+    - echo "{\"name\":\"common\", \"ref_slug\":\"${CI_COMMIT_REF_SLUG}\", \"ref_name\":\"${CI_COMMIT_REF_NAME}\", \"commit_sha\":\"${CI_COMMIT_SHA}\", \"packaged\":\"${timestamp}\"}" > .version
   artifacts:
     paths:
     - ./
