@@ -195,36 +195,12 @@ var renderTableWeb = (data) => {
 function go (mode) {
   // TODO retrieve all asset
     // TODO filter tokens
-  var tests ={
-      dummy: testAsset('dummy'),
-      eth: testAsset('eth'),
-      ark: testAsset('ark'),
-      btc: testAsset('btc'),
-      dash: testAsset('dash'),
-      dgb: testAsset('dgb'),
-      etc: testAsset('etc'),
-      exp: testAsset('exp'),
-      lsk: testAsset('lsk'),
-      ltc: testAsset('ltc'),
-      nxt: testAsset('nxt'),
-      omni: testAsset('omni'),
-      rise: testAsset('rise'),
-      shift: testAsset('shift'),
-      ubq: testAsset('ubq'),
-      waves: testAsset('waves'),
-      xcp: testAsset('xcp'),
-      xem: testAsset('xem'),
-      zec: testAsset('zec')
-      //bts: testAsset('bts'), -> FAUCET, ETC!
-      //bch: testAsset('bch'), -> ADD SEGWIT
-      //burst: testAsset('burst'), //-> REWRITE TO QRTZ
-      //xel: testAsset('xel'), //-> REWRITE TO QRTZ
-    };
+
 
   var hybridd;
   var renderTable;
   var progressCallback;
-
+  var symbolsToTest;
   if (mode === 'node') {
     ProgressBar = require('progress');
     makeProgressBar('test progress')
@@ -250,23 +226,54 @@ function go (mode) {
       'symbol': {key: 's', args: 1, description: 'Select a symbol to run test'}
      //TODO 'quiet': {key: 'q', args: 0, description: 'No extra output other than raw data'}
     });
-    if(ops.symbol){tests={[ops.symbol]: testAsset(ops.symbol)};}
+    symbolsToTest = ops.symbol
 
     // create IoC interface object
     Hybridd = require('../dist/hybridd.interface.nodejs.js');
     hybridd = new Hybridd.Interface({http: require('http')});
     renderTable = renderTableCLI;
   } else {
-    var symbol = getParameterByName('symbol');
-    if(symbol){
-      tests={[symbol]: testAsset(symbol)};
-    }
+    symbolsToTest = getParameterByName('symbol');
 
     hybridd = new Hybridd.Interface({XMLHttpRequest: XMLHttpRequest});
     renderTable = renderTableWeb;
     progressCallback = progress => {
       document.body.innerHTML = '<div style="border-style:solid; border-width:1px; border-radius:10px; height:20px;"><div style="text-align:center;color:white;background-color:blue; border-radius:10px; height:20px; width:'+(progress*100)+'%">'+Math.floor(progress*100)+'%</div></div>';
     }
+  }
+
+  var tests = {};
+  if(symbolsToTest){
+    symbolsToTest = symbolsToTest.split(',');
+    for(var i=0; i<symbolsToTest.length;++i){
+      tests[symbolsToTest[i]] =  testAsset(symbolsToTest[i]);
+    }
+  }else{
+     tests ={
+      dummy: testAsset('dummy'),
+      eth: testAsset('eth'),
+      ark: testAsset('ark'),
+      btc: testAsset('btc'),
+      dash: testAsset('dash'),
+      dgb: testAsset('dgb'),
+      etc: testAsset('etc'),
+      exp: testAsset('exp'),
+      lsk: testAsset('lsk'),
+      ltc: testAsset('ltc'),
+      nxt: testAsset('nxt'),
+      omni: testAsset('omni'),
+      rise: testAsset('rise'),
+      shift: testAsset('shift'),
+      ubq: testAsset('ubq'),
+      waves: testAsset('waves'),
+      xcp: testAsset('xcp'),
+      xem: testAsset('xem'),
+      zec: testAsset('zec')
+      //bts: testAsset('bts'), -> FAUCET, ETC!
+      //bch: testAsset('bch'), -> ADD SEGWIT
+      //burst: testAsset('burst'), //-> REWRITE TO QRTZ
+      //xel: testAsset('xel'), //-> REWRITE TO QRTZ
+    };
   }
 
 
