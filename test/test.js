@@ -223,7 +223,7 @@ function go (mode) {
 
     // command line options and init
     var ops = stdio.getopt({
-      'symbol': {key: 's', args: 1, description: 'Select a symbol to run test'}
+      'symbol': {key: 's', args: 1, description: 'Select a symbol or comma separated symbols to run test'}
      //TODO 'quiet': {key: 'q', args: 0, description: 'No extra output other than raw data'}
     });
     symbolsToTest = ops.symbol
