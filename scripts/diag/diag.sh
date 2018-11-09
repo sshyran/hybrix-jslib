@@ -12,6 +12,8 @@ HYBRIDD="`cd \"$SCRIPTDIR/../../..\" && pwd`"
 
 NODE="$HYBRIDD/node"
 
+echo "SCRIPTDIR: "$SCRIPTDIR
+
 
 if [ "`uname`" = "Darwin" ]; then
     SYSTEM="darwin-x64"
