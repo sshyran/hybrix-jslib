@@ -9,6 +9,16 @@ function makeProgressBar(title) {
   });
 }
 
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
 function testAsset (symbol) {
   var testAmount = 0.00001;
   return { data: [
@@ -34,7 +44,7 @@ function testAsset (symbol) {
 
         seedValid: {data: {query: '/source/wavalidator/' + symbol + '/' + result.address}, step: 'rout'},
         seedBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.address}, step: 'rout'},
-        seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.sample.address + '/' + result.publicKey }, step: 'rout'},
+        seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.sample.address + '/' + result.publicKey }, step: 'rout'}
         //seedHistory: {data: {query: '/asset/' + symbol + '/history/' + result.address}, step: 'rout'}
       };
     },
@@ -183,20 +193,48 @@ var renderTableWeb = (data) => {
 
 
 function go (mode) {
+  // TODO retrieve all asset
+    // TODO filter tokens
+
+
   var hybridd;
   var renderTable;
   var progressCallback;
-
+  var symbolsToTest;
   if (mode === 'node') {
     ProgressBar = require('progress');
     makeProgressBar('test progress')
     progressCallback = progress => {bar.update(progress)};
+    // cli options
+
+    var stdio = require('stdio');
+
+    function makeProgressBar(title) {
+      bar = new ProgressBar(' [.] '+title+': [:bar] :percent, eta: :etas', {
+        complete: '▓',
+        incomplete: '░',
+        width: 76-title.length,
+        total: 100
+      });
+    }
+
+    //var hostname = 'http://wallet-uat.internetofcoins.org/api/';
+    var hostname = 'http://127.0.0.1:1111/';
+
+    // command line options and init
+    var ops = stdio.getopt({
+      'symbol': {key: 's', args: 1, description: 'Select a symbol or comma separated symbols to run test'}
+     //TODO 'quiet': {key: 'q', args: 0, description: 'No extra output other than raw data'}
+    });
+    symbolsToTest = ops.symbol
+
     // create IoC interface object
     Hybridd = require('../dist/hybridd.interface.nodejs.js');
     hybridd = new Hybridd.Interface({http: require('http')});
     renderTable = renderTableCLI;
   } else {
-    //    DEBUG = true;
+    symbolsToTest = getParameterByName('symbol');
+
     hybridd = new Hybridd.Interface({XMLHttpRequest: XMLHttpRequest});
     renderTable = renderTableWeb;
     progressCallback = progress => {
@@ -204,18 +242,14 @@ function go (mode) {
     }
   }
 
-
-
-  hybridd.sequential(
-  [
-    'init',
-    {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'session',
-    {host: 'http://localhost:1111/'}, 'addHost',
-
-    // TODO retrieve all asset
-    // TODO filter tokens
-
-    {
+  var tests = {};
+  if(symbolsToTest){
+    symbolsToTest = symbolsToTest.split(',');
+    for(var i=0; i<symbolsToTest.length;++i){
+      tests[symbolsToTest[i]] =  testAsset(symbolsToTest[i]);
+    }
+  }else{
+     tests ={
       dummy: testAsset('dummy'),
       eth: testAsset('eth'),
       ark: testAsset('ark'),
@@ -239,7 +273,20 @@ function go (mode) {
       //bch: testAsset('bch'), -> ADD SEGWIT
       //burst: testAsset('burst'), //-> REWRITE TO QRTZ
       //xel: testAsset('xel'), //-> REWRITE TO QRTZ
-    },
+    };
+  }
+
+
+
+  hybridd.sequential(
+  [
+    'init',
+    {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'session',
+    {host: 'http://localhost:1111/'}, 'addHost',
+
+
+
+    tests,
     'parallel'
 
   ]
