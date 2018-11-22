@@ -223,7 +223,8 @@ function go (mode) {
 
     // command line options and init
     var ops = stdio.getopt({
-      'symbol': {key: 's', args: 1, description: 'Select a symbol or comma separated symbols to run test'}
+      'symbol': {key: 's', args: 1, description: 'Select a symbol or comma separated symbols to run test'},
+      'debug': {key: 'd', args: 0, description: 'Output debug messages.'}
      //TODO 'quiet': {key: 'q', args: 0, description: 'No extra output other than raw data'}
     });
     symbolsToTest = ops.symbol
@@ -231,11 +232,13 @@ function go (mode) {
     // create IoC interface object
     Hybridd = require('../dist/hybridd.interface.nodejs.js');
     hybridd = new Hybridd.Interface({http: require('http')});
+    DEBUG=ops.debug;
     renderTable = renderTableCLI;
   } else {
     symbolsToTest = getParameterByName('symbol');
 
     hybridd = new Hybridd.Interface({XMLHttpRequest: XMLHttpRequest});
+    DEBUG = getParameterByName('debug').toLowerCase()==='true';
     renderTable = renderTableWeb;
     progressCallback = progress => {
       document.body.innerHTML = '<div style="border-style:solid; border-width:1px; border-radius:10px; height:20px;"><div style="text-align:center;color:white;background-color:blue; border-radius:10px; height:20px; width:'+(progress*100)+'%">'+Math.floor(progress*100)+'%</div></div>';
