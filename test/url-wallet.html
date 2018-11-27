@@ -1,0 +1,57 @@
+<html>
+  <head>
+    <script src="../dist/hybridd.interface.web.js"></script>
+
+    <script>
+
+     function getParameterByName(name, url) {
+       if (!url) url = window.location.href;
+       name = name.replace(/[\[\]]/g, '\\$&');
+       var regex = new RegExp('[?&]' + name.toLowerCase() + '(=([^&#]*)|&|#|$)'),
+           results = regex.exec(url);
+       if (!results) return null;
+       if (!results[2]) return '';
+       return decodeURIComponent(results[2].replace(/\+/g, ' '));
+     }
+
+     function go () {
+
+       var hybridd;
+       var renderTable;
+       var progressCallback;
+       var symbolsToTest;
+
+       //var hostname = 'http://wallet-uat.internetofcoins.org/api/';
+
+       symbolsToTest = getParameterByName('symbol');
+
+       hybridd = new Hybridd.Interface({XMLHttpRequest: XMLHttpRequest});
+       if(getParameterByName('debug')!==null){
+         DEBUG = getParameterByName('debug')==='true';
+       }
+
+       progressCallback = progress => {
+         document.body.innerHTML = '<div style="border-style:solid; border-width:1px; border-radius:10px; height:20px;"><div style="text-align:center;color:white;background-color:blue; border-radius:10px; height:20px; width:'+(progress*100)+'%">'+Math.floor(progress*100)+'%</div></div><div>Usage: url-wallet.html?username=$USERNAME&password=$PASSWORD&symbol=$SYMBOL&target=$TARGET&amount=$AMOUNT&host=$HOST</div>';
+       }
+
+
+       hybridd.sequential(
+         [
+           'init',
+           {username: getParameterByName('username')||'POMEW4B5XACN3ZCX', password: getParameterByName('password')||'TVZS7LODA5CSGP6U'}, 'session',
+           {host: getParameterByName('host')||'http://localhost:1111/'}, 'addHost',
+           {symbol:getParameterByName('symbol')||'dummy',amount:getParameterByName('amount')||1, target:getParameterByName('target')}, 'rawTransaction'
+         ]
+         , (data)=>{document.body.innerHTML+='<code>'+data+'</code>';}
+         , (error) => { console.error(error); }
+         , progressCallback
+
+       );
+     }
+
+    </script>
+  </head>
+  <body onload="go()">
+
+  </body>
+</html>

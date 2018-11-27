@@ -12,7 +12,7 @@ function makeProgressBar(title) {
 function getParameterByName(name, url) {
     if (!url) url = window.location.href;
     name = name.replace(/[\[\]]/g, '\\$&');
-    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+    var regex = new RegExp('[?&]' + name.toLowerCase() + '(=([^&#]*)|&|#|$)'),
         results = regex.exec(url);
     if (!results) return null;
     if (!results[2]) return '';
@@ -196,6 +196,7 @@ function go (mode) {
   // TODO retrieve all asset
     // TODO filter tokens
 
+  var host='http://localhost:1111/';
 
   var hybridd;
   var renderTable;
@@ -218,15 +219,15 @@ function go (mode) {
       });
     }
 
-    //var hostname = 'http://wallet-uat.internetofcoins.org/api/';
-    var hostname = 'http://127.0.0.1:1111/';
 
     // command line options and init
     var ops = stdio.getopt({
       'symbol': {key: 's', args: 1, description: 'Select a symbol or comma separated symbols to run test'},
-      'debug': {key: 'd', args: 0, description: 'Output debug messages.'}
+      'debug': {key: 'd', args: 0, description: 'Output debug messages.'},
+      'host': {key: 'h', args: 1, description: 'Set host Defaults to :'+host}
      //TODO 'quiet': {key: 'q', args: 0, description: 'No extra output other than raw data'}
     });
+    if(typeof ops.host !== 'undefined'){host  =ops.host;}
     symbolsToTest = ops.symbol
 
     // create IoC interface object
@@ -238,7 +239,9 @@ function go (mode) {
     symbolsToTest = getParameterByName('symbol');
 
     hybridd = new Hybridd.Interface({XMLHttpRequest: XMLHttpRequest});
-    DEBUG = getParameterByName('debug').toLowerCase()==='true';
+    DEBUG = getParameterByName('debug')==='true';
+    if(getParameterByName('host')){host= getParameterByName('debug');}
+
     renderTable = renderTableWeb;
     progressCallback = progress => {
       document.body.innerHTML = '<div style="border-style:solid; border-width:1px; border-radius:10px; height:20px;"><div style="text-align:center;color:white;background-color:blue; border-radius:10px; height:20px; width:'+(progress*100)+'%">'+Math.floor(progress*100)+'%</div></div>';
@@ -285,7 +288,7 @@ function go (mode) {
   [
     'init',
     {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'session',
-    {host: 'http://localhost:1111/'}, 'addHost',
+    {host: host}, 'addHost',
 
 
 
