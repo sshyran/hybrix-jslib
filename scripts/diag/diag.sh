@@ -169,11 +169,11 @@ if [ -d "$HYBRIDD/tui-wallet" ]; then
 
     if [ -L "$HYBRIDD/tui-wallet/interface" ]; then
         echo " [.] hybridd/tui-wallet/interface found."
-        if [ "$(readlink $HYBRIDD/tui-wallet/interface)" = "$HYBRIDD/interface" ]; then
+        if [ "$(readlink $HYBRIDD/tui-wallet/interface)" = "$HYBRIDD/interface/dist" ]; then
             echo " [.] hybridd/tui-wallet/interface linked correctly."
         else
             echo "$RED [!] hybridd/tui-wallet/interface linked incorrectly."
-            echo "     Expected: $HYBRIDD/interface"
+            echo "     Expected: $HYBRIDD/interface/dist"
             echo "     Found:    $(readlink $HYBRIDD/tui-wallet/interface)$RESET"
         fi
     else
@@ -219,11 +219,11 @@ if [ -d "$HYBRIDD/cli-wallet" ]; then
 
     if [ -L "$HYBRIDD/cli-wallet/interface" ]; then
         echo " [.] hybridd/cli-wallet/interface found."
-        if [ "$(readlink $HYBRIDD/cli-wallet/interface)" = "$HYBRIDD/interface" ]; then
+        if [ "$(readlink $HYBRIDD/cli-wallet/interface)" = "$HYBRIDD/interface/dist" ]; then
             echo " [.] hybridd/cli-wallet/interface linked correctly."
         else
             echo "$RED [!] hybridd/cli-wallet/interface linked incorrectly."
-            echo "     Expected: $HYBRIDD/interface"
+            echo "     Expected: $HYBRIDD/interface/dist"
             echo "     Found:    $(readlink $HYBRIDD/cli-wallet/interface)$RESET"
         fi
     else
@@ -270,11 +270,11 @@ if [ -d "$HYBRIDD/deterministic" ]; then
 
     if [ -L "$HYBRIDD/deterministic/interface" ]; then
         echo " [.] hybridd/deterministic/interface found."
-        if [ "$(readlink $HYBRIDD/deterministic/interface)" = "$HYBRIDD/interface" ]; then
+        if [ "$(readlink $HYBRIDD/deterministic/interface)" = "$HYBRIDD/interface/dist" ]; then
             echo " [.] hybridd/deterministic/interface linked correctly."
         else
             echo "$RED [!] hybridd/deterministic/interface linked incorrectly."
-            echo "     Expected: $HYBRIDD/interface"
+            echo "     Expected: $HYBRIDD/interface/dist"
             echo "     Found:    $(readlink $HYBRIDD/deterministic/interface)$RESET"
         fi
     else
