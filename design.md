@@ -1,11 +1,11 @@
-Design for automated access to Hybridd
+Design for automated access to hybrixd
 
 
 Client: An association that is set on introducing crypto currencies to African region as way of making people more financially capable.
 
 Use cases: Developing very easy to use payment software, Point of Sale for shops, insurances, tokens for medical treatment at clinincs.
 
-Requirement : Enabling interfaces to IoC back-end (hybridd) using the API for complete payments.
+Requirement : Enabling interfaces to IoC back-end (hybrixd) using the API for complete payments.
 
 
 I describe four distinct requirements:
@@ -34,7 +34,7 @@ The remaining feature 2) Main Seed generation is currently performed by the logi
 
 - Username
 - Password
-- Host(s) : the hybridd node endpoint(s) (for example ["wallet1.internetofcoins.org:1111", "wallet2.internetofcoins.org:1111"])
+- Host(s) : the hybrixd node endpoint(s) (for example ["wallet1.internetofcoins.org:1111", "wallet2.internetofcoins.org:1111"])
 - DataCallback : the asynchronious function that is executed when the seed is retrieved
 - ErrorCallback : the asynchronious function that is executed when an error is encountered
 

@@ -5,7 +5,7 @@ module.exports = {
   entry: './common/crypto/nacl.js',
   output: {
     path: path.resolve(__dirname, '.'),
-    filename: '../dist/hybridd.interface.nacl.js.tmp'
+    filename: '../dist/hybrixd.interface.nacl.js.tmp'
   },
   plugins: [
     new UglifyJSPlugin({

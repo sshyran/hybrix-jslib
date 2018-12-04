@@ -1,7 +1,7 @@
 {
-  "name": "hybridd.interface",
+  "name": "hybrixd.interface",
   "version": "1.0.0",
-  "description": "Interface to hybridd.node",
+  "description": "Interface to hybrixd.node",
   "main": "index.js",
   "directories": {
     "doc": "docs",
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://www.gitlab.com/iochq/hybridd/interface.git"
+    "url": "https://www.gitlab.com/iochq/hybrixd/interface.git"
   },
   "author": "",
   "license": "ISC",

@@ -1,14 +1,14 @@
 nacl_factory = require('../common/crypto/nacl.js');
 
-var Hybridd = require('../dist/hybridd.interface.nodejs.js');
-var hybridd = new Hybridd.Interface({http: require('http')});
+var hybrixd = require('../dist/hybrixd.interface.nodejs.js');
+var hybrixd = new hybrixd.Interface({http: require('http')});
 
 var username = '';
 var password = '';
 var symbol = 'eth';
 var host = 'http://localhost:1111/';
 
-hybridd.sequential([
+hybrixd.sequential([
   'init',
   {username: username, password: password}, 'session',
   {host: host}, 'addHost',

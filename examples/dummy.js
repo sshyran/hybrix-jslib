@@ -1,9 +1,9 @@
 nacl_factory = require('../common/crypto/nacl.js');
 
-var Hybridd = require('../dist/hybridd.interface.nodejs.js');
-var hybridd = new Hybridd.Interface({http: require('http')});
+var hybrixd = require('../dist/hybrixd.interface.nodejs.js');
+var hybrixd = new hybrixd.Interface({http: require('http')});
 
-hybridd.sequential([
+hybrixd.sequential([
   'init',
   {host: 'http://localhost:1111/'}, 'addHost',
 //  {query:'/e/storage/set/r/g'} ,'rout'

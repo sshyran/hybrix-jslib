@@ -198,7 +198,7 @@ function go (mode) {
 
   var host='http://localhost:1111/';
 
-  var hybridd;
+  var hybrixd;
   var renderTable;
   var progressCallback;
   var symbolsToTest;
@@ -231,14 +231,14 @@ function go (mode) {
     symbolsToTest = ops.symbol
 
     // create IoC interface object
-    Hybridd = require('../dist/hybridd.interface.nodejs.js');
-    hybridd = new Hybridd.Interface({http: require('http')});
+    hybrixd = require('../dist/hybrixd.interface.nodejs.js');
+    hybrixd = new hybrixd.Interface({http: require('http')});
     DEBUG=ops.debug;
     renderTable = renderTableCLI;
   } else {
     symbolsToTest = getParameterByName('symbol');
 
-    hybridd = new Hybridd.Interface({XMLHttpRequest: XMLHttpRequest});
+    hybrixd = new hybrixd.Interface({XMLHttpRequest: XMLHttpRequest});
     DEBUG = getParameterByName('debug')==='true';
     if(getParameterByName('host')){host= getParameterByName('debug');}
 
@@ -284,7 +284,7 @@ function go (mode) {
 
 
 
-  hybridd.sequential(
+  hybrixd.sequential(
   [
     'init',
     {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'session',

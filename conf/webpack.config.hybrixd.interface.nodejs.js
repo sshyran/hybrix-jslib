@@ -8,8 +8,8 @@ module.exports = {
   entry: './lib/interface.js',
   output: {
     path: path.resolve(__dirname, '.'),
-    filename: '../dist/hybridd.interface.nodejs.js',
-    library: 'Hybridd',
+    filename: '../dist/hybrixd.interface.nodejs.js',
+    library: 'hybrixd',
     libraryTarget: 'commonjs2'
   }
 };

@@ -1,7 +1,7 @@
 nacl_factory = require('../common/crypto/nacl.js');
 
-var Hybridd = require('../dist/hybridd.interface.nodejs.js');
-var hybridd = new Hybridd.Interface({http: require('http')});
+var hybrixd = require('../dist/hybrixd.interface.nodejs.js');
+var hybrixd = new hybrixd.Interface({http: require('http')});
 
 // IoC credentials:
 var username = '';
@@ -17,7 +17,7 @@ var matcherFee = 300000 // default matcher fee found in python implementation: h
 
 var host = 'http://localhost:1111/';
 
-hybridd.sequential([
+hybrixd.sequential([
   'init',
   {username: username, password: password}, 'session',
   {host: host}, 'addHost',

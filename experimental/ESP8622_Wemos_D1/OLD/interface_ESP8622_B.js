@@ -67,7 +67,7 @@ IoC.Interface = function (data) {
       }
       }
   */
-  var hybriddNodes = {};
+  var hybrixdNodes = {};
   /**
  * Initialize the NACL factory if nacl has not been defined yet.
  * @param {Object} data - Not used
@@ -271,9 +271,9 @@ IoC.Interface = function (data) {
   this.addHost = function (data, dataCallback, errorCallback) {
     if (typeof data === 'string') { data = {host: data}; }
     // TODO check if valid hostname
-    var hybriddNode = new HybriddNode.HybriddNode(data.host);
-    hybriddNodes[data.host] = hybriddNode;
-    hybriddNode.init({userKeys: user_keys, options: data.options, connector: connector}, dataCallback, errorCallback);
+    var hybrixdNode = new hybrixdNode.hybrixdNode(data.host);
+    hybrixdNodes[data.host] = hybrixdNode;
+    hybrixdNode.init({userKeys: user_keys, options: data.options, connector: connector}, dataCallback, errorCallback);
   };
 
   /**
@@ -289,17 +289,17 @@ IoC.Interface = function (data) {
   this.call = function (data, dataCallback, errorCallback) {
     var host;
     if (typeof data.host === 'undefined') {
-      host = Object.keys(hybriddNodes)[0]; // todo select random
+      host = Object.keys(hybrixdNodes)[0]; // todo select random
     } else {
       host = data.host;
     }
 
     // TODO add for y,z chan: error when no session (user_keys) have been created
-    if (hybriddNodes.hasOwnProperty(host)) {
+    if (hybrixdNodes.hasOwnProperty(host)) {
       switch (data.channel) {
-        case 'y' : hybriddNodes[host].yCall({query: data.query, channel: data.channel, userKeys: user_keys, connector: connector}, dataCallback, errorCallback); break;
-        case 'z' : hybriddNodes[host].zCall({query: data.query, channel: data.channel, userKeys: user_keys, connector: connector}, dataCallback, errorCallback); break;
-        default : hybriddNodes[host].call({query: data.query, connector: connector}, dataCallback, errorCallback); break;
+        case 'y' : hybrixdNodes[host].yCall({query: data.query, channel: data.channel, userKeys: user_keys, connector: connector}, dataCallback, errorCallback); break;
+        case 'z' : hybrixdNodes[host].zCall({query: data.query, channel: data.channel, userKeys: user_keys, connector: connector}, dataCallback, errorCallback); break;
+        default : hybrixdNodes[host].call({query: data.query, connector: connector}, dataCallback, errorCallback); break;
       }
     } else {
       console.error('Host not initialized');

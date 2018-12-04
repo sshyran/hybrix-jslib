@@ -5,8 +5,8 @@ module.exports = {
   entry: './lib/interface.js',
   output: {
     path: path.resolve(__dirname, '.'),
-    filename: '../dist/hybridd.interface.web.js.tmp',
-    library: 'Hybridd' // added to create a library file
+    filename: '../dist/hybrixd.interface.web.js.tmp',
+    library: 'hybrixd' // added to create a library file
   },
   module: {
     rules: [

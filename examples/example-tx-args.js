@@ -1,8 +1,8 @@
 nacl_factory = require('../common/crypto/nacl.js');
 
-//var Hybridd = require('../dist/hybridd.interface.nodejs.js');
-var Hybridd = require('../lib/interface.js');
-var hybridd = new Hybridd.Interface({http: require('http')});
+//var hybrixd = require('../dist/hybrixd.interface.nodejs.js');
+var hybrixd = require('../lib/interface.js');
+var hybrixd = new hybrixd.Interface({http: require('http')});
 var ProgressBar = require('progress');
 var stdio = require('stdio');
 
@@ -87,7 +87,7 @@ if (ops.rawtransaction) {
 makeProgressBar(progress.join(','));
 
 // take action
-hybridd.sequential( 
+hybrixd.sequential( 
   actions
   , (data) => { if(!ops.quiet) { bar.update(1); } console.log(data + "\n"); }
   , (error) => { console.error("\n"+'Error: ' + error); }

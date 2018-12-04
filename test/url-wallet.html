@@ -1,6 +1,6 @@
 <html>
   <head>
-    <script src="../dist/hybridd.interface.web.js"></script>
+    <script src="../dist/hybrixd.interface.web.js"></script>
 
     <script>
 
@@ -16,7 +16,7 @@
 
      function go () {
 
-       var hybridd;
+       var hybrixd;
        var renderTable;
        var progressCallback;
        var symbolsToTest;
@@ -25,7 +25,7 @@
 
        symbolsToTest = getParameterByName('symbol');
 
-       hybridd = new Hybridd.Interface({XMLHttpRequest: XMLHttpRequest});
+       hybrixd = new hybrixd.Interface({XMLHttpRequest: XMLHttpRequest});
        if(getParameterByName('debug')!==null){
          DEBUG = getParameterByName('debug')==='true';
        }
@@ -35,7 +35,7 @@
        }
 
 
-       hybridd.sequential(
+       hybrixd.sequential(
          [
            'init',
            {username: getParameterByName('username')||'POMEW4B5XACN3ZCX', password: getParameterByName('password')||'TVZS7LODA5CSGP6U'}, 'session',

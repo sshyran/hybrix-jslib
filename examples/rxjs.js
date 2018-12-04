@@ -1,14 +1,14 @@
 nacl_factory = require('../common/crypto/nacl.js');
 
-var Hybridd = require('../dist/hybridd.interface.nodejs.js');
-var hybridd = new Hybridd.Interface({http: require('http')});
+var hybrixd = require('../dist/hybrixd.interface.nodejs.js');
+var hybrixd = new hybrixd.Interface({http: require('http')});
 
 R = require('./rxjs/rx.min');
 
 
-function createHybriddObservable(id, data) {
+function createhybrixdObservable(id, data) {
   var o = R.Observable.create(function(observer) {
-    hybridd[id](data, data => observer.next(data), error => observer.error(error));
+    hybrixd[id](data, data => observer.next(data), error => observer.error(error));
   });
   return o;
 }
@@ -19,17 +19,17 @@ function createHybriddObservable(id, data) {
  * @param {String} id The name of the interface function
  * @returns {Function} A function, when executed with the required input data, produces an Observable
  */
-fromHybriddCallback = function (id) {
+fromhybrixdCallback = function (id) {
   return function (data) {
-    return createHybriddObservable (id, data);
+    return createhybrixdObservable (id, data);
   };
 };
 
 
 DEBUG=true;
-const init = fromHybriddCallback('init');
-const session = fromHybriddCallback('session');
-const host = fromHybriddCallback('addHost');
+const init = fromhybrixdCallback('init');
+const session = fromhybrixdCallback('session');
+const host = fromhybrixdCallback('addHost');
 
 //var stream = session({username:'***',password:'**'});
 //const subscribe = stream.subscribe(val => console.log(val));
