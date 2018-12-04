@@ -6,7 +6,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, '.'),
     filename: '../dist/hybrixd.interface.web.js.tmp',
-    library: 'hybrixd' // added to create a library file
+    library: 'Hybrixd' // added to create a library file
   },
   module: {
     rules: [

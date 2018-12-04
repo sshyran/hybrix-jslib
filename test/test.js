@@ -231,14 +231,14 @@ function go (mode) {
     symbolsToTest = ops.symbol
 
     // create IoC interface object
-    hybrixd = require('../dist/hybrixd.interface.nodejs.js');
-    hybrixd = new hybrixd.Interface({http: require('http')});
+    Hybrixd = require('../dist/hybrixd.interface.nodejs.js');
+    hybrixd = new Hybrixd.Interface({http: require('http')});
     DEBUG=ops.debug;
     renderTable = renderTableCLI;
   } else {
     symbolsToTest = getParameterByName('symbol');
 
-    hybrixd = new hybrixd.Interface({XMLHttpRequest: XMLHttpRequest});
+    hybrixd = new Hybrixd.Interface({XMLHttpRequest: XMLHttpRequest});
     DEBUG = getParameterByName('debug')==='true';
     if(getParameterByName('host')){host= getParameterByName('debug');}
 

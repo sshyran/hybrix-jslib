@@ -9,7 +9,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, '.'),
     filename: '../dist/hybrixd.interface.nodejs.js',
-    library: 'hybrixd',
+    library: 'Hybrixd',
     libraryTarget: 'commonjs2'
   }
 };
