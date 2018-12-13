@@ -198,7 +198,7 @@ function go (mode) {
 
   var host='http://localhost:1111/';
 
-  var hybrixd;
+  var hybrix;
   var renderTable;
   var progressCallback;
   var symbolsToTest;
@@ -231,14 +231,14 @@ function go (mode) {
     symbolsToTest = ops.symbol
 
     // create IoC interface object
-    Hybrixd = require('../dist/hybrixd.interface.nodejs.js');
-    hybrixd = new Hybrixd.Interface({http: require('http')});
+    Hybrix = require('../dist/hybrix-lib.nodejs.js');
+    hybrix = new Hybrix.Interface({http: require('http')});
     DEBUG=ops.debug;
     renderTable = renderTableCLI;
   } else {
     symbolsToTest = getParameterByName('symbol');
 
-    hybrixd = new Hybrixd.Interface({XMLHttpRequest: XMLHttpRequest});
+    hybrix = new Hybrix.Interface({XMLHttpRequest: XMLHttpRequest});
     DEBUG = getParameterByName('debug')==='true';
     if(getParameterByName('host')){host= getParameterByName('debug');}
 
@@ -284,7 +284,7 @@ function go (mode) {
 
 
 
-  hybrixd.sequential(
+  hybrix.sequential(
   [
     'init',
     {username: 'POMEW4B5XACN3ZCX', password: 'TVZS7LODA5CSGP6U'}, 'session',
@@ -308,8 +308,5 @@ function go (mode) {
  */
 
 if (typeof window === 'undefined') {
-  // add NACL in your favourite flavour
-  nacl_factory = require('../common/crypto/nacl.js');
-  // run the tests
   go('node');
 }

@@ -4,12 +4,11 @@ const path = require('path');
 
 module.exports = {
   target: 'node',
-  //  externals: [nodeExternals()],
-  entry: './lib/interface.js',
+  entry: './lib/interface.nodejs.js.tmp',
   output: {
     path: path.resolve(__dirname, '.'),
-    filename: '../dist/hybrixd.interface.nodejs.js',
-    library: 'Hybrixd',
+    filename: '../dist/hybrix-lib.nodejs.js',
+    library: 'Hybrix',
     libraryTarget: 'commonjs2'
   }
 };
