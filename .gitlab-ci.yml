@@ -67,21 +67,21 @@ dist:
   - component=interface
   - file=hybrixd.${component}.${version}
   - path=interface/${version}/
+  
+  - cp -r ./dist/. /tmp/${component}/
     
   - cd /tmp
   - git clone --depth=1 https://oauth2:${PRIVATE_TOKEN}@gitlab.com/hybrix/dist
-  - cd dist
-  - mkdir -p interface/${version}/
-  - ls
-    
+  - mkdir -p ./dist/interface/${version}/
+  
   # download [interface] artifact
-  - "curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/api/v4/projects/hybrix%2Fhybrixd%2Finterface/jobs/artifacts/${CI_COMMIT_REF_NAME}/download?job=interface\" -o ${path}${file}.zip"
-  - ls ${path}
+  #- "curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/api/v4/projects/hybrix%2Fhybrixd%2Finterface/jobs/artifacts/${CI_COMMIT_REF_NAME}/download?job=interface\" -o ${path}${file}.zip"
   
-  - cp ${path}${file}.zip ./../${file}.zip
-  - cd ..
+  # go to folder
+  #- ls ./dist/${path}
   
-  - unzip ${file}.zip -d ${component}
+  #- cp ${path}${file}.zip ./../${file}.zip
+  #- unzip ${file}.zip -d ${component}
   
   - ls
   - ls ${component}
