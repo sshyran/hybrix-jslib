@@ -1,12 +1,13 @@
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const path = require('path');
 
+
 module.exports = {
   entry: './lib/interface.js',
   output: {
     path: path.resolve(__dirname, '.'),
     filename: '../dist/hybrixd.interface.web.js.tmp',
-    library: 'Hybrixd' // added to create a library file
+    library: 'Hybrix' // added to create a library file
   },
   module: {
     rules: [
