@@ -44,7 +44,9 @@ interface-debug:
     - mode=debug
     - echo "{\"${CI_PROJECT_PATH_SLUG}\":{\"mode\":\"${mode}\", \"project_path\":\"${CI_PROJECT_PATH}\", \"commit_ref_name\":\"${CI_COMMIT_REF_NAME}\", \"commit_ref_slug\":\"${CI_COMMIT_REF_SLUG}\", \"commit_sha\":\"${CI_COMMIT_SHA}\", \"pipeline_url\":\"${CI_PIPELINE_URL}\", \"commit_title\":\"${CI_COMMIT_TITLE}\", \"gitlab_user_login\":\"${GITLAB_USER_LOGIN}\", \"packaged\":\"${timestamp}\"}}" > .version
   except:
-  - /^v.*release$/
+  #- /^v.*release$/
+    refs:
+      - tags
   artifacts:
     paths:
     - ./*
@@ -59,7 +61,7 @@ dist:
   - apk add git
   - apk add tar
   - apk add xz
-  - apk add unzip
+  - apk add zip
    
   # set variables
   # version -> branchname without '-release'
@@ -86,9 +88,11 @@ dist:
   - ls
   - ls ${component}
   
+  - zip -r ${file}.zip ${component}
   - tar -zcvf ${file}.tar.gz ${component}
   - tar cfJ ${file}.tar.xz ${component} 
   
+  - cp ${file}.zip ./dist/${path}${file}.zip
   - cp ${file}.tar.gz ./dist/${path}${file}.tar.gz
   - cp ${file}.tar.xz ./dist/${path}${file}.tar.xz
   
@@ -106,7 +110,9 @@ dist:
   - "git push https://oauth2:${PRIVATE_TOKEN}@gitlab.com/hybrix/dist -f || true"
 
   only:
-  - /^v.*release$/
+    refs:
+      - tags
+  #- /^v.*release$/
 
 # ---------------------------------------------------------------------------
 
