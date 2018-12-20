@@ -88,9 +88,9 @@ dist:
   - ls
   - ls ${component}
   
-  - zip -r ${file}.zip ${component}
-  - tar -zcvf ${file}.tar.gz ${component}
-  - tar cfJ ${file}.tar.xz ${component} 
+  - zip -r ${file}.zip ${component}/.
+  - tar -zcvf ${file}.tar.gz ${component}/.
+  - tar cfJ ${file}.tar.xz ${component}/.
   
   - cp ${file}.zip ./dist/${path}${file}.zip
   - cp ${file}.tar.gz ./dist/${path}${file}.tar.gz
