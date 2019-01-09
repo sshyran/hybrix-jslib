@@ -16,6 +16,7 @@
     "diag": "sh scripts/npm/diag.sh",
     "dist": "sh ./scripts/npm/dist.sh",
     "build": "sh ./scripts/npm/setup.sh; sh ./scripts/npm/compile.sh; sh ./scripts/npm/dist.sh",
+    "check": "sh scripts/npm/check.sh",
     "clean" : "rm -rf dist/*"
   },
   "repository": {
