@@ -58,5 +58,9 @@ if [ ! -e "$INTERFACE/common" ];then
 
 fi
 
+
+# GIT HOOKS
+sh "$COMMON/hooks/hooks.sh" "$INTERFACE"
+
 export PATH="$OLDPATH"
 cd "$WHEREAMI"
