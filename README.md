@@ -1,8 +1,8 @@
-# IoC tools
+# hybrix.interface
 
 ## getting started
 
-This is the repository containing common tools for Internet of Coins.
+This is the repository containing the interface tool for hybrix.
 Documentation is generated automatically from the code, and can be found
 in the directory ./out/index.html . Open this in your browser to learn
 how to use the tools and client utilities.
