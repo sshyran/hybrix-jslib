@@ -35,8 +35,12 @@ else
   $INTERFACE/node_modules/uglify-es/bin/uglifyjs "$INTERFACE/dist/hybrixd.interface.web.js.tmp" > "$INTERFACE/dist/hybrixd.interface.web.js.min.tmp"
 fi
 
-# fuse the packed files together
-cat "$INTERFACE/dist/hybrixd.interface.nacl.js.tmp" "$INTERFACE/dist/hybrixd.interface.web.js.min.tmp"  > "$INTERFACE/dist/hybrix-lib.web.js"
+# fuse the packed files together (with license information)
+cat "$INTERFACE/LICENSE-pack.md" "$INTERFACE/dist/hybrixd.interface.nacl.js.tmp" "$INTERFACE/dist/hybrixd.interface.web.js.min.tmp"  > "$INTERFACE/dist/hybrix-lib.web.js"
+
+# fuse the license to nodejs version of interface
+cat "$INTERFACE/LICENSE-pack.md" "$INTERFACE/dist/hybrix-lib.nodejs.js" > "$INTERFACE/dist/hybrix-lib.nodejs.js.tmp"
+mv "$INTERFACE/dist/hybrix-lib.nodejs.js.tmp" "$INTERFACE/dist/hybrix-lib.nodejs.js"
 
 # clean up
 rm "$INTERFACE/lib/interface.nodejs.js.tmp"
