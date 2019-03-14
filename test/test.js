@@ -95,9 +95,9 @@ let renderCellCLI = (valid, data, counter) => {
   counter.total++;
   if (valid) {
     counter.valid++;
-    return '*';
+    return '\033[32m OK \033[0m';
   } else {
-    return 'X';
+    return '\033[31mFAIL\033[0m';
   }
 };
 
@@ -113,21 +113,21 @@ let renderTableCLI = (data) => {
     r += '      ├──────┼─────┼────┼──────┼──────┼────┼──────┼──────┼────┤' + '\n';
     r += symbol.substr(0, 5) + '     '.substr(0, 5 - symbol.length) + ' │';
     if (typeof data[symbol] !== 'undefined') {
-      r += renderCellCLI(validDetails(data[symbol].details), data[symbol].details, counter) + '     │';
-      r += renderCellCLI(validSample(data[symbol].sample), data[symbol].sample, counter) + '    │';
-      r += renderCellCLI(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter) + '   │';
-      r += renderCellCLI(validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter) + '     │';
-      r += renderCellCLI(validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter) + '     │';
-      //      r += renderCellCLI(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter) + '   │';
-      //      r += renderCellCLI(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter) + ' │';
-      r += renderCellCLI(validValid(data[symbol].seedValid), data[symbol].seedValid, counter) + '   │';
-      r += renderCellCLI(validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter) + '     │';
-      r += renderCellCLI(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter) + '     │';
-      //      r += renderCellCLI(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter) + '   │';
-      r += renderCellCLI(validSign(data[symbol].seedSign), data[symbol].seedSign, counter) + '   │';
+      r += ' '+renderCellCLI(validDetails(data[symbol].details), data[symbol].details, counter) + ' │';
+      r += renderCellCLI(validSample(data[symbol].sample), data[symbol].sample, counter) + ' │';
+      r += renderCellCLI(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter) + '│';
+      r +=' '+ renderCellCLI(validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter) + ' │';
+      r += ' '+renderCellCLI(validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter) + ' │';
+      //      r += renderCellCLI(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter) + '│';
+      //      r += renderCellCLI(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter) + '│';
+      r += renderCellCLI(validValid(data[symbol].seedValid), data[symbol].seedValid, counter) + '│';
+      r += ' '+renderCellCLI(validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter) + ' │';
+      r += ' '+renderCellCLI(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter) + ' │';
+      //      r += renderCellCLI(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter) + '│';
+      r += renderCellCLI(validSign(data[symbol].seedSign), data[symbol].seedSign, counter) + '│';
       r += '\n';
     } else {
-      r += 'X     │X    │X   │X     │X     │X   │X     │X     │X   │ !' + '\n';
+      r += ' \033[31mFAIL\033[0m │\033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ !' + '\n';
     }
   }
   r += '      └──────┴─────┴────┴──────┴──────┴────┴──────┴──────┴────┘' + '\n';
