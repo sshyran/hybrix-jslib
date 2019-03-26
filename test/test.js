@@ -64,7 +64,7 @@ function testAsset (symbol) {
         seedValid: {data: result.seedValid + ' ' + result.address, step: 'id'},
         seedBalance: {data: result.seedBalance, step: 'id'},
         seedUnspent: {data: result.seedUnspent, step: 'id'},
-        seedSign: {data: {symbol: symbol, amount: testAmount, target: result.sample.address}, step: 'rawTransaction'}
+        seedSign: {data: {symbol: symbol, amount: testAmount, target: result.sample.address, validate:false}, step: 'rawTransaction'}
         // seedSign: {data: {symbol: symbol, target: result.sample.address, unspent: result.seedUnspent, amount: Number(testAmount), fee: result.details.fee}, step: 'signTransaction'}
         // seedHistory: {data: result.seedHistory, step: 'id'},
       };
