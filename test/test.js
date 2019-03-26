@@ -264,6 +264,7 @@ function go (mode) {
       waves: testAsset('waves'),
       xcp: testAsset('xcp'),
       xem: testAsset('xem'),
+      xrp: testAsset('xrp'),
       zec: testAsset('zec')
       // bts: testAsset('bts'), -> FAUCET, ETC!
       // bch: testAsset('bch'), -> ADD SEGWIT
