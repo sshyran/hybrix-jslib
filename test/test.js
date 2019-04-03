@@ -26,6 +26,7 @@ function testAsset (symbol) {
     {symbol: symbol}, 'addAsset',
     {
       sample: {data: {query: '/asset/' + symbol + '/sample'}, step: 'rout'},
+      test: {data: {query: '/asset/' + symbol + '/test'}, step: 'rout'},
       details: {data: {query: '/asset/' + symbol + '/details'}, step: 'rout'},
       address: {data: {symbol: symbol}, step: 'getAddress'},
       publicKey: {data: {symbol: symbol}, step: 'getPublicKey'}
@@ -34,6 +35,7 @@ function testAsset (symbol) {
     (result) => {
       return {
         sample: {data: result.sample, step: 'id'},
+        test: {data: result.test, step: 'id'},
         details: {data: result.details, step: 'id'},
         address: {data: result.address, step: 'id'},
 
@@ -51,7 +53,10 @@ function testAsset (symbol) {
     },
     'parallel',
     (result) => {
+
+      console.log(result.test);
       return {
+        test: {data: result.test, step: 'id'},
         sample: {data: result.sample, step: 'id'},
         details: {data: result.details, step: 'id'},
         sampleValid: {data: result.sampleValid + ' ' + result.sample.address, step: 'id'},
@@ -64,7 +69,7 @@ function testAsset (symbol) {
         seedValid: {data: result.seedValid + ' ' + result.address, step: 'id'},
         seedBalance: {data: result.seedBalance, step: 'id'},
         seedUnspent: {data: result.seedUnspent, step: 'id'},
-        seedSign: {data: {symbol: symbol, amount: testAmount, target: result.sample.address, validate:false}, step: 'rawTransaction'}
+        seedSign: {data: {symbol: symbol, amount: testAmount, target: result.sample.address, validate:false, unspent:result.test.hasOwnProperty('unspent')?result.test.unspent:result.seedUnspent}, step: 'rawTransaction'}
         // seedSign: {data: {symbol: symbol, target: result.sample.address, unspent: result.seedUnspent, amount: Number(testAmount), fee: result.details.fee}, step: 'signTransaction'}
         // seedHistory: {data: result.seedHistory, step: 'id'},
       };
