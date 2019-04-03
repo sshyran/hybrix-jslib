@@ -53,8 +53,6 @@ function testAsset (symbol) {
     },
     'parallel',
     (result) => {
-
-      console.log(result.test);
       return {
         test: {data: result.test, step: 'id'},
         sample: {data: result.sample, step: 'id'},
