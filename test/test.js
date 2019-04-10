@@ -1,5 +1,8 @@
 let ProgressBar;
 
+const DEFAULT_AMOUNT = 0.00001;
+
+
 function makeProgressBar (title) {
   bar = new ProgressBar(' [.] ' + title + ': [:bar] :percent, eta: :etas', {
     complete: '▓',
@@ -21,7 +24,6 @@ function getParameterByName (name, url) {
 }
 
 function testAsset (symbol) {
-  let testAmount = 0.00001;
   return { data: [
     {symbol: symbol}, 'addAsset',
     {
@@ -41,13 +43,13 @@ function testAsset (symbol) {
 
         sampleValid: {data: {query: '/asset/' + symbol + '/validate/' + result.sample.address}, step: 'rout'},
         sampleBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.sample.address}, step: 'rout'},
-        sampleUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.sample.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.address + '/' + result.sample.publicKey}, step: 'rout'},
+        sampleUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.sample.address + '/' + (Number(DEFAULT_AMOUNT) + Number(result.details.fee)) + '/' + result.address + '/' + result.sample.publicKey}, step: 'rout'},
         // sampleHistory: {data: {query: '/asset/' + symbol + '/history/' + result.sample.address}, step: 'rout'},
         // sampleTransaction: {data: {query: '/asset/' + symbol + '/transaction/' + result.sample.transaction}, step: 'rout'},
 
         seedValid: {data: {query: '/asset/' + symbol + '/validate/' + result.address}, step: 'rout'},
         seedBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.address}, step: 'rout'},
-        seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(testAmount) + Number(result.details.fee)) + '/' + result.sample.address + '/' + result.publicKey}, step: 'rout'}
+        seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(DEFAULT_AMOUNT) + Number(result.details.fee)) + '/' + result.sample.address + '/' + result.publicKey}, step: 'rout'}
         // seedHistory: {data: {query: '/asset/' + symbol + '/history/' + result.address}, step: 'rout'}
       };
     },
@@ -62,13 +64,11 @@ function testAsset (symbol) {
         sampleUnspent: {data: result.sampleUnspent, step: 'id'},
         // sampleHistory: {data: result.sampleHistory, step: 'id'},
         // sampleTransaction: {data: result.sampleTransaction, step: 'id'},
-        //        sampleSign: {data: {symbol: symbol, target: result.address, unspent: result.sampleUnspent, amount: testAmount, fee: result.details.fee}, step: 'signTransaction'},
 
         seedValid: {data: result.seedValid + ' ' + result.address, step: 'id'},
         seedBalance: {data: result.seedBalance, step: 'id'},
         seedUnspent: {data: result.seedUnspent, step: 'id'},
-        seedSign: {data: {symbol: symbol, amount: testAmount, target: result.sample.address, validate:false, unspent:result.test.hasOwnProperty('unspent')?result.test.unspent:result.seedUnspent}, step: 'rawTransaction'}
-        // seedSign: {data: {symbol: symbol, target: result.sample.address, unspent: result.seedUnspent, amount: Number(testAmount), fee: result.details.fee}, step: 'signTransaction'}
+        seedSign: {data: {symbol: symbol, amount: DEFAULT_AMOUNT, target: result.sample.address, validate:false, unspent:result.test.hasOwnProperty('unspent')?result.test.unspent:result.seedUnspent}, step: 'rawTransaction'}
         // seedHistory: {data: result.seedHistory, step: 'id'},
       };
     },
