@@ -104,6 +104,7 @@ dist:
 
   # for interface we like to distribute the js files directly as well
   - cp -r ./${component}/*.js ./dist/${path}
+  - cp -r ./${component}/*.js ./dist/${component}/latest/
   - cd ./dist/
   
   # configure git-user
