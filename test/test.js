@@ -54,7 +54,7 @@ function testAsset (symbol) {
       };
     },
     'parallel',
-    (result) => {
+    result => {
       return {
         test: {data: result.test, step: 'id'},
         sample: {data: result.sample, step: 'id'},
@@ -72,7 +72,30 @@ function testAsset (symbol) {
         // seedHistory: {data: result.seedHistory, step: 'id'},
       };
     },
+    'parallel',
+
+    result => {
+      return {
+        test: {data: result.test, step: 'id'},
+        sample: {data: result.sample, step: 'id'},
+        details: {data: result.details, step: 'id'},
+        sampleValid:{data: result.sampleValid, step: 'id'},
+        sampleBalance: {data: result.sampleBalance, step: 'id'},
+        sampleUnspent: {data: result.sampleUnspent, step: 'id'},
+        // sampleHistory: {data: result.sampleHistory, step: 'id'},
+        // sampleTransaction: {data: result.sampleTransaction, step: 'id'},
+
+        seedValid: {data: result.seedValid, step: 'id'},
+        seedBalance: {data: result.seedBalance, step: 'id'},
+        seedUnspent: {data: result.seedUnspent, step: 'id'},
+        seedSign:  {data: result.seedSign, step: 'id'},
+        seedSignHash: {data: {data:result.seedSign}, step: 'hash'}
+        // seedHistory: {data: result.seedHistory, step: 'id'},
+      };
+    },
     'parallel'
+
+
   ],
   step: 'sequential'
   };
@@ -86,6 +109,7 @@ let validHistory = history => typeof history === 'object' && history !== null;
 let validSample = sample => typeof sample === 'object' && sample !== null;
 let validTransaction = transaction => typeof transaction === 'object' && transaction !== null;
 let validSign = sign => typeof sign === 'string';
+let validSignHash = (signHash,testHash) => signHash===testHash;
 
 let renderCellCLI = (valid, data, counter) => {
   let title;
@@ -110,10 +134,10 @@ let renderTableCLI = (data) => {
   let r = '\n';
   r += ' #     SAMPLE                                      GENERATED                       ' + '\n';
 
-  r += '      ┌──────┬─────┬────┬──────┬──────┬────┬──────┬──────┬────┐' + '\n';
-  r += '      │Detail│Sampl│Vald│Balnce│Unspnt│Vald│Balnce│Unspnt│Sign│' + '\n';
+  r += '      ┌──────┬─────┬────┬──────┬──────┬────┬──────┬──────┬────┬────┐' + '\n';
+  r += '      │Detail│Sampl│Vald│Balnce│Unspnt│Vald│Balnce│Unspnt│Sign│Hash│' + '\n';
   for (let symbol in data) {
-    r += '      ├──────┼─────┼────┼──────┼──────┼────┼──────┼──────┼────┤' + '\n';
+    r += '      ├──────┼─────┼────┼──────┼──────┼────┼──────┼──────┼────┼────┤' + '\n';
     r += symbol.substr(0, 5) + '     '.substr(0, 5 - symbol.length) + ' │';
     if (typeof data[symbol] !== 'undefined') {
       r += ' '+renderCellCLI(validDetails(data[symbol].details), data[symbol].details, counter) + ' │';
@@ -128,12 +152,13 @@ let renderTableCLI = (data) => {
       r += ' '+renderCellCLI(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter) + ' │';
       //      r += renderCellCLI(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter) + '│';
       r += renderCellCLI(validSign(data[symbol].seedSign), data[symbol].seedSign, counter) + '│';
+      r += renderCellCLI(validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash, counter)+'│';
       r += '\n';
     } else {
-      r += ' \033[31mFAIL\033[0m │\033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ !' + '\n';
+      r += ' \033[31mFAIL\033[0m │\033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│\033[31mFAIL\033[0m│ !' + '\n';
     }
   }
-  r += '      └──────┴─────┴────┴──────┴──────┴────┴──────┴──────┴────┘' + '\n';
+  r += '      └──────┴─────┴────┴──────┴──────┴────┴──────┴──────┴────┴────┘' + '\n';
   r += '\n';
   r += '      SUCCESS RATE: ' + (((counter.valid / counter.total) || 0) * 100) + '%' + '\n';
   // console.log(data);
@@ -165,7 +190,7 @@ let renderTableWeb = (data) => {
   // r+='<td>History</td><td>Transaction</td>';
   r += '<td>Valid</td><td>Balance</td><td>Unspent</td>';
   // r+='<td>History</td>'
-  r += '<td>Sign</td></tr>';
+  r += '<td>Sign</td><td>Hash</td></tr>';
   for (let symbol in data) {
     r += '<tr>';
     r += '<td>' + symbol + '</td>';
@@ -183,8 +208,9 @@ let renderTableWeb = (data) => {
       r += renderCellWeb(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter);
       // DISABLED      r += renderCellWeb(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter);
       r += renderCellWeb(validSign(data[symbol].seedSign), data[symbol].seedSign, counter);
+      r += renderCellWeb(validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash, counter);
     } else {
-      r += '<td colspan="13" style="background-color:red">Fail</td>';
+      r += '<td colspan="14" style="background-color:red">Fail</td>';
     }
     r += '</tr>';
   }
