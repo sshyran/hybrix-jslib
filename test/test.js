@@ -35,6 +35,8 @@ function testAsset (symbol) {
     },
     'parallel',
     (result) => {
+      if(typeof result.sample === 'undefined'){result.sample={};}
+      if(typeof result.details === 'undefined'){result.details={};}
       return {
         sample: {data: result.sample, step: 'id'},
         test: {data: result.test, step: 'id'},
@@ -68,7 +70,28 @@ function testAsset (symbol) {
         seedValid: {data: result.seedValid + ' ' + result.address, step: 'id'},
         seedBalance: {data: result.seedBalance, step: 'id'},
         seedUnspent: {data: result.seedUnspent, step: 'id'},
-        seedSign: {data: {symbol: symbol, amount: DEFAULT_AMOUNT, target: result.sample.address, validate:false, unspent:result.test.hasOwnProperty('unspent')?result.test.unspent:result.seedUnspent}, step: 'rawTransaction'}
+        seedSign: {data: {symbol: symbol, amount: DEFAULT_AMOUNT, target: result.sample.address, validate:false, unspent:result.test.hasOwnProperty('unspent')?result.test.unspent:result.seedUnspent, time: result.test.time}, step: 'rawTransaction'}
+        // seedHistory: {data: result.seedHistory, step: 'id'},
+      };
+    },
+    'parallel',
+
+    result => {
+      return {
+        test: {data: result.test, step: 'id'},
+        sample: {data: result.sample, step: 'id'},
+        details: {data: result.details, step: 'id'},
+        sampleValid:{data: result.sampleValid, step: 'id'},
+        sampleBalance: {data: result.sampleBalance, step: 'id'},
+        sampleUnspent: {data: result.sampleUnspent, step: 'id'},
+        // sampleHistory: {data: result.sampleHistory, step: 'id'},
+        // sampleTransaction: {data: result.sampleTransaction, step: 'id'},
+
+        seedValid: {data: result.seedValid, step: 'id'},
+        seedBalance: {data: result.seedBalance, step: 'id'},
+        seedUnspent: {data: result.seedUnspent, step: 'id'},
+        seedSign:  {data: result.seedSign, step: 'id'},
+        seedSignHash: {data: {data:result.seedSign}, step: 'hash'}
         // seedHistory: {data: result.seedHistory, step: 'id'},
       };
     },
@@ -101,15 +124,15 @@ function testAsset (symbol) {
   };
 }
 
-let validDetails = details => typeof details === 'object' && details !== null;
+let validDetails = details => typeof details === 'object' && details !== null && details.hasOwnProperty('symbol') && details.hasOwnProperty('name') && details.hasOwnProperty('fee') && details.hasOwnProperty('factor')&& details.hasOwnProperty('contract')&& details.hasOwnProperty('mode')&& details.hasOwnProperty('fee-symbol')&& details.hasOwnProperty('fee-factor')&& details.hasOwnProperty('keygen-base');
 let validValid = valid => typeof valid === 'string' && valid.startsWith('valid');
 let validBalance = (balance, factor) => typeof balance !== 'undefined' && balance !== null && !isNaN(balance) && balance.toString().indexOf('.') !== -1 && balance.toString().split('.')[1].length === Number(factor);
 let validUnspent = unspent => typeof unspent !== 'undefined' && unspent !== null;
 let validHistory = history => typeof history === 'object' && history !== null;
-let validSample = sample => typeof sample === 'object' && sample !== null;
+let validSample = sample => typeof sample === 'object' && sample !== null && sample.hasOwnProperty('address')&& sample.hasOwnProperty('transaction');
 let validTransaction = transaction => typeof transaction === 'object' && transaction !== null;
 let validSign = sign => typeof sign === 'string';
-let validSignHash = (signHash,testHash) => signHash===testHash;
+let validSignHash = (signHash,testHash) => signHash===testHash || testHash=='dynamic';
 
 let renderCellCLI = (valid, data, counter) => {
   let title;
@@ -152,7 +175,7 @@ let renderTableCLI = (data) => {
       r += ' '+renderCellCLI(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter) + ' │';
       //      r += renderCellCLI(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter) + '│';
       r += renderCellCLI(validSign(data[symbol].seedSign), data[symbol].seedSign, counter) + '│';
-      r += renderCellCLI(validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash, counter)+'│';
+      r += renderCellCLI(validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash+"|"+data[symbol].test.hash, counter)+'│';
       r += '\n';
     } else {
       r += ' \033[31mFAIL\033[0m │\033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│\033[31mFAIL\033[0m│ !' + '\n';
@@ -208,7 +231,7 @@ let renderTableWeb = (data) => {
       r += renderCellWeb(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter);
       // DISABLED      r += renderCellWeb(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter);
       r += renderCellWeb(validSign(data[symbol].seedSign), data[symbol].seedSign, counter);
-      r += renderCellWeb(validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash, counter);
+      r += renderCellWeb(validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash+"|"+data[symbol].test.hash, counter);
     } else {
       r += '<td colspan="14" style="background-color:red">Fail</td>';
     }
@@ -258,7 +281,7 @@ function go (mode) {
 
     hybrix = new Hybrix.Interface({XMLHttpRequest: XMLHttpRequest});
     DEBUG = getParameterByName('debug') === 'true';
-    if (getParameterByName('host')) { host = getParameterByName('debug'); }
+    if (getParameterByName('host')) { host = getParameterByName('host'); }
 
     renderTable = renderTableWeb;
     progressCallback = progress => {
@@ -267,7 +290,7 @@ function go (mode) {
   }
 
   let tests = {};
-  if (symbolsToTest) {
+  if (symbolsToTest && symbolsToTest!=='*') {
     symbolsToTest = symbolsToTest.split(',');
     for (let i = 0; i < symbolsToTest.length; ++i) {
       tests[symbolsToTest[i]] = testAsset(symbolsToTest[i]);
