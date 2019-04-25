@@ -37,6 +37,7 @@ function testAsset (symbol) {
     (result) => {
       if(typeof result.sample === 'undefined'){result.sample={};}
       if(typeof result.details === 'undefined'){result.details={};}
+      if(typeof result.test === 'undefined'){result.test={};}
       return {
         sample: {data: result.sample, step: 'id'},
         test: {data: result.test, step: 'id'},
