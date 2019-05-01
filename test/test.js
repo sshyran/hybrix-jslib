@@ -180,7 +180,7 @@ let renderTableCLI = (data) => {
       r += renderCellCLI(validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash+"|"+data[symbol].test.hash, counter)+'│';
       r += '\n';
     } else {
-      r += ' \033[31mFAIL\033[0m │\033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│\033[31mFAIL\033[0m│ !' + '\n';
+      r += ' \033[31mFAIL\033[0m │\033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│\033[31mFAIL\033[0m│ !' + '\n';
     }
   }
   r += '      └──────┴─────┴────┴──────┴──────┴────┴────┴──────┴──────┴────┴────┘' + '\n';
