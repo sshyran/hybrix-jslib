@@ -262,10 +262,10 @@ function go (mode) {
     progressCallback = progress => { bar.update(progress); };
     // cli options
 
-    let stdio = require('stdio');
+    const stdio = require('stdio');
 
     // command line options and init
-    let ops = stdio.getopt({
+    const ops = stdio.getopt({
       'symbol': {key: 's', args: 1, description: 'Select a symbol or comma separated symbols to run test'},
       'debug': {key: 'd', args: 0, description: 'Output debug messages.'},
       'host': {key: 'h', args: 1, description: 'Set host Defaults to :' + host}
@@ -292,7 +292,7 @@ function go (mode) {
     };
   }
 
-  let tests = {};
+  const tests = {};
   if (symbolsToTest && symbolsToTest!=='*') {
     symbolsToTest = symbolsToTest.split(',');
     for (let i = 0; i < symbolsToTest.length; ++i) {
@@ -302,6 +302,7 @@ function go (mode) {
     tests = {
       dummy: testAsset('dummy'),
       eth: testAsset('eth'),
+      flo: testAsset('flo'),
       ark: testAsset('ark'),
       btc: testAsset('btc'),
       burst: testAsset('burst'),
@@ -320,7 +321,14 @@ function go (mode) {
       xcp: testAsset('xcp'),
       xem: testAsset('xem'),
       xrp: testAsset('xrp'),
-      zec: testAsset('zec')
+      zec: testAsset('zec'),
+
+      'eth.xhy': testAsset('eth.xhy'),
+      'waves.xhy': testAsset('waves.xhy'),
+      'nxt.xhy': testAsset('nxt.xhy'),
+      'omni.xhy': testAsset('omni.xhy'),
+      'xcp.xhy': testAsset('xcp.xhy'),
+      'xem.xhy': testAsset('xem.xhy')
       // bts: testAsset('bts'), -> FAUCET, ETC!
       // bch: testAsset('bch'), -> ADD SEGWIT
       // xel: testAsset('xel'), //-> HOST issues
