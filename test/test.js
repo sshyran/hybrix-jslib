@@ -292,7 +292,7 @@ function go (mode) {
     };
   }
 
-  const tests = {};
+  let tests = {};
   if (symbolsToTest && symbolsToTest!=='*') {
     symbolsToTest = symbolsToTest.split(',');
     for (let i = 0; i < symbolsToTest.length; ++i) {
