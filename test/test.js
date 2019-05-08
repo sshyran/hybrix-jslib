@@ -180,6 +180,7 @@ let renderTableCLI = (data) => {
       r += renderCellCLI(validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash+"|"+data[symbol].test.hash, counter)+'│';
       r += '\n';
     } else {
+      counter.total+=11;
       r += ' \033[31mFAIL\033[0m │\033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│\033[31mFAIL\033[0m│ !' + '\n';
     }
   }
@@ -236,6 +237,7 @@ let renderTableWeb = (data) => {
       r += renderCellWeb(validSign(data[symbol].seedSign), data[symbol].seedSign, counter);
       r += renderCellWeb(validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash+"|"+data[symbol].test.hash, counter);
     } else {
+      counter.total+=11;
       r += '<td colspan="14" style="background-color:red">Fail</td>';
     }
     r += '</tr>';
@@ -300,6 +302,7 @@ function go (mode) {
     }
   } else {
     tests = {
+      bch: testAsset('bch'),
       dummy: testAsset('dummy'),
       eth: testAsset('eth'),
       flo: testAsset('flo'),
@@ -330,7 +333,6 @@ function go (mode) {
       'xcp.xhy': testAsset('xcp.xhy'),
       'xem.xhy': testAsset('xem.xhy')
       // bts: testAsset('bts'), -> FAUCET, ETC!
-      // bch: testAsset('bch'), -> ADD SEGWIT
       // xel: testAsset('xel'), //-> HOST issues
     };
   }
