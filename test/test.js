@@ -278,7 +278,7 @@ function go (mode) {
 
     // create IoC interface object
     Hybrix = require('../dist/hybrix-lib.nodejs.js');
-    hybrix = new Hybrix.Interface({http: require('http')});
+    hybrix = new Hybrix.Interface({http: require('http'),https: require('https')});
     DEBUG = ops.debug;
     renderTable = renderTableCLI;
   } else {
