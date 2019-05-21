@@ -22,13 +22,13 @@ echo "var nacl_factory = require('../common/crypto/nacl.js');" > "$INTERFACE/lib
 cat "$INTERFACE/lib/interface.js" >> "$INTERFACE/lib/interface.nodejs.js.tmp"
 
 if [ "$1" = "debug" ] || [ "$1" = "development" ]; then
-  echo "development mode, don't uglify";
+  echo "[i] Webpack Development mode : don't uglify";
   $INTERFACE/node_modules/webpack/bin/webpack.js --config "$INTERFACE/conf/webpack.config.hybrixd.interface.nodejs.js" --mode development
   cat "$INTERFACE/common/crypto/nacl.js" > "$INTERFACE/dist/hybrixd.interface.nacl.js.tmp"
   $INTERFACE/node_modules/webpack/bin/webpack.js -p --config "$INTERFACE/conf/webpack.config.hybrixd.interface.web.js" --mode development
   cat "$INTERFACE/dist/hybrixd.interface.web.js.tmp" > "$INTERFACE/dist/hybrixd.interface.web.js.min.tmp"
 else
-  echo "uglify";
+  echo "[i] Webpack Production mode : uglify";
   $INTERFACE/node_modules/webpack/bin/webpack.js --config "$INTERFACE/conf/webpack.config.hybrixd.interface.nodejs.js" --mode production
   $INTERFACE/node_modules/uglify-es/bin/uglifyjs "$INTERFACE/common/crypto/nacl.js" > "$INTERFACE/dist/hybrixd.interface.nacl.js.tmp"
   $INTERFACE/node_modules/webpack/bin/webpack.js -p --config "$INTERFACE/conf/webpack.config.hybrixd.interface.web.js" --mode production
