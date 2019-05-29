@@ -47,7 +47,7 @@ function testAsset (symbol) {
         sampleValid: {data: {query: '/asset/' + symbol + '/validate/' + result.sample.address}, step: 'rout'},
         sampleBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.sample.address}, step: 'rout'},
         sampleUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.sample.address + '/' + (Number(DEFAULT_AMOUNT) + Number(result.details.fee)) + '/' + result.address + '/' + result.sample.publicKey}, step: 'rout'},
-        // sampleHistory: {data: {query: '/asset/' + symbol + '/history/' + result.sample.address}, step: 'rout'},
+         sampleHistory: {data: {query: '/asset/' + symbol + '/history/' + result.sample.address}, step: 'rout'},
         sampleTransaction: {data: {query: '/asset/' + symbol + '/transaction/' + result.sample.transaction}, step: 'rout'},
 
         seedValid: {data: {query: '/asset/' + symbol + '/validate/' + result.address}, step: 'rout'},
@@ -65,7 +65,7 @@ function testAsset (symbol) {
         sampleValid: {data: result.sampleValid + ' ' + result.sample.address, step: 'id'},
         sampleBalance: {data: result.sampleBalance, step: 'id'},
         sampleUnspent: {data: result.sampleUnspent, step: 'id'},
-        // sampleHistory: {data: result.sampleHistory, step: 'id'},
+        sampleHistory: {data: result.sampleHistory, step: 'id'},
         sampleTransaction: {data: result.sampleTransaction, step: 'id'},
 
         seedValid: {data: result.seedValid + ' ' + result.address, step: 'id'},
@@ -85,7 +85,7 @@ function testAsset (symbol) {
         sampleValid:{data: result.sampleValid, step: 'id'},
         sampleBalance: {data: result.sampleBalance, step: 'id'},
         sampleUnspent: {data: result.sampleUnspent, step: 'id'},
-        // sampleHistory: {data: result.sampleHistory, step: 'id'},
+        sampleHistory: {data: result.sampleHistory, step: 'id'},
         sampleTransaction: {data: result.sampleTransaction, step: 'id'},
 
         seedValid: {data: result.seedValid, step: 'id'},
@@ -106,7 +106,7 @@ function testAsset (symbol) {
         sampleValid:{data: result.sampleValid, step: 'id'},
         sampleBalance: {data: result.sampleBalance, step: 'id'},
         sampleUnspent: {data: result.sampleUnspent, step: 'id'},
-         //sampleHistory: {data: result.sampleHistory, step: 'id'},
+         sampleHistory: {data: result.sampleHistory, step: 'id'},
          sampleTransaction: {data: result.sampleTransaction, step: 'id'},
 
         seedValid: {data: result.seedValid, step: 'id'},
@@ -157,12 +157,11 @@ let renderTableCLI = (data) => {
   let counter = {valid: 0, total: 0};
 
   let r = '\n';
-  r += ' #     SAMPLE                                      GENERATED                       ' + '\n';
-
-  r += '      ┌──────┬─────┬────┬──────┬──────┬────┬────┬──────┬──────┬────┬────┐' + '\n';
-  r += '      │Detail│Sampl│Vald│Balnce│Unspnt│Tran│Vald│Balnce│Unspnt│Sign│Hash│' + '\n';
+  r += '   #   SAMPLE                                    GENERATED                    ' + '\n';
+  r += '      ┌──────┬─────┬────┬──────┬──────┬────┬────┬────┬──────┬──────┬────┬────┐' + '\n';
+  r += '      │Detail│Sampl│Vald│Balnce│Unspnt│Hist│Tran│Vald│Balnce│Unspnt│Sign│Hash│' + '\n';
   for (let symbol in data) {
-  r += '      ├──────┼─────┼────┼──────┼──────┼────┼────┼──────┼──────┼────┼────┤' + '\n';
+  r += '      ├──────┼─────┼────┼──────┼──────┼────┼────┼────┼──────┼──────┼────┼────┤' + '\n';
     r += symbol.substr(0, 5) + '     '.substr(0, 5 - symbol.length) + ' │';
     if (typeof data[symbol] !== 'undefined') {
       r += ' '+renderCellCLI(validDetails(data[symbol].details), data[symbol].details, counter) + ' │';
@@ -170,7 +169,7 @@ let renderTableCLI = (data) => {
       r += renderCellCLI(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter) + '│';
       r +=' '+ renderCellCLI(validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter) + ' │';
       r += ' '+renderCellCLI(validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter) + ' │';
-      //      r += renderCellCLI(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter) + '│';
+      r += renderCellCLI(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter) + '│';
       r += renderCellCLI(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter) + '│';
       r += renderCellCLI(validValid(data[symbol].seedValid), data[symbol].seedValid, counter) + '│';
       r += ' '+renderCellCLI(validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter) + ' │';
@@ -181,10 +180,10 @@ let renderTableCLI = (data) => {
       r += '\n';
     } else {
       counter.total+=11;
-      r += ' \033[31mFAIL\033[0m │\033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│\033[31mFAIL\033[0m│ !' + '\n';
+      r += ' \033[31mFAIL\033[0m │\033[31mFAIL\033[0m │\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│\033[31mFAIL\033[0m│\033[31mFAIL\033[0m│ \033[31mFAIL\033[0m │ \033[31mFAIL\033[0m │\033[31mFAIL\033[0m│\033[31mFAIL\033[0m│ !' + '\n';
     }
   }
-  r += '      └──────┴─────┴────┴──────┴──────┴────┴────┴──────┴──────┴────┴────┘' + '\n';
+  r += '      └──────┴─────┴────┴──────┴──────┴────┴────┴────┴──────┴──────┴────┴────┘' + '\n';
   r += '\n';
   r += '      SUCCESS RATE: ' + (((counter.valid / counter.total) || 0) * 100) + '%' + '\n';
   // console.log(data);
@@ -213,7 +212,7 @@ let renderTableWeb = (data) => {
 
   let r = '<table><tr><td>Symbol</td><td colspan="2"></td><td colspan="6">Sample</td><td colspan="5">Generated</td></tr>';
   r += '<tr><td></td><td>Details</td><td>Sample</td><td>Valid</td><td>Balance</td><td>Unspent</td>';
-  // r+='<td>History</td><td>Transaction</td>';
+   r+='<td>History</td>';
    r+='<td>Transaction</td>';
   r += '<td>Valid</td><td>Balance</td><td>Unspent</td>';
   // r+='<td>History</td>'
@@ -227,13 +226,12 @@ let renderTableWeb = (data) => {
       r += renderCellWeb(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter);
       r += renderCellWeb(validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter);
       r += renderCellWeb(validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter);
-      // DISABLED      r += renderCellWeb(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter);
+      r += renderCellWeb(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter);
       r += renderCellWeb(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter);
 
       r += renderCellWeb(validValid(data[symbol].seedValid), data[symbol].seedValid, counter);
       r += renderCellWeb(validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter);
       r += renderCellWeb(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter);
-      // DISABLED      r += renderCellWeb(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter);
       r += renderCellWeb(validSign(data[symbol].seedSign), data[symbol].seedSign, counter);
       r += renderCellWeb(validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash+"|"+data[symbol].test.hash, counter);
     } else {
