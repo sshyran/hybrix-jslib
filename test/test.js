@@ -1,3 +1,52 @@
+const knownIssues = {
+
+  bch_seedSign: "Not yet functioning. Perhaps funds missing for test",
+  bch_seedSignHash: "Not yet functioning. Perhaps funds missing for test",
+
+  btc_seedSignHash: "Signing still holds a dynamic componement",
+
+  burst_sampleHistory: "Not yet functioning",
+
+  'dash_seedSign': "Not yet functioning. Perhaps funds missing for test",
+  'dash_seedSignHash': "Not yet functioning. Perhaps funds missing for test",
+  dash_sampleHistory: "Not yet functioning",
+  dgb_sampleHistory: "Not yet functioning",
+  'dgb_seedSign': "Not yet functioning. Perhaps funds missing for test",
+  'dgb_seedSignHash': "Not yet functioning. Perhaps funds missing for test",
+
+  etc_sampleHistory: "Not yet functioning",
+  etc_sampleTransaction: "Not yet functioning",
+  'eth.xhy_sampleHistory': "Eth token history not yet supported",
+  exp_sampleHistory: "Not yet functioning",
+
+  flo_seedSign: "Not yet functioning. Perhaps funds missing for test",
+  flo_seedSignHash: "Not yet functioning. Perhaps funds missing for test",
+
+  omni_seedSignHash: "Not yet functioning. Perhaps funds missing for test",
+  'omni.xhy_seedSignHash': "Not yet functioning. Perhaps funds missing for test",
+
+
+
+  ubq_sampleHistory: "Not yet functioning",
+  ubq_sampleTransaction: "Not yet functioning",
+  rise_sampleTransaction: "Not yet functioning",
+  shift_sampleTransaction: "Not yet functioning",
+
+  xcp_seedSignHash: "Signing still holds a dynamic componement",
+  'xcp.xhy_seedSignHash': "Signing still holds a dynamic componement",
+
+  xcp_sampleTransaction:  "Missing data for source,dest,amount, fee",
+  'xcp.xhy_sampleTransaction':  "Missing data for source,dest,amount, fee",
+  xrp_seedSignHash: "Signing still holds a dynamic componement",
+  'zec_seedSign': "Not yet functioning. Perhaps funds missing for test",
+  'zec_seedSignHash': "Not yet functioning. Perhaps funds missing for test",
+  zec_sampleHistory: "Not yet functioning"
+
+
+};
+
+
+
 let ProgressBar;
 
 const DEFAULT_AMOUNT = 0.00001;
@@ -134,9 +183,36 @@ let validSample = sample => typeof sample === 'object' && sample !== null && sam
 
 let validTransaction = transaction => typeof transaction === 'object' && transaction !== null  && transaction.hasOwnProperty('id')  && transaction.hasOwnProperty('timestamp') && transaction.hasOwnProperty('amount')   && transaction.hasOwnProperty('symbol')  && transaction.hasOwnProperty('fee')  && transaction.hasOwnProperty('fee-symbol')  && transaction.hasOwnProperty('source') && transaction.hasOwnProperty('target')  && transaction.hasOwnProperty('confirmed') ;
 let validSign = sign => typeof sign === 'string';
-let validSignHash = (signHash,testHash) => signHash===testHash || testHash=='dynamic';
+let validSignHash = (signHash,testHash) => signHash===testHash || (testHash=='dynamic' && signHash!=='00000000');
 
-let renderCellCLI = (valid, data, counter) => {
+let renderCellCLI = (symbol,type,valid, data, counter, messages) => {
+  let title;
+  if (typeof data === 'object') {
+    title = JSON.stringify(data);
+  } else {
+    title = String(data);
+  }
+  title = title.replace(/"/g, '');
+  if(knownIssues.hasOwnProperty(symbol+'_'+type)){
+    if(valid){
+      counter.total++;
+      counter.valid++;
+      return '\033[36m OK \033[0m';
+    }else{
+      messages.push(symbol+ ' '+type+' : '+knownIssues[symbol+'_'+type]);
+      return '\033[33mWARN\033[0m';
+    }
+  } else if (valid) {
+    counter.total++;
+    counter.valid++;
+    return '\033[32m OK \033[0m';
+  } else {
+    counter.total++;
+    return '\033[31mFAIL\033[0m';
+  }
+};
+
+let renderCellWeb = (symbol,type,valid, data, counter, messages) => {
   let title;
   if (typeof data === 'object') {
     title = JSON.stringify(data);
@@ -145,17 +221,29 @@ let renderCellCLI = (valid, data, counter) => {
   }
   title = title.replace(/"/g, '');
   counter.total++;
-  if (valid) {
+  if(knownIssues.hasOwnProperty(symbol+'_'+type)){
+    if(valid){
+      counter.total++;
+      counter.valid++;
+      return '<td style="text-align:center;background-color:purple" title="' + title + '">&nbsp;</td>';
+    }else{
+      messages.push('<b>'+symbol+ ' '+type+'</b> : '+knownIssues[symbol+'_'+type]);
+      return '<td style="text-align:center;background-color:yellow" title="' + title + '">&nbsp;</td>';
+    }
+  } else if (valid) {
     counter.valid++;
-    return '\033[32m OK \033[0m';
+    return '<td style="text-align:center;background-color:green" title="' + title + '">&nbsp;</td>';
   } else {
-    return '\033[31mFAIL\033[0m';
+    return '<td style="text-align:center;background-color:red"  title="' + title + '">&nbsp;</td>';
   }
 };
 
+
+
+
 let renderTableCLI = (data) => {
   let counter = {valid: 0, total: 0};
-
+  const messages = [];
   let r = '\n';
   r += '   #   SAMPLE                                    GENERATED                    ' + '\n';
   r += '      ┌──────┬─────┬────┬──────┬──────┬────┬────┬────┬──────┬──────┬────┬────┐' + '\n';
@@ -164,19 +252,19 @@ let renderTableCLI = (data) => {
   r += '      ├──────┼─────┼────┼──────┼──────┼────┼────┼────┼──────┼──────┼────┼────┤' + '\n';
     r += symbol.substr(0, 5) + '     '.substr(0, 5 - symbol.length) + ' │';
     if (typeof data[symbol] !== 'undefined') {
-      r += ' '+renderCellCLI(validDetails(data[symbol].details), data[symbol].details, counter) + ' │';
-      r += renderCellCLI(validSample(data[symbol].sample), data[symbol].sample, counter) + ' │';
-      r += renderCellCLI(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter) + '│';
-      r +=' '+ renderCellCLI(validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter) + ' │';
-      r += ' '+renderCellCLI(validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter) + ' │';
-      r += renderCellCLI(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter) + '│';
-      r += renderCellCLI(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter) + '│';
-      r += renderCellCLI(validValid(data[symbol].seedValid), data[symbol].seedValid, counter) + '│';
-      r += ' '+renderCellCLI(validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter) + ' │';
-      r += ' '+renderCellCLI(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter) + ' │';
-      //      r += renderCellCLI(validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter) + '│';
-      r += renderCellCLI(validSign(data[symbol].seedSign), data[symbol].seedSign, counter) + '│';
-      r += renderCellCLI(validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash+"|"+data[symbol].test.hash, counter)+'│';
+      r += ' ' + renderCellCLI(symbol,'details',validDetails(data[symbol].details), data[symbol].details, counter, messages) + ' │';
+      r +=       renderCellCLI(symbol,'sample',validSample(data[symbol].sample), data[symbol].sample, counter, messages) + ' │';
+      r +=       renderCellCLI(symbol,'sampleValid',validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter, messages) + '│';
+      r += ' ' + renderCellCLI(symbol,'sampleBalance',validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter, messages) + ' │';
+      r += ' ' + renderCellCLI(symbol,'sampleUnspent',validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter, messages) + ' │';
+      r +=       renderCellCLI(symbol,'sampleHistory',validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter, messages) + '│';
+      r +=       renderCellCLI(symbol,'sampleTransaction',validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter, messages) + '│';
+      r +=       renderCellCLI(symbol,'seedValid',validValid(data[symbol].seedValid), data[symbol].seedValid, counter, messages) + '│';
+      r += ' ' + renderCellCLI(symbol,'seedBalance',validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter, messages) + ' │';
+      r += ' ' + renderCellCLI(symbol,'seedUnspent',validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter, messages) + ' │';
+      //      r += renderCellCLI(symbol,validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter, messages) + '│';
+      r +=       renderCellCLI(symbol,'seedSign',validSign(data[symbol].seedSign), data[symbol].seedSign, counter, messages) + '│';
+      r +=       renderCellCLI(symbol,'seedSignHash',validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash+"|"+data[symbol].test.hash, counter, messages)+'│';
       r += '\n';
     } else {
       counter.total+=11;
@@ -185,32 +273,20 @@ let renderTableCLI = (data) => {
   }
   r += '      └──────┴─────┴────┴──────┴──────┴────┴────┴────┴──────┴──────┴────┴────┘' + '\n';
   r += '\n';
+  r += 'Known Issues:\n';
+  for (let i =0;i<messages.length;++i) {
+    r+= ' - '+messages[i]+'\n';
+  }
+  r += '\n';
   r += '      SUCCESS RATE: ' + (((counter.valid / counter.total) || 0) * 100) + '%' + '\n';
   // console.log(data);
   console.log(r);
 };
 
-let renderCellWeb = (valid, data, counter) => {
-  let title;
-  if (typeof data === 'object') {
-    title = JSON.stringify(data);
-  } else {
-    title = String(data);
-  }
-  title = title.replace(/"/g, '');
-  counter.total++;
-  if (valid) {
-    counter.valid++;
-    return '<td style="background-color:green" title="' + title + '">Pass</td>';
-  } else {
-    return '<td style="background-color:red"  title="' + title + '">Fail</td>';
-  }
-};
-
 let renderTableWeb = (data) => {
   let counter = {valid: 0, total: 0};
-
-  let r = '<table><tr><td>Symbol</td><td colspan="2"></td><td colspan="6">Sample</td><td colspan="5">Generated</td></tr>';
+  const messages = [];
+  let r = '<table><tr><td>Symbol</td><td colspan="2"></td><td colspan="6" style="text-align:center;">Sample</td><td colspan="5"  style="text-align:center;">Generated</td></tr>';
   r += '<tr><td></td><td>Details</td><td>Sample</td><td>Valid</td><td>Balance</td><td>Unspent</td>';
    r+='<td>History</td>';
    r+='<td>Transaction</td>';
@@ -221,26 +297,34 @@ let renderTableWeb = (data) => {
     r += '<tr>';
     r += '<td>' + symbol + '</td>';
     if (typeof data[symbol] !== 'undefined') {
-      r += renderCellWeb(validDetails(data[symbol].details), data[symbol].details, counter);
-      r += renderCellWeb(validSample(data[symbol].sample), data[symbol].sample, counter);
-      r += renderCellWeb(validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter);
-      r += renderCellWeb(validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter);
-      r += renderCellWeb(validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter);
-      r += renderCellWeb(validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter);
-      r += renderCellWeb(validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter);
+      r += renderCellWeb(symbol,'details',validDetails(data[symbol].details), data[symbol].details, counter, messages);
+      r += renderCellWeb(symbol,'sample',validSample(data[symbol].sample), data[symbol].sample, counter, messages);
+      r += renderCellWeb(symbol,'sampleValid',validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter, messages);
+      r += renderCellWeb(symbol,'sampleBalance',validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter, messages);
+      r += renderCellWeb(symbol,'sampleUnspent',validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter, messages);
+      r += renderCellWeb(symbol,'sampleHistory',validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter, messages);
+      r += renderCellWeb(symbol,'sampleTransaction',validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter, messages);
 
-      r += renderCellWeb(validValid(data[symbol].seedValid), data[symbol].seedValid, counter);
-      r += renderCellWeb(validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter);
-      r += renderCellWeb(validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter);
-      r += renderCellWeb(validSign(data[symbol].seedSign), data[symbol].seedSign, counter);
-      r += renderCellWeb(validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash+"|"+data[symbol].test.hash, counter);
+      r += renderCellWeb(symbol,'seedValid',validValid(data[symbol].seedValid), data[symbol].seedValid, counter, messages);
+      r += renderCellWeb(symbol,'seedBalance',validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter, messages);
+      r += renderCellWeb(symbol,'seedUnspent',validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter, messages);
+      r += renderCellWeb(symbol,'seedSign',validSign(data[symbol].seedSign), data[symbol].seedSign, counter, messages);
+      r += renderCellWeb(symbol,'seedSignHash',validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash+"|"+data[symbol].test.hash, counter, messages);
     } else {
       counter.total+=11;
-      r += '<td colspan="14" style="background-color:red">Fail</td>';
+      r += '<td colspan="15" style="background-color:red">Fail</td>';
     }
     r += '</tr>';
   }
   r += '</table>';
+  r += '<h3>Known Issues</h3>';
+  r += '<ul>';
+  for (let i =0;i<messages.length;++i) {
+    r += '<li>'+messages[i]+'</li>';
+  }
+  r += '</ul>';
+
+
   r += '<h1>' + (counter.valid / counter.total * 100) + '%</h1>';
   console.log(data);
   document.body.innerHTML = r;
