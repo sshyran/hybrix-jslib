@@ -1,46 +1,52 @@
 const knownIssues = {
 
-  bch_seedSign: "Not yet functioning. Perhaps funds missing for test",
-  bch_seedSignHash: "Not yet functioning. Perhaps funds missing for test",
+  bch_seedSign: {message:"Not yet functioning. Perhaps funds missing for test", link:""},
+  bch_seedSignHash: {message:"Not yet functioning. Perhaps funds missing for test", link:""},
 
-  btc_seedSignHash: "Signing still holds a dynamic componement",
+  btc_seedSignHash: {message:"Signing still holds a dynamic componement", link:""},
 
-  burst_sampleHistory: "Not yet functioning",
+  burst_sampleHistory: {message:"Not yet functioning", link:""},
+  burst_seedUnspent: {message:"Not yet functioning. Perhaps funds missing for test", link:""},
+  burst_seedSign: {message:"Not yet functioning. Perhaps funds missing for test", link:""},
+  burst_seedSignHash: {message:"Not yet functioning. Perhaps funds missing for test / Signing still holds a dynamic componement", link:""},
 
-  'dash_seedSign': "Not yet functioning. Perhaps funds missing for test",
-  'dash_seedSignHash': "Not yet functioning. Perhaps funds missing for test",
-  dash_sampleHistory: "Not yet functioning",
-  dgb_sampleHistory: "Not yet functioning",
-  'dgb_seedSign': "Not yet functioning. Perhaps funds missing for test",
-  'dgb_seedSignHash': "Not yet functioning. Perhaps funds missing for test",
+  'dash_seedSign': {message:"Unstable host. Should work", link:""},
+  'dash_seedSignHash': {message:"Unstable host. Should work", link:""},
+  dash_sampleHistory: {message:"Unstable host. Should work", link:""},
 
-  etc_sampleHistory: "Not yet functioning",
-  etc_sampleTransaction: "Not yet functioning",
-  'eth.xhy_sampleHistory': "Eth token history not yet supported",
-  exp_sampleHistory: "Not yet functioning",
+  dgb_sampleHistory: {message:"Not yet functioning", link:""},
+  'dgb_seedSign': {message:"Not yet functioning. Perhaps funds missing for test", link:""},
+  'dgb_seedSignHash': {message:"Not yet functioning. Perhaps funds missing for test", link:""},
 
-  flo_seedSign: "Not yet functioning. Perhaps funds missing for test",
-  flo_seedSignHash: "Not yet functioning. Perhaps funds missing for test",
+  etc_sampleHistory: {message:"Not yet functioning", link:""},
+  etc_sampleTransaction: {message:"Not yet functioning", link:""},
+  'eth.xhy_sampleHistory':{message: "Eth token history not yet supported", link:""},
+  exp_sampleHistory: {message:"Not yet functioning", link:""},
 
-  omni_seedSignHash: "Not yet functioning. Perhaps funds missing for test",
-  'omni.xhy_seedSignHash': "Not yet functioning. Perhaps funds missing for test",
+  flo_seedSign:{message: "Not yet functioning. Perhaps funds missing for test", link:""},
+  flo_seedSignHash: {message:"Not yet functioning. Perhaps funds missing for test", link:""},
+
+  nxt_seedSignHash: {message:"Signing still holds a dynamic componement", link:""},
+  'nxt.xhy_seedSignHash': {message:"Signing still holds a dynamic componement", link:""},
+
+  omni_seedSignHash:{message: "Not yet functioning. Perhaps funds missing for test", link:""},
+  'omni.xhy_seedSignHash': {message:"Not yet functioning. Perhaps funds missing for test", link:""},
 
 
 
-  ubq_sampleHistory: "Not yet functioning",
-  ubq_sampleTransaction: "Not yet functioning",
-  rise_sampleTransaction: "Not yet functioning",
-  shift_sampleTransaction: "Not yet functioning",
+  ubq_sampleHistory: {message:"Not yet functioning", link:"https://gitlab.com/hybrix/hybrixd/node/issues/697"},
+  rise_sampleTransaction: {message:"Not yet functioning", link:""},
+  shift_sampleTransaction: {message:"Not yet functioning", link:""},
 
-  xcp_seedSignHash: "Signing still holds a dynamic componement",
-  'xcp.xhy_seedSignHash': "Signing still holds a dynamic componement",
+  xcp_seedSignHash: {message:"Signing still holds a dynamic componement", link:""},
+  'xcp.xhy_seedSignHash': {message:"Signing still holds a dynamic componement", link:""},
 
-  xcp_sampleTransaction:  "Missing data for source,dest,amount, fee",
-  'xcp.xhy_sampleTransaction':  "Missing data for source,dest,amount, fee",
-  xrp_seedSignHash: "Signing still holds a dynamic componement",
-  'zec_seedSign': "Not yet functioning. Perhaps funds missing for test",
-  'zec_seedSignHash': "Not yet functioning. Perhaps funds missing for test",
-  zec_sampleHistory: "Not yet functioning"
+  xcp_sampleTransaction:  {message:"Missing data for source,dest,amount, fee", link:""},
+  'xcp.xhy_sampleTransaction':  {message:"Missing data for source,dest,amount, fee", link:""},
+  xrp_seedSignHash:{message: "Signing still holds a dynamic componement", link:""},
+  'zec_seedSign': {message:"Not yet functioning. Perhaps funds missing for test", link:""},
+  'zec_seedSignHash': {message:"Not yet functioning. Perhaps funds missing for test", link:""},
+  zec_sampleHistory: {message:"Not yet functioning", link:""}
 
 
 };
@@ -199,7 +205,7 @@ let renderCellCLI = (symbol,type,valid, data, counter, messages) => {
       counter.valid++;
       return '\033[36m OK \033[0m';
     }else{
-      messages.push(symbol+ ' '+type+' : '+knownIssues[symbol+'_'+type]);
+      messages.push(symbol+ ' '+type+' : '+knownIssues[symbol+'_'+type].message);
       return '\033[33mWARN\033[0m';
     }
   } else if (valid) {
@@ -227,7 +233,12 @@ let renderCellWeb = (symbol,type,valid, data, counter, messages) => {
       counter.valid++;
       return '<td style="text-align:center;background-color:purple" title="' + title + '">&nbsp;</td>';
     }else{
-      messages.push('<b>'+symbol+ ' '+type+'</b> : '+knownIssues[symbol+'_'+type]);
+      const issue= knownIssues[symbol+'_'+type]
+      if(issue.link){
+        messages.push('<b>'+symbol+ ' '+type+'</b> : <a href="'+issue.link+'">'+issue.message+'</a>');
+      }else{
+        messages.push('<b>'+symbol+ ' '+type+'</b> : '+issue.message+' <a href="https://gitlab.com/hybrix/hybrixd/node/issues/new?issue[title]='+encodeURIComponent(symbol+ ' '+type+' '+issue.message)+'">Create issue</a>');
+      }
       return '<td style="text-align:center;background-color:yellow" title="' + title + '">&nbsp;</td>';
     }
   } else if (valid) {
@@ -317,7 +328,7 @@ let renderTableWeb = (data) => {
     r += '</tr>';
   }
   r += '</table>';
-  r += '<h3>Known Issues</h3>';
+  r += '<h3><a href="https://gitlab.com/groups/hybrix/-/issues?milestone_title=Coin+support+%3A+Test+Issues">Known Issues</a></h3>';
   r += '<ul>';
   for (let i =0;i<messages.length;++i) {
     r += '<li>'+messages[i]+'</li>';
