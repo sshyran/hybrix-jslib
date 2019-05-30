@@ -205,7 +205,12 @@ let renderCellCLI = (symbol,type,valid, data, counter, messages) => {
       counter.valid++;
       return '\033[36m OK \033[0m';
     }else{
-      messages.push(symbol+ ' '+type+' : '+knownIssues[symbol+'_'+type].message);
+       const issue= knownIssues[symbol+'_'+type]
+      if(issue.link){
+        messages.push(symbol+ ' '+type+' : '+issue.message);
+      }else{
+        messages.push(symbol+ ' '+type+' : '+issue.message+ ' \033[31m [Create issue]\033[0m');
+      }
       return '\033[33mWARN\033[0m';
     }
   } else if (valid) {
@@ -226,7 +231,6 @@ let renderCellWeb = (symbol,type,valid, data, counter, messages) => {
     title = String(data);
   }
   title = title.replace(/"/g, '');
-  counter.total++;
   if(knownIssues.hasOwnProperty(symbol+'_'+type)){
     if(valid){
       counter.total++;
@@ -235,16 +239,18 @@ let renderCellWeb = (symbol,type,valid, data, counter, messages) => {
     }else{
       const issue= knownIssues[symbol+'_'+type]
       if(issue.link){
-        messages.push('<b>'+symbol+ ' '+type+'</b> : <a href="'+issue.link+'">'+issue.message+'</a>');
+        messages.push('<b>'+symbol+ ' '+type+'</b> : <a  target="_blank" href="'+issue.link+'">'+issue.message+'</a>');
       }else{
-        messages.push('<b>'+symbol+ ' '+type+'</b> : '+issue.message+' <a href="https://gitlab.com/hybrix/hybrixd/node/issues/new?issue[title]='+encodeURIComponent(symbol+ ' '+type+' '+issue.message)+'">Create issue</a>');
+        messages.push('<b>'+symbol+ ' '+type+'</b> : '+issue.message+' <a style="color:red;"target="_blank" href="https://gitlab.com/hybrix/hybrixd/node/issues/new?issue[title]='+encodeURIComponent(symbol+ ' '+type+' '+issue.message)+'"><b>Create issue</b></a>');
       }
       return '<td style="text-align:center;background-color:yellow" title="' + title + '">&nbsp;</td>';
     }
   } else if (valid) {
+    counter.total++;
     counter.valid++;
     return '<td style="text-align:center;background-color:green" title="' + title + '">&nbsp;</td>';
   } else {
+    counter.total++;
     return '<td style="text-align:center;background-color:red"  title="' + title + '">&nbsp;</td>';
   }
 };
@@ -328,7 +334,7 @@ let renderTableWeb = (data) => {
     r += '</tr>';
   }
   r += '</table>';
-  r += '<h3><a href="https://gitlab.com/groups/hybrix/-/issues?milestone_title=Coin+support+%3A+Test+Issues">Known Issues</a></h3>';
+  r += '<h3><a href="https://gitlab.com/groups/hybrix/-/issues?milestone_title=Coin+support+%3A+Test+Issues" target="_blank">Known Issues</a></h3>';
   r += '<ul>';
   for (let i =0;i<messages.length;++i) {
     r += '<li>'+messages[i]+'</li>';
