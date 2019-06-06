@@ -5,7 +5,6 @@ const knownIssues = {
 
   btc_seedSignHash: {message:"Signing still holds a dynamic componement", link:""},
 
-  burst_sampleHistory: {message:"Not yet functioning", link:""},
   burst_seedUnspent: {message:"Not yet functioning. Perhaps funds missing for test", link:""},
   burst_seedSign: {message:"Not yet functioning. Perhaps funds missing for test", link:""},
   burst_seedSignHash: {message:"Not yet functioning. Perhaps funds missing for test / Signing still holds a dynamic componement", link:""},
@@ -18,9 +17,9 @@ const knownIssues = {
   'dgb_seedSign': {message:"Not yet functioning. Perhaps funds missing for test", link:""},
   'dgb_seedSignHash': {message:"Not yet functioning. Perhaps funds missing for test", link:""},
 
-  etc_sampleHistory: {message:"Not yet functioning", link:""},
-  etc_sampleTransaction: {message:"Not yet functioning", link:""},
-  'eth.xhy_sampleHistory':{message: "Eth token history not yet supported", link:""},
+  etc_sampleHistory: {message:"Not yet functioning", link:"https://gitlab.com/hybrix/hybrixd/node/issues/699"},
+//  etc_sampleTransaction: {message:"Not yet functioning", link:""},
+  'eth.xhy_sampleHistory':{message: "Eth token history not yet supported", link:"https://gitlab.com/hybrix/hybrixd/node/issues/701"},
   exp_sampleHistory: {message:"Not yet functioning", link:""},
 
   flo_seedSign:{message: "Not yet functioning. Perhaps funds missing for test", link:""},
@@ -35,18 +34,18 @@ const knownIssues = {
 
 
   ubq_sampleHistory: {message:"Not yet functioning", link:"https://gitlab.com/hybrix/hybrixd/node/issues/697"},
-  rise_sampleTransaction: {message:"Not yet functioning", link:""},
-  shift_sampleTransaction: {message:"Not yet functioning", link:""},
+  rise_sampleTransaction: {message:"Not yet functioning", link:"https://gitlab.com/hybrix/hybrixd/node/issues/703"},
+  shift_sampleTransaction: {message:"Not yet functioning", link:"https://gitlab.com/hybrix/hybrixd/node/issues/704"},
 
   xcp_seedSignHash: {message:"Signing still holds a dynamic componement", link:""},
   'xcp.xhy_seedSignHash': {message:"Signing still holds a dynamic componement", link:""},
 
-  xcp_sampleTransaction:  {message:"Missing data for source,dest,amount, fee", link:""},
-  'xcp.xhy_sampleTransaction':  {message:"Missing data for source,dest,amount, fee", link:""},
+  xcp_sampleTransaction:  {message:"Missing data for source,dest,amount, fee", link:"https://gitlab.com/hybrix/hybrixd/node/issues/705"},
+  'xcp.xhy_sampleTransaction':  {message:"Missing data for source,dest,amount, fee", link:"https://gitlab.com/hybrix/hybrixd/node/issues/705"},
   xrp_seedSignHash:{message: "Signing still holds a dynamic componement", link:""},
   'zec_seedSign': {message:"Not yet functioning. Perhaps funds missing for test", link:""},
   'zec_seedSignHash': {message:"Not yet functioning. Perhaps funds missing for test", link:""},
-  zec_sampleHistory: {message:"Not yet functioning", link:""}
+  zec_sampleHistory: {message:"Unstable", link:"https://gitlab.com/hybrix/hybrixd/node/issues/702"}
 
 
 };
@@ -191,7 +190,7 @@ let validTransaction = transaction => typeof transaction === 'object' && transac
 let validSign = sign => typeof sign === 'string';
 let validSignHash = (signHash,testHash) => signHash===testHash || (testHash=='dynamic' && signHash!=='00000000');
 
-let renderCellCLI = (symbol,type,valid, data, counter, messages) => {
+let renderCellCLI = (symbol,type,valid, data, counter, messages,newMessages) => {
   let title;
   if (typeof data === 'object') {
     title = JSON.stringify(data);
@@ -200,16 +199,21 @@ let renderCellCLI = (symbol,type,valid, data, counter, messages) => {
   }
   title = title.replace(/"/g, '');
   if(knownIssues.hasOwnProperty(symbol+'_'+type)){
+    const issue= knownIssues[symbol+'_'+type]
     if(valid){
       counter.total++;
       counter.valid++;
+      if(issue.link){
+        messages.push('\033[36m'+symbol+ ' '+type+'\033[0m : '+issue.message);
+      }else{
+        messages.push('\033[36m'+symbol+ ' '+type+'\033[0m : '+issue.message+ ' \033[31m [Create issue]\033[0m');
+      }
       return '\033[36m OK \033[0m';
     }else{
-       const issue= knownIssues[symbol+'_'+type]
       if(issue.link){
-        messages.push(symbol+ ' '+type+' : '+issue.message);
+        messages.push('\033[33m'+symbol+ ' '+type+'\033[0m : '+issue.message);
       }else{
-        messages.push(symbol+ ' '+type+' : '+issue.message+ ' \033[31m [Create issue]\033[0m');
+        messages.push('\033[33m'+symbol+ ' '+type+'\033[0m : '+issue.message+ ' \033[31m [Create issue]\033[0m');
       }
       return '\033[33mWARN\033[0m';
     }
@@ -218,12 +222,18 @@ let renderCellCLI = (symbol,type,valid, data, counter, messages) => {
     counter.valid++;
     return '\033[32m OK \033[0m';
   } else {
+    newMessages.push('\033[31m'+symbol+ ' '+type+'\033[0m : returned '+title+' \033[31m [Create issue]\033[0m');
     counter.total++;
     return '\033[31mFAIL\033[0m';
   }
 };
 
-let renderCellWeb = (symbol,type,valid, data, counter, messages) => {
+function issueLink(symbol,type,issue){
+
+  return `https://gitlab.com/hybrix/hybrixd/node/issues/new?issue[description]=${encodeURIComponent('/label ~"\\* Development Team \\*"\n/milestone %"Coin support : Test Issues"\n')}&issue[title]=${encodeURIComponent(symbol+ ' '+type+' '+(issue?issue.message:''))} `
+}
+
+let renderCellWeb = (symbol,type,valid, data, counter, messages, newMessages) => {
   let title;
   if (typeof data === 'object') {
     title = JSON.stringify(data);
@@ -235,32 +245,50 @@ let renderCellWeb = (symbol,type,valid, data, counter, messages) => {
     if(valid){
       counter.total++;
       counter.valid++;
-      return '<td style="text-align:center;background-color:purple" title="' + title + '">&nbsp;</td>';
+
+      const issue= knownIssues[symbol+'_'+type]
+      if(issue.link){
+        messages.push('<b style="color:purple;">'+symbol+ ' '+type+'</b> : <a  name="'+symbol+'_'+type+'" target="_blank" href="'+issue.link+'">'+issue.message+'</a>');
+      }else{
+        messages.push('<b style="color:purple;">'+symbol+ ' '+type+'</b> : <a name="'+symbol+'_'+type+'">'+issue.message+' </a><a style="color:red;"target="_blank" href="'+issueLink(symbol,type,issue)+'"><b>Create issue</b></a>');
+      }
+
+
+      return '<td style="text-align:center;background-color:purple" title="' + title + '"><a style="text-decoration:none; width: 100%;height: 100%;display: block;" href="#'+symbol+'_'+type+'">&nbsp;</a></td>';
+
     }else{
       const issue= knownIssues[symbol+'_'+type]
       if(issue.link){
-        messages.push('<b>'+symbol+ ' '+type+'</b> : <a  target="_blank" href="'+issue.link+'">'+issue.message+'</a>');
+        messages.push('<b style="color:orange;">'+symbol+ ' '+type+'</b> : <a  name="'+symbol+'_'+type+'" target="_blank" href="'+issue.link+'">'+issue.message+'</a>');
       }else{
-        messages.push('<b>'+symbol+ ' '+type+'</b> : '+issue.message+' <a style="color:red;"target="_blank" href="https://gitlab.com/hybrix/hybrixd/node/issues/new?issue[title]='+encodeURIComponent(symbol+ ' '+type+' '+issue.message)+'"><b>Create issue</b></a>');
+        messages.push('<b style="color:orange;">'+symbol+ ' '+type+'</b> : <a name="'+symbol+'_'+type+'">'+issue.message+' </a><a style="color:red;"target="_blank" href="'+issueLink(symbol,type,issue)+'"><b>Create issue</b></a>');
       }
-      return '<td style="text-align:center;background-color:yellow" title="' + title + '">&nbsp;</td>';
+      return '<td style="text-align:center;background-color:orange" title="' + title + '"><a style="text-decoration:none; width: 100%;height: 100%;display: block;" href="#'+symbol+'_'+type+'">&nbsp;</a></td>';
     }
   } else if (valid) {
     counter.total++;
     counter.valid++;
     return '<td style="text-align:center;background-color:green" title="' + title + '">&nbsp;</td>';
   } else {
+
+    newMessages.push('<b style="color:red;">'+symbol+ ' '+type+'</b> : returned '+title+' <a  name="'+symbol+'_'+type+'" style="color:red;"target="_blank" href="'+issueLink(symbol,type)+'"><b>Create issue</b></a>');
+
     counter.total++;
-    return '<td style="text-align:center;background-color:red"  title="' + title + '">&nbsp;</td>';
+    return '<td style="text-align:center;background-color:red"  title="' + title + '"><a style="text-decoration:none; width: 100%;height: 100%;display: block;" href="#'+symbol+'_'+type+'">&nbsp;</a></td>';
   }
 };
 
 
 
 
-let renderTableCLI = (data) => {
+let renderTableCLI = (unorderdedData) => {
+  const data = {};
+  Object.keys(unorderdedData).sort().forEach(function(key) {
+    data[key] = unorderdedData[key];
+  });
   let counter = {valid: 0, total: 0};
   const messages = [];
+  const newMessages = [];
   let r = '\n';
   r += '   #   SAMPLE                                    GENERATED                    ' + '\n';
   r += '      ┌──────┬─────┬────┬──────┬──────┬────┬────┬────┬──────┬──────┬────┬────┐' + '\n';
@@ -269,19 +297,19 @@ let renderTableCLI = (data) => {
   r += '      ├──────┼─────┼────┼──────┼──────┼────┼────┼────┼──────┼──────┼────┼────┤' + '\n';
     r += symbol.substr(0, 5) + '     '.substr(0, 5 - symbol.length) + ' │';
     if (typeof data[symbol] !== 'undefined') {
-      r += ' ' + renderCellCLI(symbol,'details',validDetails(data[symbol].details), data[symbol].details, counter, messages) + ' │';
-      r +=       renderCellCLI(symbol,'sample',validSample(data[symbol].sample), data[symbol].sample, counter, messages) + ' │';
-      r +=       renderCellCLI(symbol,'sampleValid',validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter, messages) + '│';
-      r += ' ' + renderCellCLI(symbol,'sampleBalance',validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter, messages) + ' │';
-      r += ' ' + renderCellCLI(symbol,'sampleUnspent',validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter, messages) + ' │';
-      r +=       renderCellCLI(symbol,'sampleHistory',validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter, messages) + '│';
-      r +=       renderCellCLI(symbol,'sampleTransaction',validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter, messages) + '│';
-      r +=       renderCellCLI(symbol,'seedValid',validValid(data[symbol].seedValid), data[symbol].seedValid, counter, messages) + '│';
-      r += ' ' + renderCellCLI(symbol,'seedBalance',validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter, messages) + ' │';
-      r += ' ' + renderCellCLI(symbol,'seedUnspent',validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter, messages) + ' │';
-      //      r += renderCellCLI(symbol,validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter, messages) + '│';
-      r +=       renderCellCLI(symbol,'seedSign',validSign(data[symbol].seedSign), data[symbol].seedSign, counter, messages) + '│';
-      r +=       renderCellCLI(symbol,'seedSignHash',validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash+"|"+data[symbol].test.hash, counter, messages)+'│';
+      r += ' ' + renderCellCLI(symbol,'details',validDetails(data[symbol].details), data[symbol].details, counter, messages,newMessages) + ' │';
+      r +=       renderCellCLI(symbol,'sample',validSample(data[symbol].sample), data[symbol].sample, counter, messages,newMessages) + ' │';
+      r +=       renderCellCLI(symbol,'sampleValid',validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter, messages,newMessages) + '│';
+      r += ' ' + renderCellCLI(symbol,'sampleBalance',validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter, messages,newMessages) + ' │';
+      r += ' ' + renderCellCLI(symbol,'sampleUnspent',validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter, messages,newMessages) + ' │';
+      r +=       renderCellCLI(symbol,'sampleHistory',validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter, messages,newMessages) + '│';
+      r +=       renderCellCLI(symbol,'sampleTransaction',validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter, messages,newMessages) + '│';
+      r +=       renderCellCLI(symbol,'seedValid',validValid(data[symbol].seedValid), data[symbol].seedValid, counter, messages,newMessages) + '│';
+      r += ' ' + renderCellCLI(symbol,'seedBalance',validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter, messages,newMessages) + ' │';
+      r += ' ' + renderCellCLI(symbol,'seedUnspent',validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter, messages,newMessages) + ' │';
+      //      r += renderCellCLI(symbol,validHistory(data[symbol].seedHistory), data[symbol].seedHistory, counter, messages,newMessages) + '│';
+      r +=       renderCellCLI(symbol,'seedSign',validSign(data[symbol].seedSign), data[symbol].seedSign, counter, messages,newMessages) + '│';
+      r +=       renderCellCLI(symbol,'seedSignHash',validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash+"|"+data[symbol].test.hash, counter, messages,newMessages)+'│';
       r += '\n';
     } else {
       counter.total+=11;
@@ -290,7 +318,14 @@ let renderTableCLI = (data) => {
   }
   r += '      └──────┴─────┴────┴──────┴──────┴────┴────┴────┴──────┴──────┴────┴────┘' + '\n';
   r += '\n';
+  r += 'New Issues:\n';
+  newMessages.sort();
+  for (let i =0;i<newMessages.length;++i) {
+    r+= ' - '+newMessages[i]+'\n';
+  }
+  r += '\n';
   r += 'Known Issues:\n';
+  messages.sort();
   for (let i =0;i<messages.length;++i) {
     r+= ' - '+messages[i]+'\n';
   }
@@ -300,10 +335,22 @@ let renderTableCLI = (data) => {
   console.log(r);
 };
 
-let renderTableWeb = (data) => {
+let renderTableWeb = (unorderdedData) => {
+  const data = {};
+  Object.keys(unorderdedData).sort().forEach(function(key) {
+    data[key] = unorderdedData[key];
+  });
+
   let counter = {valid: 0, total: 0};
   const messages = [];
-  let r = '<table><tr><td>Symbol</td><td colspan="2"></td><td colspan="6" style="text-align:center;">Sample</td><td colspan="5"  style="text-align:center;">Generated</td></tr>';
+  const newMessages = [];
+  let r = `
+<style>
+:target {
+ background-color: yellow;
+}
+</style>
+<table><tr><td>Symbol</td><td colspan="2"></td><td colspan="6" style="text-align:center;">Sample</td><td colspan="5"  style="text-align:center;">Generated</td></tr>`;
   r += '<tr><td></td><td>Details</td><td>Sample</td><td>Valid</td><td>Balance</td><td>Unspent</td>';
    r+='<td>History</td>';
    r+='<td>Transaction</td>';
@@ -314,19 +361,19 @@ let renderTableWeb = (data) => {
     r += '<tr>';
     r += '<td>' + symbol + '</td>';
     if (typeof data[symbol] !== 'undefined') {
-      r += renderCellWeb(symbol,'details',validDetails(data[symbol].details), data[symbol].details, counter, messages);
-      r += renderCellWeb(symbol,'sample',validSample(data[symbol].sample), data[symbol].sample, counter, messages);
-      r += renderCellWeb(symbol,'sampleValid',validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter, messages);
-      r += renderCellWeb(symbol,'sampleBalance',validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter, messages);
-      r += renderCellWeb(symbol,'sampleUnspent',validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter, messages);
-      r += renderCellWeb(symbol,'sampleHistory',validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter, messages);
-      r += renderCellWeb(symbol,'sampleTransaction',validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter, messages);
+      r += renderCellWeb(symbol,'details',validDetails(data[symbol].details), data[symbol].details, counter, messages,newMessages);
+      r += renderCellWeb(symbol,'sample',validSample(data[symbol].sample), data[symbol].sample, counter, messages,newMessages);
+      r += renderCellWeb(symbol,'sampleValid',validValid(data[symbol].sampleValid), data[symbol].sampleValid, counter, messages,newMessages);
+      r += renderCellWeb(symbol,'sampleBalance',validBalance(data[symbol].sampleBalance, data[symbol].details.factor), data[symbol].sampleBalance, counter, messages,newMessages);
+      r += renderCellWeb(symbol,'sampleUnspent',validUnspent(data[symbol].sampleUnspent), data[symbol].sampleUnspent, counter, messages,newMessages);
+      r += renderCellWeb(symbol,'sampleHistory',validHistory(data[symbol].sampleHistory), data[symbol].sampleHistory, counter, messages,newMessages);
+      r += renderCellWeb(symbol,'sampleTransaction',validTransaction(data[symbol].sampleTransaction), data[symbol].sampleTransaction, counter, messages,newMessages);
 
-      r += renderCellWeb(symbol,'seedValid',validValid(data[symbol].seedValid), data[symbol].seedValid, counter, messages);
-      r += renderCellWeb(symbol,'seedBalance',validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter, messages);
-      r += renderCellWeb(symbol,'seedUnspent',validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter, messages);
-      r += renderCellWeb(symbol,'seedSign',validSign(data[symbol].seedSign), data[symbol].seedSign, counter, messages);
-      r += renderCellWeb(symbol,'seedSignHash',validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash+"|"+data[symbol].test.hash, counter, messages);
+      r += renderCellWeb(symbol,'seedValid',validValid(data[symbol].seedValid), data[symbol].seedValid, counter, messages,newMessages);
+      r += renderCellWeb(symbol,'seedBalance',validBalance(data[symbol].seedBalance, data[symbol].details.factor), data[symbol].seedBalance, counter, messages,newMessages);
+      r += renderCellWeb(symbol,'seedUnspent',validUnspent(data[symbol].seedUnspent), data[symbol].seedUnspent, counter, messages,newMessages);
+      r += renderCellWeb(symbol,'seedSign',validSign(data[symbol].seedSign), data[symbol].seedSign, counter, messages,newMessages);
+      r += renderCellWeb(symbol,'seedSignHash',validSignHash(data[symbol].seedSignHash,data[symbol].test.hash), data[symbol].seedSignHash+"|"+data[symbol].test.hash, counter, messages,newMessages);
     } else {
       counter.total+=11;
       r += '<td colspan="15" style="background-color:red">Fail</td>';
@@ -334,8 +381,16 @@ let renderTableWeb = (data) => {
     r += '</tr>';
   }
   r += '</table>';
+  r += '<h3>New Issues</h3>';
+  r += '<ul>';
+  newMessages.sort();
+  for (let i =0;i<newMessages.length;++i) {
+    r += '<li>'+newMessages[i]+'</li>';
+  }
+  r += '</ul>';
   r += '<h3><a href="https://gitlab.com/groups/hybrix/-/issues?milestone_title=Coin+support+%3A+Test+Issues" target="_blank">Known Issues</a></h3>';
   r += '<ul>';
+  messages.sort();
   for (let i =0;i<messages.length;++i) {
     r += '<li>'+messages[i]+'</li>';
   }
