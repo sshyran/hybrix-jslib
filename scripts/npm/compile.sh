@@ -41,6 +41,7 @@ cat "$INTERFACE/LICENSE-pack.md" "$INTERFACE/dist/hybrixd.interface.nacl.js.tmp"
 # fuse the license to nodejs version of interface
 cat "$INTERFACE/LICENSE-pack.md" "$INTERFACE/dist/hybrix-lib.nodejs.js" > "$INTERFACE/dist/hybrix-lib.nodejs.js.tmp"
 mv "$INTERFACE/dist/hybrix-lib.nodejs.js.tmp" "$INTERFACE/dist/hybrix-lib.nodejs.js"
+cp "$INTERFACE/test/test.js" "$INTERFACE/dist/test.js"
 
 # clean up
 rm "$INTERFACE/lib/interface.nodejs.js.tmp"
