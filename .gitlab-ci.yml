@@ -1,3 +1,7 @@
+variables:
+  GIT_STRATEGY: none
+
+
 stages:
  - build
  - release
@@ -6,16 +10,32 @@ interface:
   image: node:8.14.0-stretch
   stage: build
   script:
-    - init
-    
+
+    # Because of race conditions with merge squashes leaving broken references we circumvent the default git strategy GIT_STRATEGY: none
+    - cd ..
+    - "git clone -n https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/hybrix/hybrixd/interface.git --depth 10 --single-branch --branch $CI_COMMIT_REF_NAME"
+    - cd interface
+    - if git log | grep $CI_COMMIT_SHA; then
+    -   echo "Commit $CI_COMMIT_SHA exists, retrieving it."
+    -   "git -c advice.detachedHead=false checkout $CI_COMMIT_SHA"
+    - else
+    -   echo "Commit $CI_COMMIT_SHA does not exist, retrieving latest in branch $CI_COMMIT_REF_NAME"
+    -   "git checkout"
+    - fi
+    - "git clone -n https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/hybrix/hybrixd/common.git --depth 10 --single-branch --branch master"
+    - cd common
+    -   "git checkout"
+    - cd ..
+
     # compile in release mode (uglified and minified)
     - ./scripts/npm/compile.sh
-    
+    # For debug use - ./scripts/npm/compile.sh debug
+
     # extract dist
     - shopt -s extglob
     - rm -rf !(dist) || true
     - dist
-    
+
     # create a .version file
     - timestamp=$(date -u '+%Y-%m-%dT%H:%M:%S+00:00')
     - mode=release
@@ -25,33 +45,7 @@ interface:
     paths:
     - ./*
 
-interface-debug:
-  image: node:8.14.0-stretch
-  stage: build
-  script:
-    - init
-
-    # compile in debug mode
-    - ./scripts/npm/compile.sh debug
-    
-    # extract dist
-    - shopt -s extglob
-    - rm -rf !(dist) || true
-    - dist
-    
-    # create a .version file
-    - timestamp=$(date -u '+%Y-%m-%dT%H:%M:%S+00:00')
-    - mode=debug
-    - echo "{\"${CI_PROJECT_PATH_SLUG}\":{\"mode\":\"${mode}\", \"project_path\":\"${CI_PROJECT_PATH}\", \"commit_ref_name\":\"${CI_COMMIT_REF_NAME}\", \"commit_ref_slug\":\"${CI_COMMIT_REF_SLUG}\", \"commit_sha\":\"${CI_COMMIT_SHA}\", \"pipeline_url\":\"${CI_PIPELINE_URL}\", \"commit_title\":\"${CI_COMMIT_TITLE}\", \"gitlab_user_login\":\"${GITLAB_USER_LOGIN}\", \"packaged\":\"${timestamp}\"}}" > .version
-  except:
-  #- /^v.*release$/
-    refs:
-      - tags
-  artifacts:
-    paths:
-    - ./*
-    
-dist: 
+dist:
   image: alpine:latest
   stage: release
   script:
@@ -62,7 +56,7 @@ dist:
   - apk add tar
   - apk add xz
   - apk add zip
-   
+
   # set variables
   # version -> branchname without '-release'
   - version=${CI_COMMIT_REF_NAME/-release/}
@@ -70,33 +64,33 @@ dist:
   - file=hybrixd.${component}.${version}
   - fileLatest=hybrixd.${component}.latest
   - path=interface/${version}/
-  
+
   - cp -r ./dist/. /tmp/${component}/
-    
+
   - cd /tmp
   - git clone --depth=1 https://oauth2:${PRIVATE_TOKEN}@gitlab.com/hybrix/dist
   - mkdir -p ./dist/interface/${version}/
-  
+
   # download [interface] artifact
   #- "curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/api/v4/projects/hybrix%2Fhybrixd%2Finterface/jobs/artifacts/${CI_COMMIT_REF_NAME}/download?job=interface\" -o ${path}${file}.zip"
-  
+
   # go to folder
   #- ls ./dist/${path}
-  
+
   #- cp ${path}${file}.zip ./../${file}.zip
   #- unzip ${file}.zip -d ${component}
-  
+
   - ls
   - ls ${component}
-  
+
   - zip -r ${file}.zip ${component}/.
   - tar -zcvf ${file}.tar.gz ${component}/.
   - tar cfJ ${file}.tar.xz ${component}/.
-  
+
   - cp ${file}.zip ./dist/${path}${file}.zip
   - cp ${file}.tar.gz ./dist/${path}${file}.tar.gz
   - cp ${file}.tar.xz ./dist/${path}${file}.tar.xz
-  
+
   - mkdir -p ./dist/${component}/latest
   - cp ${file}.zip ./dist/${component}/latest/${fileLatest}.zip
   - cp ${file}.tar.gz ./dist/${component}/latest/${fileLatest}.tar.gz
@@ -106,11 +100,11 @@ dist:
   - cp -r ./${component}/*.js ./dist/${path}
   - cp -r ./${component}/*.js ./dist/${component}/latest/
   - cd ./dist/
-  
+
   # configure git-user
   - "git config --global user.name \"${GITLAB_USER_NAME}\""
   - "git config --global user.email \"${GITLAB_USER_EMAIL}\""
-  
+
   # add, commit and push
   - "git add ."
   - "git commit -m \"release ${version} ${component}\" || true"
@@ -128,38 +122,38 @@ dist:
 
   function init() {
     apt-get update
-    
+
     apt-get install unzip
-    
+
     npm install -g jsdoc
-    
+
     # trigger pipeline common
     # "curl --request POST --form \"token=$CI_JOB_TOKEN\" --form ref=master https://gitlab.com/api/v4/projects/hybrix%2Fhybrixd%2Fcommon/trigger/pipeline"
-    
+
     # download [common] artifact
     #- "curl --location --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"https://gitlab.com/api/v4/projects/hybrix%2Fhybrixd%2Fcommon/jobs/artifacts/master/download?job=common\" -o artifacts-common.zip"
-    
+
     # download common repo
     curl --location --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://gitlab.com/api/v4/projects/hybrix%2Fhybrixd%2Fcommon/jobs/artifacts/master/download?job=common" -o artifacts-common.zip
-    
+
     # remove link to common and unzip the downloaded artifact to the directory (|| true --> on error, no problem)
     rm -rf  common || true
     unzip -o artifacts-common.zip -d common
-    
+
     # remove the zip-file (|| true --> on error, no problem)
     rm -rf  artifacts-common.zip || true
-    
+
     # remove symbolic link to node
     rm -rf  node || true
     # don't download git clone https://github.com/internetofcoins/nodejs-v8-lts.git, refer to docker pre installed nodejs as defined in the first line of this file
     ln -s "$(which nodejs)" node
   }
-  
+
   function dist() {
     # clean up and prepare the artifacts (instead of having a dist)
     mv ./dist/* ./
     rm -rf ./dist || true
-    
+
     # remove .git directory and .* files
     rm -rf ./.git* || true
   }
