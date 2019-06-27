@@ -330,7 +330,7 @@ let renderTableCLI = (unorderdedData) => {
     r+= ' - '+messages[i]+'\n';
   }
   r += '\n';
-  r += '      SUCCESS RATE: ' + (((counter.valid / counter.total) || 0) * 100) + '%' + '\n';
+  r += '      SUCCESS RATE :' + Math.floor(((counter.valid / counter.total) || 0) * 100) + '%' + '\n';
   // console.log(data);
   console.log(r);
 };
