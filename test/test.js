@@ -428,7 +428,7 @@ function go (mode) {
             P=  s[0]+'.'+s[1][0];
           }
           if(P!==lastP){
-            console.log(P+'%')
+            process.stdout.write(P+'%\r');
             lastP=P;
           }
         }else{
