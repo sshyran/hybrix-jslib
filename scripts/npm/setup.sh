@@ -13,6 +13,19 @@ DETERMINISTIC="$HYBRIXD/deterministic"
 NODEJS="$HYBRIXD/nodejs"
 COMMON="$HYBRIXD/common"
 WEB_WALLET="$HYBRIXD/web-wallet"
+ENVIRONMENT=$1
+
+if [ "$ENVIRONMENT" == "dev" ]; then
+    URL_COMMON="https://gitlab.com/hybrix/hybrixd/common.git"
+    echo "[i] Environment is development..."
+elif [ "$ENVIRONMENT" == "public" ]; then
+    URL_COMMON="https://github.com/hybrix-io/hybrixd-common.git"
+    echo "[i] Environment is public..."
+else
+    echo "[!] Unknown Environment (please use npm run setup[:dev])"
+    exit 1
+fi
+
 
 if [ "`uname`" = "Darwin" ]; then
     SYSTEM="darwin-x64"
@@ -51,7 +64,7 @@ if [ ! -e "$INTERFACE/common" ];then
     if [ ! -e "$COMMON" ];then
         cd "$HYBRIXD"
         echo " [i] Clone common files"
-        git clone https://www.gitlab.com/hybrix/hybrixd/common.git
+        git clone $URL_COMMON
     fi
     echo " [i] Link common files"
     ln -sf "$COMMON" "$INTERFACE/common"
