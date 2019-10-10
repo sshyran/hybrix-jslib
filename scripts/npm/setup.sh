@@ -17,15 +17,18 @@ ENVIRONMENT=$1
 
 if [ "$ENVIRONMENT" = "dev" ]; then
     URL_COMMON="https://gitlab.com/hybrix/hybrixd/common.git"
+    URL_NODEJS="https://www.gitlab.com/hybrix/hybrixd/dependencies/nodejs.git"
     echo "[i] Environment is development..."
 elif [ "$ENVIRONMENT" = "public" ]; then
     URL_COMMON="https://github.com/hybrix-io/hybrixd-common.git"
+    URL_NODEJS="https://github.com/hybrix-io/nodejs.git"
     echo "[i] Environment is public..."
 else
     echo "[!] Unknown Environment (please use npm run setup[:dev])"
+    export PATH="$OLDPATH"
+    cd "$WHEREAMI"
     exit 1
 fi
-
 
 if [ "`uname`" = "Darwin" ]; then
     SYSTEM="darwin-x64"
@@ -38,8 +41,6 @@ else
 #    exit 1;
 fi
 
-
-
 # NODE
 if [ ! -e "$INTERFACE/node_binaries" ];then
 
@@ -48,7 +49,12 @@ if [ ! -e "$INTERFACE/node_binaries" ];then
     if [ ! -e "$NODEJS" ];then
         cd "$HYBRIXD"
         echo " [i] Clone node js runtimes files"
-        git clone https://www.gitlab.com/hybrix/hybrixd/dependencies/nodejs.git
+        git clone "$URL_NODEJS"
+        if [ "$ENVIRONMENT" = "public" ]; then
+            echo " [i] Link hybrixd-dependencies-nodejs files"
+            ln -sf "hybrixd-dependencies-nodejs" "nodejs"
+        fi
+
     fi
     echo " [i] Link NODEJS files"
     ln -sf "$NODEJS/$SYSTEM" "$INTERFACE/node_binaries"
@@ -64,11 +70,10 @@ if [ ! -e "$INTERFACE/common" ];then
     if [ ! -e "$COMMON" ];then
         cd "$HYBRIXD"
         echo " [i] Clone common files"
-        git clone $URL_COMMON
-
+        git clone "$URL_COMMON"
         if [ "$ENVIRONMENT" = "public" ]; then
-            echo " [i] Renaming common folder"
-            mv hybrixd-common common
+            echo " [i] Link hybrixd-common files"
+            ln -sf "hybrixd-common" "common"
         fi
 
     fi
