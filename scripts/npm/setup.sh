@@ -13,7 +13,7 @@ DETERMINISTIC="$HYBRIXD/deterministic"
 NODEJS="$HYBRIXD/nodejs"
 COMMON="$HYBRIXD/common"
 WEB_WALLET="$HYBRIXD/web-wallet"
-ENVIRONMENT=$1
+ENVIRONMENT="$1"
 
 if [ "$ENVIRONMENT" = "dev" ]; then
     URL_COMMON="https://gitlab.com/hybrix/hybrixd/common.git"
