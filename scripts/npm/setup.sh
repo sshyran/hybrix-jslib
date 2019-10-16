@@ -82,6 +82,9 @@ if [ ! -e "$INTERFACE/common" ];then
 
 fi
 
+if [ -e "$HYBRIXD/project-xhy" ]; then
+    ln -sf "$HYBRIXD/project-xhy" "$INTERFACE/lib/methods/rawTransaction/project-xhy"
+fi
 
 # GIT HOOKS
 sh "$COMMON/hooks/hooks.sh" "$INTERFACE"
