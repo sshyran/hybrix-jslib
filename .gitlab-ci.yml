@@ -5,6 +5,7 @@ variables:
 stages:
  - build
  - release
+ - publish
 
 interface:
   image: node:8.14.0-stretch
@@ -113,18 +114,21 @@ dist:
   only:
     refs:
       - tags
-  #- /^v.*release$/
+  artifacts:
+    paths:
+      - ./
+
 
 publish:
   cache: {}
+  dependencies:
+    - dist
   stage: publish
   script:
     - publish
-  # only:
-  #   refs:
-  #     - master
-  #   variables:
-  #     - PUBLISH_ENABLED
+  only:
+    refs:
+      - tags
 
 # ---------------------------------------------------------------------------
 
@@ -180,16 +184,14 @@ publish:
 
     # Remove redundant files
     rm -rf node_modules
-    rm environment_url.txt
 
     # Change package name for NPM
     sed -i -e "s#\"name\": \"hybrixd\"#\"name\": \"hybrix-client\"#g" package.json
 
-    sed -i -e '/version/c\
-    \ \ "version":"$VERSION_NUMBER",
-    ' package.json
+    sed -i -e "/version/c\
+    \ \ \"version\":\"$VERSION_NUMBER\",
+    " package.json
 
-    npm version "$version"
     npm publish
   }
 
