@@ -232,6 +232,7 @@ publish:
     - dist
   stage: publish
   script:
+    - ls -l
     - sh ./scripts/npm/publish.sh
   only:
     refs:
