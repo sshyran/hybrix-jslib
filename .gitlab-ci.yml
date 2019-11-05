@@ -61,6 +61,7 @@ dist:
   stage: release
   script:
   # install the packages that we need
+  - apt-get update
   - apt-get -y install zip
   - apt-get -y install xz-utils
 
