@@ -12,7 +12,7 @@ stages:
  - build-interface
  - build-hybrixd
  - test
- - release
+ # - release
  - publish
  - cleanup
 
@@ -57,60 +57,60 @@ interface:
     paths:
     - ./*
 
-dist:
-  stage: release
-  script:
-  # install the packages that we need
-  - apk update
-  - apk add xz
-  - apk add zip
+# dist:
+#   stage: release
+#   script:
+#   # install the packages that we need
+#   - apk update
+#   - apk add xz
+#   - apk add zip
 
-  # set variables
-  # version -> branchname without '-release'
-  - version=${CI_COMMIT_REF_NAME/-release/}
-  - component=interface
-  - file=hybrixd.${component}.${version}
-  - fileLatest=hybrixd.${component}.latest
-  - path=interface/${version}/
+#   # set variables
+#   # version -> branchname without '-release'
+#   - version=${CI_COMMIT_REF_NAME/-release/}
+#   - component=interface
+#   - file=hybrixd.${component}.${version}
+#   - fileLatest=hybrixd.${component}.latest
+#   - path=interface/${version}/
 
-  - cp -r ./dist/. /tmp/${component}/
+#   - cp -r ./dist/. /tmp/${component}/
 
-  - cd /tmp
-  - git clone --depth=1 https://oauth2:${PRIVATE_TOKEN}@gitlab.com/hybrix/dist
-  - mkdir -p ./dist/interface/${version}/
+#   - cd /tmp
+#   - git clone --depth=1 https://oauth2:${PRIVATE_TOKEN}@gitlab.com/hybrix/dist
+#   - mkdir -p ./dist/interface/${version}/
 
-  - ls
-  - ls ${component}
+#   - ls
+#   - ls ${component}
 
-  - zip -r ${file}.zip ${component}/.
-  - tar -zcvf ${file}.tar.gz ${component}/.
-  - tar cfJ ${file}.tar.xz ${component}/.
+#   - zip -r ${file}.zip ${component}/.
+#   - tar -zcvf ${file}.tar.gz ${component}/.
+#   - tar cfJ ${file}.tar.xz ${component}/.
 
-  - cp ${file}.zip ./dist/${path}${file}.zip
-  - cp ${file}.tar.gz ./dist/${path}${file}.tar.gz
-  - cp ${file}.tar.xz ./dist/${path}${file}.tar.xz
+#   - cp ${file}.zip ./dist/${path}${file}.zip
+#   - cp ${file}.tar.gz ./dist/${path}${file}.tar.gz
+#   - cp ${file}.tar.xz ./dist/${path}${file}.tar.xz
 
-  - mkdir -p ./dist/${component}/latest
-  - cp ${file}.zip ./dist/${component}/latest/${fileLatest}.zip
-  - cp ${file}.tar.gz ./dist/${component}/latest/${fileLatest}.tar.gz
-  - cp ${file}.tar.xz ./dist/${component}/latest/${fileLatest}.tar.xz
+#   - mkdir -p ./dist/${component}/latest
+#   - cp ${file}.zip ./dist/${component}/latest/${fileLatest}.zip
+#   - cp ${file}.tar.gz ./dist/${component}/latest/${fileLatest}.tar.gz
+#   - cp ${file}.tar.xz ./dist/${component}/latest/${fileLatest}.tar.xz
 
-  # for interface we like to distribute the js files directly as well
-  - cp -r ./${component}/*.js ./dist/${path}
-  - cp -r ./${component}/*.js ./dist/${component}/latest/
-  - cd ./dist/
+#   # for interface we like to distribute the js files directly as well
+#   - cp -r ./${component}/*.js ./dist/${path}
+#   - cp -r ./${component}/*.js ./dist/${component}/latest/
+#   - cd ./dist/
 
-  # configure git-user
-  - "git config --global user.name \"${GITLAB_USER_NAME}\""
-  - "git config --global user.email \"${GITLAB_USER_EMAIL}\""
+#   # configure git-user
+#   - "git config --global user.name \"${GITLAB_USER_NAME}\""
+#   - "git config --global user.email \"${GITLAB_USER_EMAIL}\""
 
-  # add, commit and push
-  - "git add ."
-  - "git commit -m \"release ${version} ${component}\" || true"
-  - "git push https://oauth2:${PRIVATE_TOKEN}@gitlab.com/hybrix/dist -f || true"
+#   # add, commit and push
+#   - "git add ."
+#   - "git commit -m \"release ${version} ${component}\" || true"
+#   - "git push https://oauth2:${PRIVATE_TOKEN}@gitlab.com/hybrix/dist -f || true"
 
-  only:
-  - tags
+#   only:
+#   - tags
 
 hybrixd:
   cache: {}
@@ -221,7 +221,6 @@ stop_review:
   artifacts:
     paths:
       - ./
-
 
 publish:
   cache: {}
