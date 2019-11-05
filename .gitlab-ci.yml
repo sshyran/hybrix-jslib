@@ -59,6 +59,7 @@ interface:
 
 dist:
   stage: release
+  image: alpine:latest
   script:
   # install the packages that we need
   - apk update
