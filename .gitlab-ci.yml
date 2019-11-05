@@ -72,7 +72,7 @@ dist:
   - fileLatest=hybrixd.${component}.latest
   - path=interface/${version}/
 
-  - mkdir dist
+  - mkdir ./dist
   - mv hybrix-lib.nodejs.js ./dist
   - mv hybrix-lib.web.js ./dist
 
