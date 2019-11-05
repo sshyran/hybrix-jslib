@@ -61,7 +61,8 @@ dist:
   stage: release
   script:
   # install the packages that we need
-  - apt-get install xz zip
+  - apt-get -y install zip
+  - apt-get -y install xz-utils
 
   # set variables
   # version -> branchname without '-release'
