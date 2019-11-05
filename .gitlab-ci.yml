@@ -62,8 +62,7 @@ dist:
   script:
   # install the packages that we need
   - apt-get update
-  - apt-get -y install zip
-  - apt-get -y install xz-utils
+  - apt-get install zip
 
   # set variables
   # version -> branchname without '-release'
@@ -72,6 +71,8 @@ dist:
   - file=hybrixd.${component}.${version}
   - fileLatest=hybrixd.${component}.latest
   - path=interface/${version}/
+
+  - ls -l
 
   - cp -r ./dist/. /tmp/${component}/
 
