@@ -61,9 +61,9 @@ dist:
   stage: release
   script:
   # install the packages that we need
-  - apk update
-  - apk add xz
-  - apk add zip
+  - apt-get update
+  - apt-get add xz
+  - apt-get add zip
 
   # set variables
   # version -> branchname without '-release'

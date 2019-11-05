@@ -1,7 +1,7 @@
 {
-  "name": "hybrixd.interface",
+  "name": "hybrixd-client",
   "version": "0.5.0",
-  "description": "Interface to hybrixd.node",
+  "description": "Interface to hybrixd-node",
   "main": "index.js",
   "directories": {
     "doc": "docs",
