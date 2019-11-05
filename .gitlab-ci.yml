@@ -527,9 +527,9 @@ publish:
   function publish () {
     # Publish on NPM
 
-    npm install npm-cli-login
-    node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
-    npm publish
+    # npm install npm-cli-login
+    # node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
+    # npm publish
 
     # Publish on Github
     sed -i -e "\$i \,\"publishConfig\": { \"registry\": \"https://npm.pkg.github.com/\" }" package.json
