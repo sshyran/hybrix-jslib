@@ -229,7 +229,7 @@ stop_review:
 publish:
   cache: {}
   dependencies:
-    - dist
+    - release
   stage: publish
   script:
     - sh ./scripts/npm/publish.sh
