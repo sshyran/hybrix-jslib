@@ -232,13 +232,10 @@ stop_review:
 publish:
   cache: {}
   dependencies:
-    - interface
     - dist
   stage: publish
   script:
-    - ls -l
-    - ls -l ./scripts/npm
-    - sh ./scripts/npm/publish.sh
+    - publish
   only:
     refs:
       - tags
@@ -526,6 +523,19 @@ publish:
     # remove .git directory and .* files
     rm -rf ./.git* || true
   }
+
+  function publish () {
+    # Publish on NPM
+    npm install npm-cli-login
+    node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL"
+    npm publish
+
+  # Publish on Github
+  sed -i -e "\$i \,\"publishConfig\": { \"registry\": \"https://npm.pkg.github.com/\" }" package.json
+  node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$GITHUB_USER" -p "$GITHUB_PASSWORD" -e "$GITHUB_MAIL" -r "https://npm.pkg.github.com/"
+  npm publish
+
+}
 
 before_script:
   - *auto_devops
