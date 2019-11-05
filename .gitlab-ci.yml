@@ -237,6 +237,7 @@ publish:
   stage: publish
   script:
     - ls -l
+    - ls -l ./scripts/npm
     - sh ./scripts/npm/publish.sh
   only:
     refs:
