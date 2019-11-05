@@ -114,6 +114,9 @@ dist:
 
   only:
   - tags
+  artifacts:
+    paths:
+      - ./*
 
 hybrixd:
   cache: {}
@@ -521,6 +524,10 @@ publish:
     # remove .git directory and .* files
     rm -rf ./.git* || true
   }
+
+  # function set_env () {
+  #   kubectl create configmap env_variables --from-env-file=path/to/bar.env
+  # }
 
 before_script:
   - *auto_devops
