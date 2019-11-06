@@ -9,6 +9,9 @@
     "lib": "lib",
     "test": "test"
   },
+  "engines": {
+    "node": ">=12.13.0 <13.0.0"
+  },
   "scripts": {
     "test": "sh ./scripts/npm/test.sh",
     "setup": "sh ./scripts/npm/setup.sh 'public'",
