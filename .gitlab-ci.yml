@@ -532,8 +532,14 @@ publish:
     # npm publish
 
     # Publish on Github
+    touch .npmrc
+    echo "//npm.pkg.github.com/:_authToken=$GITHUB_PAT" >> .npmrc
+    echo "@hybrix-io:registry=https://npm.pkg.github.com" >> .npmrc
+
+    sed -i -e 's/.*name.*/name: @hybrix-io\/hybrixd-interface/' package.json
     sed -i -e "\$i \,\"publishConfig\": { \"registry\": \"https://npm.pkg.github.com/\" }" package.json
-    node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$GITHUB_USER" -p "$GITHUB_PASSWORD" -e "$GITHUB_MAIL" -r "https://npm.pkg.github.com/"
+
+    # node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$GITHUB_USER" -p "$GITHUB_PASSWORD" -e "$GITHUB_MAIL" -r "https://npm.pkg.github.com/"
     npm publish
 
   }
