@@ -528,8 +528,8 @@ publish:
     # Publish on NPM
 
     npm install npm-cli-login
-    # node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
-    # npm publish
+    node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
+    npm publish
 
     # Publish on Github
     touch .npmrc
@@ -539,7 +539,6 @@ publish:
     sed -i -e 's/.*name.*/"name": "@hybrix-io\/hybrixd-interface",/' package.json
     sed -i -e "\$i \,\"publishConfig\": { \"registry\": \"https://npm.pkg.github.com/\" }" package.json
 
-    # node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$GITHUB_USER" -p "$GITHUB_PASSWORD" -e "$GITHUB_MAIL" -r "https://npm.pkg.github.com/"
     npm publish
 
   }
