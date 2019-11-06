@@ -112,11 +112,13 @@ dist:
   # - "git commit -m \"release ${version} ${component}\" || true"
   # - "git push https://oauth2:${PRIVATE_TOKEN}@gitlab.com/hybrix/dist -f || true"
 
+  - cp ./package.json ./dist
+
   only:
   - tags
   artifacts:
     paths:
-      - ./*
+      - ./dist
 
 hybrixd:
   cache: {}
@@ -537,6 +539,7 @@ publish:
     echo "@hybrix-io:registry=https://npm.pkg.github.com" >> .npmrc
 
     sed -i -e 's/.*name.*/"name": "@hybrix-io\/hybrixd-interface",/' package.json
+    sed -i -e 's/.*version.*/"version": "",/' package.json
     sed -i -e "\$i \,\"publishConfig\": { \"registry\": \"https://npm.pkg.github.com/\" }" package.json
 
     npm publish
