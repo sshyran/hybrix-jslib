@@ -55,7 +55,7 @@ interface:
 
   artifacts:
     paths:
-    - ./*
+    - ./package.json
 
 dist:
   stage: release
@@ -111,9 +111,6 @@ dist:
   # - "git add ."
   # - "git commit -m \"release ${version} ${component}\" || true"
   # - "git push https://oauth2:${PRIVATE_TOKEN}@gitlab.com/hybrix/dist -f || true"
-  - ls -l ./../
-  - ls -l ./../interface
-  - cp ./../interface/package.json ./dist
 
   only:
   - tags
@@ -235,6 +232,7 @@ stop_review:
 publish:
   cache: {}
   dependencies:
+    - interface
     - dist
   stage: publish
   script:
