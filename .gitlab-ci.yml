@@ -55,6 +55,10 @@ interface:
     - ls -l
     - cd ..
     - ls -l
+    - cd ..
+    - ls -l
+    - cd ..
+    - ls -l
 
   artifacts:
     paths:
