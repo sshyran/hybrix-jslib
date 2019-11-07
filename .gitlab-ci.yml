@@ -72,6 +72,8 @@ dist:
   - fileLatest=hybrixd.${component}.latest
   - path=interface/${version}/
 
+  - ls -l
+
   - mkdir ./dist
   - cp hybrix-lib.nodejs.js ./dist
   - cp hybrix-lib.web.js ./dist
