@@ -55,7 +55,7 @@ interface:
 
   artifacts:
     paths:
-    - ./package.json
+    - ./*
 
 dist:
   stage: release
