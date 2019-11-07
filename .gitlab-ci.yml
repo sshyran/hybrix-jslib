@@ -204,7 +204,6 @@ test:
     - sh ./scripts/pipeline/test.sh
   coverage: /SUCCESS RATE[^|]*\:[^|]*\s+([\d\.]+)/
   dependencies:
-    - interface
     - hybrixd
   except:
    refs:
