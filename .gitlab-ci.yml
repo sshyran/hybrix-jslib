@@ -52,8 +52,9 @@ interface:
     - timestamp=$(date -u '+%Y-%m-%dT%H:%M:%S+00:00')
     - mode=release
     - echo "{\"${CI_PROJECT_PATH_SLUG}\":{\"mode\":\"${mode}\", \"project_path\":\"${CI_PROJECT_PATH}\", \"commit_ref_name\":\"${CI_COMMIT_REF_NAME}\", \"commit_ref_slug\":\"${CI_COMMIT_REF_SLUG}\", \"commit_sha\":\"${CI_COMMIT_SHA}\", \"pipeline_url\":\"${CI_PIPELINE_URL}\", \"packaged\":\"${timestamp}\"}}" > .version
-
+    - ls -l
     - cd ..
+    - ls -l
 
   artifacts:
     paths:
@@ -119,7 +120,7 @@ dist:
   - tags
   artifacts:
     paths:
-      - ./*
+      - ./dist
 
 hybrixd:
   cache: {}
