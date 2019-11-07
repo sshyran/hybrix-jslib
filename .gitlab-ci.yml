@@ -73,8 +73,8 @@ dist:
   - path=interface/${version}/
 
   - mkdir ./dist
-  - mv hybrix-lib.nodejs.js ./dist
-  - mv hybrix-lib.web.js ./dist
+  - cp hybrix-lib.nodejs.js ./dist
+  - cp hybrix-lib.web.js ./dist
 
   - cp -r ./dist/. /tmp/${component}/
 
