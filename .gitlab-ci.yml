@@ -105,7 +105,6 @@ dist:
   # for interface we like to distribute the js files directly as well
   - cp -r ./${component}/*.js ./dist/${path}
   - cp -r ./${component}/*.js ./dist/${component}/latest/
-  - cd ./dist/
 
   # # configure git-user
   # - "git config --global user.name \"${GITLAB_USER_NAME}\""
@@ -120,7 +119,7 @@ dist:
   - tags
   artifacts:
     paths:
-      - ./dist
+      - ./*
 
 hybrixd:
   cache: {}
@@ -192,6 +191,8 @@ hybrixd:
     - service docker start
     - setup_docker
     - build
+
+    - rm package.json
   artifacts:
     paths:
     - ./*
@@ -203,6 +204,7 @@ test:
     - sh ./scripts/pipeline/test.sh
   coverage: /SUCCESS RATE[^|]*\:[^|]*\s+([\d\.]+)/
   dependencies:
+    - interface
     - hybrixd
   except:
    refs:
