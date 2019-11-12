@@ -45,6 +45,9 @@ interface:
 
     # extract dist
     - shopt -s extglob
+
+    - cp ./package.json ./dist/
+
     - rm -rf !(dist) || true
     - dist
 
