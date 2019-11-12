@@ -541,10 +541,11 @@ publish:
   function publish () {
     # Publish on NPM
 
-    ls -l
 
-    cp ./dist/package.json ./
     rm -rf ./dist
+    rm test.js
+
+    cat package.json
 
     npm install npm-cli-login
     node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
