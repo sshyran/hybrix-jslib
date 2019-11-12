@@ -22,7 +22,8 @@ interface:
   cache: {}
   stage: build-interface
   script:
-
+    - version=${CI_COMMIT_REF_NAME/-release/}
+    - echo ${version}
     # Because of race conditions with merge squashes leaving broken references we circumvent the default git strategy GIT_STRATEGY: none
     - cd ..
     - "git clone -n https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/hybrix/hybrixd/interface.git --depth 10 --single-branch --branch $CI_COMMIT_REF_NAME"
@@ -54,13 +55,6 @@ interface:
     - timestamp=$(date -u '+%Y-%m-%dT%H:%M:%S+00:00')
     - mode=release
     - echo "{\"${CI_PROJECT_PATH_SLUG}\":{\"mode\":\"${mode}\", \"project_path\":\"${CI_PROJECT_PATH}\", \"commit_ref_name\":\"${CI_COMMIT_REF_NAME}\", \"commit_ref_slug\":\"${CI_COMMIT_REF_SLUG}\", \"commit_sha\":\"${CI_COMMIT_SHA}\", \"pipeline_url\":\"${CI_PIPELINE_URL}\", \"packaged\":\"${timestamp}\"}}" > .version
-    - ls -l
-    - cd ..
-    - ls -l
-    - cd ..
-    - ls -l
-    - cd ..
-    - ls -l
 
   artifacts:
     paths:
@@ -246,7 +240,7 @@ publish:
   stage: publish
   script:
     - shopt -s extglob
-    - rm !(package.json|hybrix-lib.nodejs.js|hybrix-lib.web.js) || true
+    - rm -rf !(package.json|hybrix-lib.nodejs.js|hybrix-lib.web.js) || true
     - ls -l
     - publish
   only:
