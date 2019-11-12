@@ -24,6 +24,7 @@ interface:
   script:
     - version=${CI_COMMIT_REF_NAME/-release/}
     - versionNumber="${version//v}"
+    - echo ${versionNumber}
     # Because of race conditions with merge squashes leaving broken references we circumvent the default git strategy GIT_STRATEGY: none
     - cd ..
     - "git clone -n https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/hybrix/hybrixd/interface.git --depth 10 --single-branch --branch $CI_COMMIT_REF_NAME"
