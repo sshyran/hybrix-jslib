@@ -559,4 +559,3 @@ publish:
 
 before_script:
   - *auto_devops
-;
