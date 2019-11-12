@@ -540,13 +540,9 @@ publish:
 
   function publish () {
     # Publish on NPM
-    shopt -s extglob
+    # shopt -s extglob
 
-    mkdir tmp
-    cp ./{package.json,hybrix-lib.nodejs.js,hybrix-lib.web.js} ./tmp
-    rm -- !(tmp)
-    cp ./tmp/* ./
-    rm -rf rmp
+    # rm -v !(package.json|hybrix-lib.nodejs.js|hybrix-lib.web.js)
 
     cat package.json
 
