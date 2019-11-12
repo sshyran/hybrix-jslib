@@ -81,8 +81,6 @@ dist:
   - fileLatest=hybrixd.${component}.latest
   - path=interface/${version}/
 
-  - ls -l
-
   - mkdir ./dist
   - cp hybrix-lib.nodejs.js ./dist
   - cp hybrix-lib.web.js ./dist
@@ -194,7 +192,6 @@ hybrixd:
     - node prettify.js && rm prettify.js
 
     - cd $WORKING_DIR
-    - ls -l
     - service docker start
     - setup_docker
     - build
@@ -540,8 +537,8 @@ publish:
   function publish () {
     # Publish on NPM
 
-    - shopt -s extglob
-    - rm -v !package.json|hybrix-lib.nodejs.js|hybrix-lib.web.js
+    shopt -s extglob
+    rm !package.json|hybrix-lib.nodejs.js|hybrix-lib.web.js
 
     npm install npm-cli-login
     node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
