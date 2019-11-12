@@ -22,9 +22,6 @@ interface:
   cache: {}
   stage: build-interface
   script:
-    - version=${CI_COMMIT_REF_NAME/-release/}
-    - versionNumber="${version//v}"
-    - echo ${versionNumber}
     # Because of race conditions with merge squashes leaving broken references we circumvent the default git strategy GIT_STRATEGY: none
     - cd ..
     - "git clone -n https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/hybrix/hybrixd/interface.git --depth 10 --single-branch --branch $CI_COMMIT_REF_NAME"
@@ -535,10 +532,11 @@ publish:
   function publish () {
     # Publish on NPM
 
-    # - version=${CI_COMMIT_REF_NAME/-release/}
-    # - versionNumber=${$version/v/}
+    # Get correct version from repository tag
+    - version=${CI_COMMIT_REF_NAME/-release/}
+    - versionNumber="${version//v}"
 
-    # sed -i -e 's/.*version.*/"version": "",/' package.json
+    sed -i -e 's/.*version.*/"version": "$versionNumber",/' package.json
 
     npm install npm-cli-login
     node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
