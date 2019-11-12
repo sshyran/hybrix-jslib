@@ -533,8 +533,8 @@ publish:
     # Publish on NPM
 
     # Get correct version from repository tag
-    - version=${CI_COMMIT_REF_NAME/-release/}
-    - versionNumber="${version//v}"
+    version=${CI_COMMIT_REF_NAME/-release/}
+    versionNumber="${version//v}"
 
     sed -i -e 's/.*version.*/"version": "$versionNumber",/' package.json
 
