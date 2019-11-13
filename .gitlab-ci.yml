@@ -42,11 +42,12 @@ interface:
     - ./scripts/npm/compile.sh
     # For debug use - ./scripts/npm/compile.sh debug
 
-    - cp ./package.json ./dist/
+    # - cp ./package.json ./dist/
+    # - cp ./package.json ./dist/
 
     # extract dist
     - shopt -s extglob
-    - rm -rf !(dist) || true
+    - rm -rf !(dist|package.json|README.md) || true
     - dist
 
     # create a .version file
