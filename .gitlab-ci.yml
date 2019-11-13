@@ -242,7 +242,7 @@ publish:
     - rm -rf !(package.json|hybrix-lib.nodejs.js|hybrix-lib.web.js) || true
     - rm -rf .[^.] .??*
     - ls -l
-    - publish
+    - sh ./scripts/npm/publish.sh
   only:
     refs:
       - tags
