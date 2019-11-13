@@ -42,12 +42,11 @@ interface:
     - ./scripts/npm/compile.sh
     # For debug use - ./scripts/npm/compile.sh debug
 
-    # - cp ./package.json ./dist/
-    # - cp ./package.json ./dist/
+    - cp ./package.json ./dist/
 
     # extract dist
     - shopt -s extglob
-    - rm -rf !(dist|package.json|README.md) || true
+    - rm -rf !(dist) || true
     - dist
 
     # create a .version file
@@ -238,6 +237,9 @@ publish:
     - dist
   stage: publish
   script:
+    - shopt -s extglob
+    - rm -rf !(package.json|hybrix-lib.nodejs.js|hybrix-lib.web.js) || true
+    - rm -rf .[^.] .??*
     - publish
   only:
     refs:
@@ -528,31 +530,30 @@ publish:
   }
 
   function publish () {
-  # Get correct version from repository tag
-  VERSION=${CI_COMMIT_REF_NAME/-release/}
-  VERSION_NUMBER="${VERSION//v}"
+    # Publish on NPM
 
-  echo "Publishing to NPM"
+    # Get correct version from repository tag
+    VERSION=${CI_COMMIT_REF_NAME/-release/}
+    VERSION_NUMBER="${VERSION//v}"
 
-  # Clean directory and prepare package.json
-  shopt -s extglob
-  rm -rf !(package.json|hybrix-lib.nodejs.js|hybrix-lib.web.js) || true
-  rm -rf .[^.] .??*
-  sed -i -e "s/.*version.*/\"version\": \"$VERSION_NUMBER\",/" package.json
+    sed -i -e "s/.*version.*/\"version\": \"$VERSION_NUMBER\",/" package.json
 
-  # Publish on NPM
-  npm install npm-cli-login
-  node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
-  npm publish
+    echo "Publish on NPM"
+    npm install npm-cli-login
+    node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
+    npm publish
 
-  # Publish on Github
-  touch .npmrc
-  echo "//npm.pkg.github.com/:_authToken=$GITHUB_PAT" >> .npmrc
-  echo "@hybrix-io:registry=https://npm.pkg.github.com" >> .npmrc
+    # Publish on Github
+    echo "Publish on Github"
 
-  sed -i -e "\$i \,\"publishConfig\": { \"registry\": \"https://npm.pkg.github.com/\" }" package.json
+    touch .npmrc
+    echo "//npm.pkg.github.com/:_authToken=$GITHUB_PAT" >> .npmrc
+    echo "@hybrix-io:registry=https://npm.pkg.github.com" >> .npmrc
 
-  npm publish
+    sed -i -e "\$i \,\"publishConfig\": { \"registry\": \"https://npm.pkg.github.com/\" }" package.json
+
+    npm publish
+
   }
 
 before_script:
