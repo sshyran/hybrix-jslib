@@ -538,16 +538,16 @@ publish:
 
     sed -i -e "s/.*version.*/\"version\": \"$VERSION_NUMBER\",/" package.json
 
-    # echo "Publish on NPM"
-    # npm install npm-cli-login
-    # node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
-    # npm publish
+    echo "Publish on NPM"
+    npm install npm-cli-login
+    node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
+    npm publish
 
     # Publish on Github
-    echo "Publish on Github"
+    # echo "Publish on Github"
 
-    node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "GITHUB_USER" -p "$GITHUB_PASSWORD" -e "$GITHUB_MAIL" -r "https://registry.npmjs.org"
-    npm publish
+    # node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "GITHUB_USER" -p "$GITHUB_PASSWORD" -e "$GITHUB_MAIL" -r "https://npm.pkg.github.com/"
+    # npm publish
 
   }
 
