@@ -546,12 +546,7 @@ publish:
     # Publish on Github
     echo "Publish on Github"
 
-    touch .npmrc
-    echo "//npm.pkg.github.com/:_authToken=$GITHUB_PAT" >> .npmrc
-    echo "registry=https://npm.pkg.github.com/@hybrix.io" >> .npmrc
-
-    sed -i -e "\$i \,\"publishConfig\": { \"registry\": \"https://npm.pkg.github.com/\" }" package.json
-
+    node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "GITHUB_USER" -p "$GITHUB_PASSWORD" -e "$GITHUB_MAIL" -r "https://registry.npmjs.org"
     npm publish
 
   }
