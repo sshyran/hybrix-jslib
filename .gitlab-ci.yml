@@ -103,14 +103,14 @@ dist:
   - cp -r ./${component}/*.js ./dist/${path}
   - cp -r ./${component}/*.js ./dist/${component}/latest/
 
-  # # configure git-user
-  # - "git config --global user.name \"${GITLAB_USER_NAME}\""
-  # - "git config --global user.email \"${GITLAB_USER_EMAIL}\""
+  # configure git-user
+  - "git config --global user.name \"${GITLAB_USER_NAME}\""
+  - "git config --global user.email \"${GITLAB_USER_EMAIL}\""
 
-  # # add, commit and push
-  # - "git add ."
-  # - "git commit -m \"release ${version} ${component}\" || true"
-  # - "git push https://oauth2:${PRIVATE_TOKEN}@gitlab.com/hybrix/dist -f || true"
+  # add, commit and push
+  - "git add ."
+  - "git commit -m \"release ${version} ${component}\" || true"
+  - "git push https://oauth2:${PRIVATE_TOKEN}@gitlab.com/hybrix/dist -f || true"
 
   only:
   - tags
