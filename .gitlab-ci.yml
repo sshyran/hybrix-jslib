@@ -13,6 +13,7 @@ stages:
  - build-hybrixd
  - test
  - release
+ - publish
  - cleanup
 
 interface:
@@ -21,7 +22,6 @@ interface:
   cache: {}
   stage: build-interface
   script:
-
     # Because of race conditions with merge squashes leaving broken references we circumvent the default git strategy GIT_STRATEGY: none
     - cd ..
     - "git clone -n https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/hybrix/hybrixd/interface.git --depth 10 --single-branch --branch $CI_COMMIT_REF_NAME"
@@ -42,6 +42,8 @@ interface:
     - ./scripts/npm/compile.sh
     # For debug use - ./scripts/npm/compile.sh debug
 
+    - cp ./package.json ./dist/
+
     # extract dist
     - shopt -s extglob
     - rm -rf !(dist) || true
@@ -60,9 +62,8 @@ dist:
   stage: release
   script:
   # install the packages that we need
-  - apk update
-  - apk add xz
-  - apk add zip
+  - apt-get update
+  - apt-get install zip
 
   # set variables
   # version -> branchname without '-release'
@@ -71,6 +72,10 @@ dist:
   - file=hybrixd.${component}.${version}
   - fileLatest=hybrixd.${component}.latest
   - path=interface/${version}/
+
+  - mkdir ./dist
+  - cp hybrix-lib.nodejs.js ./dist
+  - cp hybrix-lib.web.js ./dist
 
   - cp -r ./dist/. /tmp/${component}/
 
@@ -97,7 +102,6 @@ dist:
   # for interface we like to distribute the js files directly as well
   - cp -r ./${component}/*.js ./dist/${path}
   - cp -r ./${component}/*.js ./dist/${component}/latest/
-  - cd ./dist/
 
   # configure git-user
   - "git config --global user.name \"${GITLAB_USER_NAME}\""
@@ -110,6 +114,9 @@ dist:
 
   only:
   - tags
+  artifacts:
+    paths:
+      - ./dist
 
 hybrixd:
   cache: {}
@@ -177,10 +184,11 @@ hybrixd:
     - node prettify.js && rm prettify.js
 
     - cd $WORKING_DIR
-    - ls -l
     - service docker start
     - setup_docker
     - build
+
+    - rm package.json
   artifacts:
     paths:
     - ./*
@@ -216,10 +224,26 @@ stop_review:
   allow_failure: true
   only:
     refs:
-      - branches
-    kubernetes: active
-    variables:
-      - $REVIEW_ENABLED
+      - tags
+  artifacts:
+    paths:
+      - ./
+
+
+publish:
+  cache: {}
+  dependencies:
+    - interface
+    - dist
+  stage: publish
+  script:
+    - shopt -s extglob
+    - rm -rf !(package.json|hybrix-lib.nodejs.js|hybrix-lib.web.js) || true
+    - rm -rf .[^.] .??*
+    - publish
+  only:
+    refs:
+      - tags
 
 # ---------------------------------------------------------------------------
 
@@ -503,6 +527,28 @@ stop_review:
 
     # remove .git directory and .* files
     rm -rf ./.git* || true
+  }
+
+  function publish () {
+    # Publish on NPM
+
+    # Get correct version from repository tag
+    VERSION=${CI_COMMIT_REF_NAME/-release/}
+    VERSION_NUMBER="${VERSION//v}"
+
+    sed -i -e "s/.*version.*/\"version\": \"$VERSION_NUMBER\",/" package.json
+
+    echo "Publish on NPM"
+    npm install npm-cli-login
+    node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
+    npm publish
+
+    # Publish on Github
+    # echo "Publish on Github"
+
+    # node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "GITHUB_USER" -p "$GITHUB_PASSWORD" -e "$GITHUB_MAIL" -r "https://npm.pkg.github.com/"
+    # npm publish
+
   }
 
 before_script:
