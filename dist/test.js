@@ -1,8 +1,4 @@
 const knownIssues = {
-  ark_sampleBalance: {message:"API changed", link:"https://gitlab.com/hybrix/hybrixd/node/issues/881"},
-  ark_seedBalance: {message:"API changed", link:"https://gitlab.com/hybrix/hybrixd/node/issues/881"},
-  ark_sampleTransaction: {message:"API changed", link:"https://gitlab.com/hybrix/hybrixd/node/issues/881"},
-  ark_sampleHistory: {message:"API changed", link:"https://gitlab.com/hybrix/hybrixd/node/issues/881"},
 
   bch_seedSign: {message:"Not yet functioning. Perhaps funds missing for test", link:""},
   bch_seedSignHash: {message:"Not yet functioning. Perhaps funds missing for test", link:""},
