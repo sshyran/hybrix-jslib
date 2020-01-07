@@ -546,7 +546,7 @@ publish:
     # Publish on Github
     echo "Publish on Github"
 
-    node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "GITHUB_USER" -p "$GITHUB_PASSWORD" -e "$GITHUB_MAIL" -r "https://npm.pkg.github.com/"
+    node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$GITHUB_USER" -p "$GITHUB_PASSWORD" -e "$GITHUB_MAIL" -r "https://npm.pkg.github.com/"
     npm publish
   }
 
