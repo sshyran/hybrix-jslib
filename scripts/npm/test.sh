@@ -1,7 +1,6 @@
 #!/bin/sh
 OLDPATH=$PATH
 WHEREAMI=`pwd`
-NODEINST=`which node`
 
 # $HYBRIXD/interface/scripts/npm  => $HYBRIXD
 SCRIPTDIR="`dirname \"$0\"`"
@@ -13,7 +12,7 @@ export PATH="$INTERFACE/node_binaries/bin:$PATH"
 
 echo " [i] Running Interface tests"
 
-node "$NODE/interface/test.js" --path="$NODE/interface" | tee output
+node "$INTERFACE/test/lib/cli.js" --path="$INTERFACE/dist" | tee output
 
 TEST_INTERFACE_OUTPUT=$(cat output)
 
