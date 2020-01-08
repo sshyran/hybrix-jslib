@@ -1,7 +1,7 @@
 <html>
 <head>
 <script src="../dist/hybrix-lib.web.js"></script>
-<script src="./test.js"></script>
+<script src="./test.web.js"></script>
 <style>
 body {
   padding: 50px;
@@ -11,14 +11,14 @@ body {
 </style>
 </head>
 <body>
-<p>This will test hybrixd assets using hybrix-lib.web.js</p>
+<p>This will test hybrix assets using hybrix-lib.web.js</p>
 
 <p>Use the symbol get parameter to specify one or more assets and
   symbol=* for all assets</p>
 
-<p>Use the debug=true to get all debug output.</p>
+<p>Use debug=true to get all debug output.</p>
 
-<input type="button" value="Run" onclick="go()"/>
+<input type="button" value="Run" onclick="window.go()"/>
 
 
 <script>
@@ -35,7 +35,7 @@ function getParameter(parameterName) {
     return result;
 }
 if(getParameter('symbol')){
-go();
+   window.go();
 }
 </script>
   </body>
