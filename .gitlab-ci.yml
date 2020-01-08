@@ -533,10 +533,10 @@ publish:
     # Publish on NPM
 
     # Get correct version from repository tag
-    VERSION=${CI_COMMIT_REF_NAME/-release/}
-    VERSION_NUMBER="${VERSION//v}"
+    # VERSION=${CI_COMMIT_REF_NAME/-release/}
+    # VERSION_NUMBER="${VERSION//v}"
 
-    sed -i -e "s/.*version.*/\"version\": \"$VERSION_NUMBER\",/" package.json
+    # sed -i -e "s/.*version.*/\"version\": \"$VERSION_NUMBER\",/" package.json
 
     # echo "PUBLISH ON NPM"
     # npm install npm-cli-login
