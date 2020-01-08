@@ -1,5 +1,5 @@
 {
-  "name": "hybrixd-client",
+  "name": "hybrixd-interface",
   "version": "0.5.4",
   "description": "Interface to hybrixd-node",
   "main": "index.js",
@@ -27,6 +27,9 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/hybrix-io/hybrixd-interface.git"
+  },
+  "publishConfig": {
+    "registry":"https://npm.pkg.github.com/@hybrix-io"
   },
   "author": "",
   "license": "ISC",
