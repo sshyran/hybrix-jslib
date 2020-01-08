@@ -232,9 +232,9 @@ stop_review:
 
 publish:
   cache: {}
-  dependencies:
-    - interface
-    - dist
+  # dependencies:
+  #   - interface
+  #   - dist
   stage: publish
   script:
     - shopt -s extglob
