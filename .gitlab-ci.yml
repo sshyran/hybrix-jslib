@@ -9,11 +9,11 @@ variables:
   GIT_STRATEGY: none
 
 stages:
+ - publish
  - build-interface
  - build-hybrixd
  - test
  - release
- - publish
  - cleanup
 
 interface:
@@ -241,9 +241,9 @@ publish:
     - rm -rf !(package.json|hybrix-lib.nodejs.js|hybrix-lib.web.js) || true
     - rm -rf .[^.] .??*
     - publish
-  only:
-    refs:
-      - tags
+  # only:
+  #   refs:
+  #     - tags
 
 # ---------------------------------------------------------------------------
 
@@ -538,22 +538,21 @@ publish:
 
     sed -i -e "s/.*version.*/\"version\": \"$VERSION_NUMBER\",/" package.json
 
-    echo "PUBLISH ON NPM"
-    npm install npm-cli-login
-    node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
-    npm publish
+    # echo "PUBLISH ON NPM"
+    # npm install npm-cli-login
+    # node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
+    # npm publish
 
     cat package.json
   
     # Publish on Github
-    echo "PUBLISH ON GITHUB"
+    echo "PUBLISH ON GITHUB"    
 
-    echo "- Set Github registry."
     npm config set registry "https://npm.pkg.github.com/"
-    npm config get registry
-    echo "- Authenticate Github user."
     node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$GITHUB_USER" -p "$GITHUB_PAT" -e "$GITHUB_MAIL" -r "https://npm.pkg.github.com/"
-    echo "- Publish"
+
+    npm config ls
+  
     npm publish
   }
 
