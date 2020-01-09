@@ -22,7 +22,7 @@ if [ "$ENVIRONMENT" = "dev" ]; then
 elif [ "$ENVIRONMENT" = "public" ]; then
     URL_COMMON="https://github.com/hybrix-io/common.git"
     URL_NODEJS="https://github.com/hybrix-io/nodejs.git"
-    INTERFACE="$HYBRIXD/hybrixd-jslib"
+    INTERFACE="$HYBRIXD/hybrix-jslib"
     echo "[i] Environment is public..."
 else
     echo "[!] Unknown Environment (please use npm run setup[:dev])"
