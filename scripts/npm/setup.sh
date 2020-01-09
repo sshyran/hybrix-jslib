@@ -7,7 +7,6 @@ NODEINST=`which node`
 SCRIPTDIR="`dirname \"$0\"`"
 HYBRIXD="`cd \"$SCRIPTDIR/../../..\" && pwd`"
 
-INTERFACE="$HYBRIXD/interface"
 NODE="$HYBRIXD/node"
 DETERMINISTIC="$HYBRIXD/deterministic"
 NODEJS="$HYBRIXD/nodejs"
@@ -18,10 +17,12 @@ ENVIRONMENT="$1"
 if [ "$ENVIRONMENT" = "dev" ]; then
     URL_COMMON="https://gitlab.com/hybrix/hybrixd/common.git"
     URL_NODEJS="https://www.gitlab.com/hybrix/hybrixd/dependencies/nodejs.git"
+    INTERFACE="$HYBRIXD/interface"
     echo "[i] Environment is development..."
 elif [ "$ENVIRONMENT" = "public" ]; then
     URL_COMMON="https://github.com/hybrix-io/common.git"
     URL_NODEJS="https://github.com/hybrix-io/nodejs.git"
+    INTERFACE="$HYBRIXD/hybrixd-jslib"
     echo "[i] Environment is public..."
 else
     echo "[!] Unknown Environment (please use npm run setup[:dev])"
@@ -44,7 +45,7 @@ fi
 # NODE
 if [ ! -e "$INTERFACE/node_binaries" ];then
 
-    echo " [!] interface/node_binaries not found."
+    echo " [!] node_binaries not found."
 
     if [ ! -e "$NODEJS" ];then
         cd "$HYBRIXD"
@@ -60,7 +61,7 @@ export PATH="$INTERFACE/node_binaries/bin:$PATH"
 # COMMON
 if [ ! -e "$INTERFACE/common" ];then
 
-    echo " [!] interface/common not found."
+    echo " [!] common not found."
 
     if [ ! -e "$COMMON" ];then
         cd "$HYBRIXD"
