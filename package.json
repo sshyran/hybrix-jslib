@@ -1,7 +1,7 @@
 {
-  "name": "hybrixd-client",
+  "name": "hybrixd-jslib",
   "version": "0.5.4",
-  "description": "Interface to hybrixd-node",
+  "description": "Interface to hybrixd",
   "main": "index.js",
   "directories": {
     "doc": "docs",
@@ -26,7 +26,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/hybrix-io/hybrixd-interface.git"
+    "url": "git://github.com/hybrix-io/hybrix-jslib.git"
   },
   "author": "",
   "license": "ISC",
@@ -37,7 +37,7 @@
     "webpack-cli": "^3.1.0"
   },
   "bugs": {
-    "url": "https://github.com/hybrix-io/hybrixd-interface/issues"
+    "url": "https://github.com/hybrix-io/hybrix-jslib/issues"
   },
-  "homepage": "https://github.com/hybrix-io/hybrixd-interface#readme"
+  "homepage": "https://github.com/hybrix-io/hybrix-jslib#readme"
 }
