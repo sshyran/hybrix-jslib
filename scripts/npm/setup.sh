@@ -20,7 +20,7 @@ if [ "$ENVIRONMENT" = "dev" ]; then
     URL_NODEJS="https://www.gitlab.com/hybrix/hybrixd/dependencies/nodejs.git"
     echo "[i] Environment is development..."
 elif [ "$ENVIRONMENT" = "public" ]; then
-    URL_COMMON="https://github.com/hybrix-io/hybrixd-common.git"
+    URL_COMMON="https://github.com/hybrix-io/common.git"
     URL_NODEJS="https://github.com/hybrix-io/nodejs.git"
     echo "[i] Environment is public..."
 else
@@ -50,11 +50,6 @@ if [ ! -e "$INTERFACE/node_binaries" ];then
         cd "$HYBRIXD"
         echo " [i] Clone node js runtimes files"
         git clone "$URL_NODEJS"
-        if [ "$ENVIRONMENT" = "public" ]; then
-            echo " [i] Link hybrixd-dependencies-nodejs files"
-            ln -sf "hybrixd-dependencies-nodejs" "nodejs"
-        fi
-
     fi
     echo " [i] Link NODEJS files"
     ln -sf "$NODEJS/$SYSTEM" "$INTERFACE/node_binaries"
@@ -71,10 +66,6 @@ if [ ! -e "$INTERFACE/common" ];then
         cd "$HYBRIXD"
         echo " [i] Clone common files"
         git clone "$URL_COMMON"
-        if [ "$ENVIRONMENT" = "public" ]; then
-            echo " [i] Link hybrixd-common files"
-            ln -sf "hybrixd-common" "common"
-        fi
 
     fi
     echo " [i] Link common files"
