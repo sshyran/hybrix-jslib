@@ -1,5 +1,5 @@
 {
-  "name": "hybrixd-jslib",
+  "name": "hybrix-jslib",
   "version": "0.5.4",
   "description": "Interface to hybrixd",
   "main": "index.js",
