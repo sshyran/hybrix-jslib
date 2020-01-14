@@ -1,4 +1,4 @@
-# hybrix.interface
+# hybrix-jslib
 
 ## getting started
 
