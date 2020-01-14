@@ -1,4 +1,3 @@
-const render = require('./render.js');
 const main = require('./main.js');
 const stdio = require('stdio');
 const fs = require('fs');
@@ -64,12 +63,12 @@ DEBUG = ops.debug;
 
 const renderTable = data => {
   if (ops.xml) {
-    fs.writeFileSync(ops.xml, render.xml(data));
+    fs.writeFileSync(ops.xml, main.xml(data));
   }
   if (ops.json) {
-    fs.writeFileSync(ops.json, render.json(data));
+    fs.writeFileSync(ops.json, main.json(data));
   }
-  console.log(render.cli(data));
+  console.log(main.cli(data));
 };
 
 main.runTests(symbolsToTest, hybrix, host, renderTable, progressCallback);

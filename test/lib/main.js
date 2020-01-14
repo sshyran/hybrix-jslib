@@ -1,3 +1,4 @@
+const render = require('./render.js');
 const knownIssues = require('./knownIssues.js').knownIssues;
 const valid = require('./valid.js');
 const DEFAULT_AMOUNT = 0.00001;
@@ -190,3 +191,6 @@ function runTests (symbols, hybrix, host, dataCallback, progressCallback) {
 }
 
 exports.runTests = runTests;
+exports.xml = render.xml;
+exports.json = render.json;
+exports.cli = render.cli;
