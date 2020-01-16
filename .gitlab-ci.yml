@@ -103,6 +103,7 @@ dist:
   - cp -r ./${component}/*.js ./dist/${path}
   - cp -r ./${component}/*.js ./dist/${component}/latest/
 
+  - cd dist
   # configure git-user
   - "git config --global user.name \"${GITLAB_USER_NAME}\""
   - "git config --global user.email \"${GITLAB_USER_EMAIL}\""
@@ -113,7 +114,10 @@ dist:
   - "git push https://oauth2:${PRIVATE_TOKEN}@gitlab.com/hybrix/dist -f || true"
 
   only:
-  - tags
+   refs:
+     - tags
+   variables:
+     - $TEST_ENABLED
   artifacts:
     paths:
       - ./dist
@@ -509,7 +513,7 @@ publish:
     npm install npm-cli-login
     node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$NPM_USER" -p "$NPM_PASSWORD" -e "$NPM_MAIL" -r "https://registry.npmjs.org"
     npm publish
-  
+
     # Publish on Github
     echo "PUBLISH ON GITHUB"
     npm config set registry "https://npm.pkg.github.com/"
