@@ -116,8 +116,6 @@ dist:
   only:
    refs:
      - tags
-   variables:
-     - $TEST_ENABLED
   artifacts:
     paths:
       - ./dist
