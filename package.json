@@ -1,7 +1,7 @@
 {
   "name": "hybrix-jslib",
-  "version": "0.5.4",
-  "description": "Interface to hybrixd",
+  "version": "0.5.5",
+  "description": "javascript interface library to hybrixd",
   "main": "index.js",
   "directories": {
     "doc": "docs",
@@ -28,8 +28,8 @@
     "type": "git",
     "url": "git://github.com/hybrix-io/hybrix-jslib.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "hybrix",
+  "license": "GPL-3.0",
   "dependencies": {},
   "devDependencies": {
     "uglify-es": "^3.3.9",
@@ -39,5 +39,5 @@
   "bugs": {
     "url": "https://github.com/hybrix-io/hybrix-jslib/issues"
   },
-  "homepage": "https://github.com/hybrix-io/hybrix-jslib#readme"
+  "homepage": "https://hybrix.io"
 }
