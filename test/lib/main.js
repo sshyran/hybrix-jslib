@@ -192,5 +192,6 @@ function runTests (symbols, hybrix, host, dataCallback, progressCallback) {
 
 exports.runTests = runTests;
 exports.xml = render.xml;
+exports.web = render.web;
 exports.json = render.json;
 exports.cli = render.cli;
