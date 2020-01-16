@@ -516,9 +516,11 @@ publish:
     echo "PUBLISH ON GITHUB"
     sed -i -e '2i\
     "publishConfig": {"registry": "https://npm.pkg.github.com/"},' package.json
+    
     touch .npmrc
     echo "//npm.pkg.github.com/:_authToken=$GITHUB_PAT" >> .npmrc
     echo "@hybrix-io:registry=https://npm.pkg.github.com" >> .npmrc
+    
     npm config set registry "https://npm.pkg.github.com/"
     node ./node_modules/npm-cli-login/bin/npm-cli-login.js -u "$GITHUB_USER" -p "$GITHUB_PAT" -e "$GITHUB_MAIL" -r "https://npm.pkg.github.com/"
     npm publish
