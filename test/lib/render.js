@@ -216,8 +216,7 @@ const renderTableWeb = data => {
 
 
   r += '<h1>' + ((data.total-data.failures) / data.total * 100) + '%</h1>';
-  console.log(data);
-  document.body.innerHTML = r;
+  return r;
 };
 
 exports.xml = renderTableXML;
