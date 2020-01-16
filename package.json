@@ -1,6 +1,6 @@
 {
   "name": "hybrix-jslib",
-  "version": "0.5.5",
+  "version": "0.5.7",
   "description": "javascript interface library to hybrixd",
   "main": "index.js",
   "directories": {
