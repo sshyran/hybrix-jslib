@@ -508,7 +508,7 @@ publish:
     sed -i -e "s/.*version.*/\"version\": \"$VERSION_NUMBER\",/" package.json
 
     echo "[.] Install npm-cli-login (FIXME: should not be needed)"
-    #TODO implement without npm-cli-login use .npmrx instead
+    #TODO implement without npm-cli-login use .npmrc instead
     npm install npm-cli-login --save-dev
 
     echo "[.] Login to npm"
