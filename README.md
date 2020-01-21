@@ -1,19 +1,11 @@
 # hybrix-jslib
 
-## getting started
+This library can be used to connect software to leverage the
+capabilities of the hybrix platform. It serves two purposes: first to
+facilitate the logistics of interfacing with the hybrixd REST API,
+secondly to handle all client-side operations securely and
+privately. This ensures that keys required for transaction never leave
+the users device and communication over an encrypted channel.
 
-This is the repository containing the interface tool for hybrix.
-Documentation is generated automatically from the code, and can be found
-in the directory ./out/index.html . Open this in your browser to learn
-how to use the tools and client utilities.
-
-## file structure
-
-- ./out/      auto documentation
-- ./test/     folder containing test utility
-- ./ESP8266/  experimental for running the tools on ESP microcontrollers
-- - test.html browser test for library file
-- - test.js   js file for test
-- compile.sh
-- webpack.config.web.js
-- webpack.config.module.js
+Library documentation: https://api.hybrix.io/help/hybrix-lib.js
+REST API reference: https://api.hybrix.io/help/api
