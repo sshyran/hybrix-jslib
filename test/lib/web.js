@@ -25,8 +25,8 @@ function go () {
     document.body.innerHTML = '<div style="border-style:solid; border-width:1px; border-radius:10px; height:20px;"><div style="text-align:center;color:white;background-color:blue; border-radius:10px; height:20px; width:' + (progress * 100) + '%">' + Math.floor(progress * 100) + '%</div></div>';
   };
 
-  const render = data => { document.body.innerHTML = render.web(data); };
-  main.runTests(symbolsToTest, hybrix, host, render, progressCallback);
+  const renderCallback = data => { document.body.innerHTML = render.web(data); };
+  main.runTests(symbolsToTest, hybrix, host, renderCallback, progressCallback);
 }
 
 window.go = go;
