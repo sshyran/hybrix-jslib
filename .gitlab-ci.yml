@@ -17,9 +17,9 @@ stages:
  - cleanup
 
 interface:
-  tags:
-    - docker
   cache: {}
+  services:
+  - docker:stable-dind
   stage: build-interface
   script:
     # Because of race conditions with merge squashes leaving broken references we circumvent the default git strategy GIT_STRATEGY: none
