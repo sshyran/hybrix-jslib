@@ -208,7 +208,7 @@ publish:
   stage: publish
   script:
     - shopt -s extglob
-    - rm -rf !(package.json|hybrix-lib.nodejs.js|hybrix-lib.web.js) || true
+    - rm -rf !(package.json|README.md|hybrix-lib.nodejs.js|hybrix-lib.web.js) || true
     - rm -rf .[^.] .??*
     - publish
   only:
