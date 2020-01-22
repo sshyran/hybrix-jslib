@@ -12,7 +12,8 @@ export PATH="$INTERFACE/node_binaries/bin:$PATH"
 
 echo " [i] Running Interface tests"
 
-node "$INTERFACE/test/lib/cli.js" --path="$INTERFACE/dist" | tee output
+node "$INTERFACE/test/lib/cli.js" --path="$INTERFACE/dist"
+         #| tee output
 
 TEST_INTERFACE_OUTPUT=$(cat output)
 
