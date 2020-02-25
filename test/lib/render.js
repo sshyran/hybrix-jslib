@@ -51,8 +51,11 @@ const renderCellCLI = (symbol,testId, valid, known, result, messages,newMessages
   }
 };
 
-function issueLink(symbol,type,issue){
-  return `https://gitlab.com/hybrix/hybrixd/node/issues/new?issue[description]=${encodeURIComponent('/label ~"\\* Development Team \\*"\n/milestone %"Coin support : Test Issues"\n')}&issue[title]=${encodeURIComponent(symbol+ ' '+type+' '+(issue?issue.message:''))} `
+function issueLink (symbol, type, issue, title) {
+ const description = issue && issue.message
+   ? issue.message
+   : 'returned ' +  title;
+  return `https://gitlab.com/hybrix/hybrixd/node/issues/new?issue[description]=${encodeURIComponent(`/label ~"\\* Development Team \\*"\n/milestone %"DEV - asset maintenance - 2020-Q1"\n${description}`)}&issue[title]=${encodeURIComponent(symbol+' '+type+' '+description)}`;
 }
 
 const renderCellWeb = (symbol,type,valid,known, data, messages, newMessages) => {
@@ -69,7 +72,7 @@ const renderCellWeb = (symbol,type,valid,known, data, messages, newMessages) => 
       if(known.link){
         messages.push('<b style="color:purple;">'+symbol+ ' '+type+'</b> : <a  name="'+symbol+'_'+type+'" target="_blank" href="'+known.link+'">'+known.message+'</a>');
       }else{
-        messages.push('<b style="color:purple;">'+symbol+ ' '+type+'</b> : <a name="'+symbol+'_'+type+'">'+known.message+' </a><a style="color:red;"target="_blank" href="'+issueLink(symbol,type,known)+'"><b>Create issue</b></a>');
+        messages.push('<b style="color:purple;">'+symbol+ ' '+type+'</b> : <a name="'+symbol+'_'+type+'">'+known.message+' </a><a style="color:red;"target="_blank" href="'+issueLink(symbol,type,known,known.message)+'"><b>Create issue</b></a>');
       }
 
 
@@ -79,7 +82,7 @@ const renderCellWeb = (symbol,type,valid,known, data, messages, newMessages) => 
       if(known.link){
         messages.push('<b style="color:orange;">'+symbol+ ' '+type+'</b> : <a  name="'+symbol+'_'+type+'" target="_blank" href="'+known.link+'">'+known.message+'</a>');
       }else{
-        messages.push('<b style="color:orange;">'+symbol+ ' '+type+'</b> : <a name="'+symbol+'_'+type+'">'+known.message+' </a><a style="color:red;"target="_blank" href="'+issueLink(symbol,type,known)+'"><b>Create issue</b></a>');
+        messages.push('<b style="color:orange;">'+symbol+ ' '+type+'</b> : <a name="'+symbol+'_'+type+'">'+known.message+' </a><a style="color:red;"target="_blank" href="'+issueLink(symbol,type,known,known.message)+'"><b>Create issue</b></a>');
       }
       return '<td style="text-align:center;background-color:orange" title="' + title + '"><a style="text-decoration:none; width: 100%;height: 100%;display: block;" href="#'+symbol+'_'+type+'">&nbsp;</a></td>';
     }
@@ -87,7 +90,7 @@ const renderCellWeb = (symbol,type,valid,known, data, messages, newMessages) => 
     return '<td style="text-align:center;background-color:green" title="' + title + '">&nbsp;</td>';
   } else {
 
-    newMessages.push('<b style="color:red;">'+symbol+ ' '+type+'</b> : returned '+title+' <a  name="'+symbol+'_'+type+'" style="color:red;"target="_blank" href="'+issueLink(symbol,type)+'"><b>Create issue</b></a>');
+    newMessages.push('<b style="color:red;">'+symbol+ ' '+type+'</b> : returned '+title+' <a  name="'+symbol+'_'+type+'" style="color:red;"target="_blank" href="'+issueLink(symbol,type, undefined, title)+'"><b>Create issue</b></a>');
 
     return '<td style="text-align:center;background-color:red"  title="' + title + '"><a style="text-decoration:none; width: 100%;height: 100%;display: block;" href="#'+symbol+'_'+type+'">&nbsp;</a></td>';
   }
