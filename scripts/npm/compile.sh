@@ -41,6 +41,9 @@ cat "$INTERFACE/LICENSE-pack.md" "$INTERFACE/dist/hybrixd.interface.nacl.js.tmp"
 cat "$INTERFACE/LICENSE-pack.md" "$INTERFACE/dist/hybrix-lib.nodejs.js" > "$INTERFACE/dist/hybrix-lib.nodejs.js.tmp"
 mv "$INTERFACE/dist/hybrix-lib.nodejs.js.tmp" "$INTERFACE/dist/hybrix-lib.nodejs.js"
 
+echo "[i] Copy README.npm.md to dist/README.md";
+cp "$INTERFACE/README.npm.md" "dist/README.md"
+
 # clean up
 rm "$INTERFACE/lib/interface.nodejs.js.tmp"
 rm "$INTERFACE/dist/hybrixd.interface.nacl.js.tmp"

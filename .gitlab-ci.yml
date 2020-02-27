@@ -158,8 +158,8 @@ hybrixd:
     - node prettify.js && rm prettify.js
 
     - service docker start
+    - sleep 30
     - setup_docker
-    - sleep 3
     - build
   artifacts:
     paths:
