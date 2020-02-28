@@ -21,8 +21,8 @@ const issueData = [
   ['dash_seedSignHash', 'Unstable host. Should work', '1040'],
   ['dash_seedBalance', 'returned undefined', '1018'],
   ['dash_seedUnspent', 'returned undefined', '1022'],
-  ['dash_sampleTransaction', 'Malfunction', ''],
-  ['dash_sampleHistory', 'Unstable host. Should work', '1060'],
+  ['dash_sampleTransaction', 'Malfunction', '1060'],
+  ['dash_sampleHistory', 'Unstable host. Should work', '1063'],
   ['dash_sampleBalance', 'returned undefined', '1021'],
   ['dash_sampleUnspent', 'returned undefined', '1025'],
 
