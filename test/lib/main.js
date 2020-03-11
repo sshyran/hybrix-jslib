@@ -38,7 +38,17 @@ const DEFAULT_TEST_SYMBOLS = [
   // 'xel' -> HOST issues
 ];
 
+function sanitizeResult (result) {
+  const props = ["sample", "details", "test"]
+  const result = typeof result === 'undefined' ? {} : result
+  
+  props.forEach(prop => { if (typeof result[prop]  === 'undefined') result[prop] = {} })
+  
+  return result;
+}
+
 const testCases = result => {
+  result = sanitizeResult(result);
   return {
     test: {data: result.test, step: 'id'},
     sample: {data: result.sample, step: 'id'},
@@ -71,10 +81,8 @@ function testAsset (symbol) {
       publicKey: {data: {symbol: symbol}, step: 'getPublicKey'}
     },
     'parallel',
-    (result) => {
-      if (typeof result.sample === 'undefined') { result.sample = {}; }
-      if (typeof result.details === 'undefined') { result.details = {}; }
-      if (typeof result.test === 'undefined') { result.test = {}; }
+    result => {
+      result = sanitizeResult(result);
       return {
         sample: {data: result.sample, step: 'id'},
         test: {data: result.test, step: 'id'},
@@ -95,6 +103,7 @@ function testAsset (symbol) {
     },
     'parallel',
     result => {
+      result = sanitizeResult(result);
       return {
         test: {data: result.test, step: 'id'},
         sample: {data: result.sample, step: 'id'},
@@ -120,20 +129,21 @@ function testAsset (symbol) {
   };
 }
 
-const validate = (symbols) => results => {
+const validate = symbols => results => {
   const assets = {};
   let total = 0;
   let failures = 0;
   for (let symbol in results) {
     assets[symbol] = {};
-    if (symbols.includes(symbol)) {
-      const details = results[symbol].details;
-      const test = results[symbol].test;
+    const symbolResult = results[symbol];
+    if (symbols.includes(symbol) && typeof symbolResult !== 'undefined') {
+      const details = symbolResult.details || {};
+      const test = symbolResult.test || {};
 
-      for (let testId in results[symbol]) {
-        const result = results[symbol][testId];
+      for (let testId in symbolResult) {
+        const result = symbolResult[testId];
         if (valid.hasOwnProperty(testId)) {
-          const isValid = valid[testId](results[symbol][testId], details, test);
+          const isValid = valid[testId](result, details, test);
           let known;
           if (!isValid) {
             ++failures;
