@@ -39,11 +39,11 @@ const DEFAULT_TEST_SYMBOLS = [
 ];
 
 function sanitizeResult (result) {
-  const props = ["sample", "details", "test"]
-  const result = typeof result === 'undefined' ? {} : result
-  
-  props.forEach(prop => { if (typeof result[prop]  === 'undefined') result[prop] = {} })
-  
+  const props = ['sample', 'details', 'test'];
+  result = typeof result === 'undefined' ? {} : result;
+
+  props.forEach(prop => { if (typeof result[prop] === 'undefined') result[prop] = {}; });
+
   return result;
 }
 
