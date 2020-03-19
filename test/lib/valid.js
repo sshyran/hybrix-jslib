@@ -12,19 +12,23 @@ function valid (valid) {
 
 function balance (balance, details, test) {
   if (details.hasOwnProperty('factor')) {
-    const factor = details.factor;
-    return typeof balance === 'string' && balance.toString().indexOf('.') !== -1 && balance.split('.')[1].length === Number(factor);
+    const factor = Number(details.factor);
+    // TODO /\d+.\d{factor}
+    return typeof balance === 'string' &&
+      ((balance.toString().indexOf('.') !== -1 && balance.split('.')[1].length === factor) ||
+       (factor === 0 && balance.length === factor))
+    ;
   } else {
     return false;
   }
 }
 
 function unspent (unspent) {
-  return typeof unspent !== 'undefined' && unspent !== null;
+  return typeof unspent !== 'undefined' && unspent !== null && !(typeof unspent === 'string' && unspent.startsWith('ERROR'));
 }
 
 function history (history) {
-  return typeof history === 'object' && history !== null;// TODO array of strings
+  return history instanceof Array;// TODO array of strings
 }
 
 function sample (sample) {
@@ -36,7 +40,7 @@ function transaction (transaction) {
 }
 
 function sign (sign) {
-  return typeof sign === 'string';
+  return typeof sign === 'string' && !sign.startsWith('ERROR');
 }
 
 function signHash (signHash, details, test) {

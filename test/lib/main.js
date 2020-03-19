@@ -74,6 +74,7 @@ function testAsset (symbol) {
   return { data: [
     {symbol: symbol}, 'addAsset',
     {
+      _options: {passErrors: true},
       sample: {data: {query: '/asset/' + symbol + '/sample'}, step: 'rout'},
       test: {data: {query: '/asset/' + symbol + '/test'}, step: 'rout'},
       details: {data: {query: '/asset/' + symbol + '/details'}, step: 'rout'},
@@ -84,6 +85,7 @@ function testAsset (symbol) {
     result => {
       result = sanitizeResult(result);
       return {
+        _options: {passErrors: true},
         sample: {data: result.sample, step: 'id'},
         test: {data: result.test, step: 'id'},
         details: {data: result.details, step: 'id'},
@@ -105,6 +107,7 @@ function testAsset (symbol) {
     result => {
       result = sanitizeResult(result);
       return {
+        _options: {passErrors: true},
         test: {data: result.test, step: 'id'},
         sample: {data: result.sample, step: 'id'},
         details: {data: result.details, step: 'id'},
@@ -146,8 +149,8 @@ const validate = symbols => results => {
           const isValid = valid[testId](result, details, test);
           let known;
           if (!isValid) {
-            ++failures;
             known = knownIssues[symbol + '_' + testId];
+            if (!known) ++failures;
           }
           assets[symbol][testId] = {valid: isValid, known, result, messages: ['TODO']};
         } else {
