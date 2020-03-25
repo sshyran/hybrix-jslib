@@ -10,6 +10,10 @@ const issueData = [
   ['bch_seedBalance', 'returned undefined', '1016'],
   ['bch_seedUnspent', 'returned undefined', '999'],
   ['bch_sampleValid', 'returned undefined', '1026'],
+  ['bch_seedValid', 'returned null', '1115'],
+  ['bch_test', 'returned null', '1114'],
+  ['bch_details', 'returned null', '1117'],
+  ['bch_sample', 'returned null', '1116'],
 
   ['btc_seedSignHash', 'Signing still holds a dynamic componement', '1035'],
 
@@ -57,8 +61,6 @@ const issueData = [
   ['ltc_seedUnspent', 'returned undefined', '1030'],
   ['ltc_sampleTransaction', 'Not yet functioning', '1061'],
 
-  ['mock.btc_sampleTransaction', 'returned unknown transaction2', '1007'],
-
   ['nxt_seedSignHash', 'Signing still holds a dynamic componement', ''],
   ['nxt_sampleHistory', 'returned valid', '1017'],
   ['nxt.xhy_seedSignHash', 'Signing still holds a dynamic componement', ''],
@@ -76,6 +78,9 @@ const issueData = [
   ['rise_sampleHistory', 'returned undefined', '1059'],
 
   ['shift_sampleTransaction', 'Not yet functioning', '885'],
+  ['shift_sampleHistory', 'returned undefined', '1123'],
+  ['shift_sampleBalance', 'returned undefined', '1124'],
+  ['shift_seedBalance', 'returned undefined', '1122'],
 
   ['xcp_seedSignHash', 'Signing still holds a dynamic componement', '1049'],
   ['xcp_sampleTransaction', 'Missing data for source,dest,amount, fee', '705'],
@@ -89,11 +94,13 @@ const issueData = [
   ['xem.xhy_sampleHistory', 'returned undefined', '1013'],
 
   ['xrp_seedSignHash', 'Signing still holds a dynamic componement', '1051'],
+  ['xrp_seedSign', 'returned undefined', '1121'],
   ['xrp_sampleHistory', 'returned undefined', '1014'],
 
   ['zec_seedSign', 'Not yet functioning. Perhaps funds missing for test', '1052'],
   ['zec_seedSignHash', 'Not yet functioning. Perhaps funds missing for test', '1053'],
-  ['zec_sampleHistory', 'Unstable', '702']
+  ['zec_sampleHistory', 'Unstable', '702'],
+  ['zec_sampleUnspent', 'returned undefined', '1120']
 ];
 
 issueData.map(makeKnownIssues);
