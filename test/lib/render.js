@@ -19,6 +19,7 @@ const renderSymbol = (renderCell, symbol, data, messages, newMessages) => {
 };
 
 const renderCellCLI = (symbol,testId, valid, known, result, messages,newMessages) => {
+  const title = JSON.stringify(result).replace(/"/g, '');
   if(known){
     if(valid){
       if(known.link){
@@ -29,7 +30,7 @@ const renderCellCLI = (symbol,testId, valid, known, result, messages,newMessages
       return '\033[36m OK \033[0m';
     }else{
       if(known.link){
-        messages.push('\033[33m'+symbol+ ' '+testId+'\033[0m : '+known.message);
+        messages.push('\033[33m'+symbol+ ' '+testId+'\033[0m : '+known.message+' (Returned '+ title+')');
       }else{
         messages.push('\033[33m'+symbol+ ' '+testId+'\033[0m : '+known.message+ ' \033[31m [Create issue]\033[0m');
       }
@@ -38,14 +39,6 @@ const renderCellCLI = (symbol,testId, valid, known, result, messages,newMessages
   } else if (valid) {
     return '\033[32m OK \033[0m';
   } else {
-    let title;
-
-    if (typeof data === 'object') {
-      title = JSON.stringify(result);
-    } else {
-      title = String(result);
-    }
-    title = title.replace(/"/g, '');
     newMessages.push('\033[31m'+symbol+ ' '+testId+'\033[0m : returned '+title+' \033[31m [Create issue]\033[0m');
     return '\033[31mFAIL\033[0m';
   }
@@ -59,13 +52,8 @@ function issueLink (symbol, type, issue, title) {
 }
 
 const renderCellWeb = (symbol,type,valid,known, data, messages, newMessages) => {
-  let title;
-  if (typeof data === 'object') {
-    title = JSON.stringify(data);
-  } else {
-    title = String(data);
-  }
-  title = title.replace(/"/g, '');
+  const title = JSON.stringify(data).replace(/"/g, '');
+
   if(known){
     if(valid){
 
@@ -80,7 +68,7 @@ const renderCellWeb = (symbol,type,valid,known, data, messages, newMessages) => 
 
     }else{
       if(known.link){
-        messages.push('<b style="color:orange;">'+symbol+ ' '+type+'</b> : <a  name="'+symbol+'_'+type+'" target="_blank" href="'+known.link+'">'+known.message+'</a>');
+        messages.push('<b style="color:orange;">'+symbol+ ' '+type+'</b> : <a  name="'+symbol+'_'+type+'" target="_blank" href="'+known.link+'">'+known.message+' (returned '+title+')</a>');
       }else{
         messages.push('<b style="color:orange;">'+symbol+ ' '+type+'</b> : <a name="'+symbol+'_'+type+'">'+known.message+' </a><a style="color:red;"target="_blank" href="'+issueLink(symbol,type,known,known.message)+'"><b>Create issue</b></a>');
       }
@@ -97,14 +85,7 @@ const renderCellWeb = (symbol,type,valid,known, data, messages, newMessages) => 
 };
 
 const renderCellXML = (symbol,testId, valid, known, result, messages,newMessages) => {
-  let title;
-  if (typeof result === 'object') {
-    title = JSON.stringify(result);
-  } else {
-    title = String(result);
-  }
-  title = title.replace(/"/g, '\\"');
-
+  const title = JSON.stringify(result).replace(/"/g, '');
   let r =  `<testcase id="${symbol+'_'+testId}" name="${symbol+' '+testId}" time="0.001">`
   if (!valid) {
     r+=`<failure message="${title}" type="ERROR"></failure>`
@@ -114,7 +95,6 @@ const renderCellXML = (symbol,testId, valid, known, result, messages,newMessages
 };
 
 const renderTableXML = data => {
-
   const messages = [];
   const newMessages = [];
 
