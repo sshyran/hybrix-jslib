@@ -117,17 +117,17 @@ const renderTableCLI = data => {
   const newMessages = [];
   let r = '\n';
   r += '   #   SAMPLE                                    GENERATED                    ' + '\n';
-  r += '      ┌────┬──────┬─────┬────┬──────┬──────┬────┬────┬────┬──────┬──────┬────┬────┐' + '\n';
-  r += '      │Test│Detail│Sampl│Vald│Balnce│Unspnt│Hist│Tran│Vald│Balnce│Unspnt│Sign│Hash│' + '\n';
+  r += '      ┌────┬─────┬──────┬────┬──────┬──────┬────┬────┬────┬──────┬──────┬────┬────┐' + '\n';
+  r += '      │Test│Sampl│Detail│Vald│Balnce│Unspnt│Hist│Tran│Vald│Balnce│Unspnt│Sign│Hash│' + '\n';
   for (let symbol in data.assets) {
-    r += '      ├────┼──────┼─────┼────┼──────┼──────┼────┼────┼────┼──────┼──────┼────┼────┤' + '\n';
+  r += '      ├────┼─────┼──────┼────┼──────┼──────┼────┼────┼────┼──────┼──────┼────┼────┤' + '\n';
     r += symbol.substr(0, 5) + '     '.substr(0, 5 - symbol.length) + ' │';
 
     const results = renderSymbol(renderCellCLI, symbol, data.assets[symbol],messages,newMessages);
     //
     r +=    results[0] + '│';
-    r += ' ' + results[1] + ' │';
-    r +=       results[2] + ' │';
+    r +=    results[1] + ' │';
+    r += ' ' + results[2] + ' │';
     r +=       results[3] + '│';
     r += ' ' + results[4] + ' │';
     r += ' ' + results[5] + ' │';
@@ -140,7 +140,7 @@ const renderTableCLI = data => {
     r +=       results[12]+'│';
     r += '\n';
   }
-  r += '      └────┴──────┴─────┴────┴──────┴──────┴────┴────┴────┴──────┴──────┴────┴────┘' + '\n';
+  r += '      └────┴─────┴──────┴────┴──────┴──────┴────┴────┴────┴──────┴──────┴────┴────┘' + '\n';
   r += '\n';
   r += 'New Issues:\n';
   newMessages.sort();
@@ -169,7 +169,7 @@ const renderTableWeb = data => {
 }
 </style>
 <table><tr><td>Symbol</td><td colspan="2"></td><td colspan="7" style="text-align:center;">Sample</td><td colspan="5"  style="text-align:center;">Generated</td></tr>`;
-  r += '<tr><td></td><td>Test</td><td>Details</td><td>Sample</td><td>Valid</td><td>Balance</td><td>Unspent</td>';
+  r += '<tr><td></td><td>Test</td><td>Sample</td><td>Details</td><td>Valid</td><td>Balance</td><td>Unspent</td>';
   r+='<td>History</td>';
   r+='<td>Transaction</td>';
   r += '<td>Valid</td><td>Balance</td><td>Unspent</td>';
