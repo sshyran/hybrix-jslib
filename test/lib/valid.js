@@ -1,9 +1,23 @@
+function hasProperties (object) {
+  if (typeof object !== 'object' || object === null) return false;
+  const propertyNames = [].slice.call(arguments);
+  propertyNames.shift(); // drop object parameter
+  return propertyNames.reduce((hasAllProperties, propertyName) => object.hasOwnProperty(propertyName) && hasAllProperties, true);
+}
+
 function test (test) {
-  return typeof test === 'object' && test !== null;
+  return hasProperties(test);
+}
+
+function fee (details) {
+  return details.fee &&
+    (typeof details.fee === 'string' || // FIXME remove after multi asset fees have been implemented
+      (typeof details.fee === 'object' && details.fee !== null) // TODO extend with more checks. All properties should be string number values
+    );
 }
 
 function details (details) {
-  return typeof details === 'object' && details !== null && details.hasOwnProperty('symbol') && details.hasOwnProperty('name') && details.hasOwnProperty('fee') && typeof details.hasOwnProperty('fee') && details.hasOwnProperty('factor') && details.hasOwnProperty('contract') && details.hasOwnProperty('mode') && details.hasOwnProperty('keygen-base');
+  return hasProperties(details, 'symbol', 'name', 'factor', 'contract', 'mode', 'keygen-base') && fee(details);
 }
 
 function valid (valid) {
@@ -32,11 +46,11 @@ function history (history) {
 }
 
 function sample (sample) {
-  return typeof sample === 'object' && sample !== null && sample.hasOwnProperty('address') && sample.hasOwnProperty('transaction');
+  return hasProperties(sample, 'address', 'transaction');
 }
 
 function transaction (transaction) {
-  return typeof transaction === 'object' && transaction !== null && transaction.hasOwnProperty('id') && transaction.hasOwnProperty('timestamp') && transaction.hasOwnProperty('amount') && transaction.hasOwnProperty('symbol') && transaction.hasOwnProperty('fee') && transaction.hasOwnProperty('source') && transaction.hasOwnProperty('target') && transaction.hasOwnProperty('confirmed');
+  return hasProperties(transaction, 'id', 'timestamp', 'amount', 'symbol', 'source', 'target', 'confirmed') && fee(transaction);
 }
 
 function sign (sign) {

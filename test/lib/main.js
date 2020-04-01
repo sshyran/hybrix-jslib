@@ -70,6 +70,17 @@ const testCases = result => {
 
 const testIds = Object.keys(testCases({}));
 
+function getFeeForUnspents (details) {
+  const fee = details.fee;
+  if (typeof fee === 'string') {
+    return Number(fee);
+  } else if (typeof fee === 'object' && fee !== null) {
+    return Number(Object.values(fee)[0]);
+  } else {
+    return NaN;
+  }
+}
+
 function testAsset (symbol) {
   return { data: [
     {symbol: symbol}, 'addAsset',
@@ -84,6 +95,7 @@ function testAsset (symbol) {
     'parallel',
     result => {
       result = sanitizeResult(result);
+      const amount = result.test.amount || DEFAULT_AMOUNT;
       return {
         _options: {passErrors: true},
         sample: {data: result.sample, step: 'id'},
@@ -93,19 +105,20 @@ function testAsset (symbol) {
 
         sampleValid: {data: {query: '/asset/' + symbol + '/validate/' + result.sample.address}, step: 'rout'},
         sampleBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.sample.address}, step: 'rout'},
-        sampleUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.sample.address + '/' + (Number(DEFAULT_AMOUNT) + Number(result.details.fee)) + '/' + result.address + '/' + result.sample.publicKey}, step: 'rout'},
+        sampleUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.sample.address + '/' + (Number(amount) + getFeeForUnspents(result.details)) + '/' + result.address + '/' + result.sample.publicKey}, step: 'rout'},
         sampleHistory: {data: {query: '/asset/' + symbol + '/history/' + result.sample.address}, step: 'rout'},
         sampleTransaction: {data: {query: '/asset/' + symbol + '/transaction/' + result.sample.transaction}, step: 'rout'},
 
         seedValid: {data: {query: '/asset/' + symbol + '/validate/' + result.address}, step: 'rout'},
         seedBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.address}, step: 'rout'},
-        seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(DEFAULT_AMOUNT) + Number(result.details.fee)) + '/' + result.sample.address + '/' + result.publicKey}, step: 'rout'}
+        seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(amount) + getFeeForUnspents(result.details)) + '/' + result.sample.address + '/' + result.publicKey}, step: 'rout'}
         // seedHistory: {data: {query: '/asset/' + symbol + '/history/' + result.address}, step: 'rout'}
       };
     },
     'parallel',
     result => {
       result = sanitizeResult(result);
+      const amount = result.test.amount || DEFAULT_AMOUNT;
       return {
         _options: {passErrors: true},
         test: {data: result.test, step: 'id'},
@@ -120,7 +133,7 @@ function testAsset (symbol) {
         seedValid: {data: result.seedValid + ' ' + result.address, step: 'id'},
         seedBalance: {data: result.seedBalance, step: 'id'},
         seedUnspent: {data: result.seedUnspent, step: 'id'},
-        seedSign: {data: {symbol: symbol, amount: DEFAULT_AMOUNT, target: result.sample.address, validate: false, unspent: result.test.hasOwnProperty('unspent') ? result.test.unspent : result.seedUnspent, time: result.test.time}, step: 'rawTransaction'}
+        seedSign: {data: {symbol: symbol, amount: amount, target: result.sample.address, validate: false, unspent: result.test.hasOwnProperty('unspent') ? result.test.unspent : result.seedUnspent, time: result.test.time}, step: 'rawTransaction'}
         // seedHistory: {data: result.seedHistory, step: 'id'},
       };
     },
