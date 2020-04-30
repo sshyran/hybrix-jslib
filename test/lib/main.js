@@ -70,12 +70,14 @@ const testCases = result => {
 
 const testIds = Object.keys(testCases({}));
 
-function getFeeForUnspents (details) {
+function getFeeForUnspents (amount, details) {
   const fee = details.fee;
   if (typeof fee === 'string') {
-    return Number(fee);
+    return Number(amount) + Number(fee);
+  } else if (typeof fee === 'number') {
+    return Number(amount) + fee;
   } else if (typeof fee === 'object' && fee !== null) {
-    return Number(Object.values(fee)[0]);
+    return Number(amount) + Number(Object.values(fee)[0]);
   } else {
     return NaN;
   }
@@ -105,13 +107,13 @@ function testAsset (symbol) {
 
         sampleValid: {data: {query: '/asset/' + symbol + '/validate/' + result.sample.address}, step: 'rout'},
         sampleBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.sample.address}, step: 'rout'},
-        sampleUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.sample.address + '/' + (Number(amount) + getFeeForUnspents(result.details)) + '/' + result.address + '/' + result.sample.publicKey}, step: 'rout'},
+        sampleUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.sample.address + '/' + (getFeeForUnspents(amount, result.details)) + '/' + result.address + '/' + result.sample.publicKey}, step: 'rout'},
         sampleHistory: {data: {query: '/asset/' + symbol + '/history/' + result.sample.address}, step: 'rout'},
         sampleTransaction: {data: {query: '/asset/' + symbol + '/transaction/' + result.sample.transaction}, step: 'rout'},
 
         seedValid: {data: {query: '/asset/' + symbol + '/validate/' + result.address}, step: 'rout'},
         seedBalance: {data: {query: '/asset/' + symbol + '/balance/' + result.address}, step: 'rout'},
-        seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (Number(amount) + getFeeForUnspents(result.details)) + '/' + result.sample.address + '/' + result.publicKey}, step: 'rout'}
+        seedUnspent: {data: {query: '/asset/' + symbol + '/unspent/' + result.address + '/' + (getFeeForUnspents(amount, result.details)) + '/' + result.sample.address + '/' + result.publicKey}, step: 'rout'}
         // seedHistory: {data: {query: '/asset/' + symbol + '/history/' + result.address}, step: 'rout'}
       };
     },
