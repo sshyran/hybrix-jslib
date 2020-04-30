@@ -116,7 +116,7 @@ const renderTableCLI = data => {
   const messages = [];
   const newMessages = [];
   let r = '\n';
-  r += '   #   SAMPLE                                    GENERATED                    ' + '\n';
+  r += '   #   SAMPLE                                    SEED                    ' + '\n';
   r += '      ┌────┬─────┬──────┬────┬──────┬──────┬────┬────┬────┬──────┬──────┬────┬────┐' + '\n';
   r += '      │Test│Sampl│Detail│Vald│Balnce│Unspnt│Hist│Tran│Vald│Balnce│Unspnt│Sign│Hash│' + '\n';
   for (let symbol in data.assets) {
@@ -168,7 +168,7 @@ const renderTableWeb = data => {
  background-color: yellow;
 }
 </style>
-<table><tr><td>Symbol</td><td colspan="2"></td><td colspan="7" style="text-align:center;">Sample</td><td colspan="5"  style="text-align:center;">Generated</td></tr>`;
+<table><tr><td>Symbol</td><td colspan="2"></td><td colspan="7" style="text-align:center;">Sample</td><td colspan="5"  style="text-align:center;">Seed</td></tr>`;
   r += '<tr><td></td><td>Test</td><td>Sample</td><td>Details</td><td>Valid</td><td>Balance</td><td>Unspent</td>';
   r+='<td>History</td>';
   r+='<td>Transaction</td>';
