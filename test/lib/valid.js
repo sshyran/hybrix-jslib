@@ -11,8 +11,8 @@ function test (test) {
 
 function fee (details) {
   return details.fee &&
-    (typeof details.fee === 'string' || // FIXME remove after multi asset fees have been implemented
-      (typeof details.fee === 'object' && details.fee !== null) // TODO extend with more checks. All properties should be string number values
+    (typeof details.fee === 'string' || typeof details.fee === 'number' || // FIXME remove after multi asset fees have been implemented
+    (typeof details.fee === 'object' && details.fee !== null) // TODO extend with more checks. All properties should be string number values
     );
 }
 
