@@ -43,6 +43,7 @@ interface:
     # For debug use - ./scripts/npm/compile.sh debug
 
     - cp ./package.json ./dist/
+    - cp ./scripts/pipeline/dist.sh ./dist/
 
     # extract dist
     - shopt -s extglob
@@ -58,67 +59,6 @@ interface:
     paths:
     - ./*
 
-dist:
-  stage: release
-  script:
-  # install the packages that we need
-  - apt-get update
-  - apt-get install zip
-
-  # set variables
-  # version -> branchname without '-release'
-  - version=${CI_COMMIT_REF_NAME/-release/}
-  - component=interface
-  - file=hybrixd.${component}.${version}
-  - fileLatest=hybrixd.${component}.latest
-  - path=interface/${version}/
-
-  - mkdir ./dist
-  - cp hybrix-lib.nodejs.js ./dist
-  - cp hybrix-lib.web.js ./dist
-
-  - cp -r ./dist/. /tmp/${component}/
-
-  - cd /tmp
-  - git clone --depth=1 https://oauth2:${PRIVATE_TOKEN}@gitlab.com/hybrix/dist
-  - mkdir -p ./dist/interface/${version}/
-
-  - ls
-  - ls ${component}
-
-  - zip -r ${file}.zip ${component}/.
-  - tar -zcvf ${file}.tar.gz ${component}/.
-  - tar cfJ ${file}.tar.xz ${component}/.
-
-  - cp ${file}.zip ./dist/${path}${file}.zip
-  - cp ${file}.tar.gz ./dist/${path}${file}.tar.gz
-  - cp ${file}.tar.xz ./dist/${path}${file}.tar.xz
-
-  - mkdir -p ./dist/${component}/latest
-  - cp ${file}.zip ./dist/${component}/latest/${fileLatest}.zip
-  - cp ${file}.tar.gz ./dist/${component}/latest/${fileLatest}.tar.gz
-  - cp ${file}.tar.xz ./dist/${component}/latest/${fileLatest}.tar.xz
-
-  # for interface we like to distribute the js files directly as well
-  - cp -r ./${component}/*.js ./dist/${path}
-  - cp -r ./${component}/*.js ./dist/${component}/latest/
-
-  - cd dist
-  # configure git-user
-  - "git config --global user.name \"${GITLAB_USER_NAME}\""
-  - "git config --global user.email \"${GITLAB_USER_EMAIL}\""
-
-  # add, commit and push
-  - "git add ."
-  - "git commit -m \"release ${version} ${component}\" || true"
-  - "git push https://oauth2:${PRIVATE_TOKEN}@gitlab.com/hybrix/dist -f || true"
-
-  only:
-    refs:
-      - tags
-  artifacts:
-    paths:
-      - ./dist
 
 hybrixd:
   cache: {}
@@ -134,6 +74,10 @@ hybrixd:
     - PROJECT_REF_BRANCH=master
     - PROJECT_REF_ID=6980168
 
+    #move files required for dist
+    - mv ./dist.sh /tmp/dist.sh
+    - mv ./package.json /tmp/package.json
+
     - "curl -s --location --header \"Private-Token: $PRIVATE_TOKEN\" \"https://gitlab.com/api/v4/projects/${PROJECT_REF_ID}/jobs/artifacts/master/download?job=hybrixd\" -o artifacts-${PROJECT_REF_NAME}.zip"
     - unzip -qq -o artifacts-hybrixd.zip  -d ./
 
@@ -147,7 +91,9 @@ hybrixd:
     - mv ./hybrix-lib.nodejs.js interface/hybrix-lib.nodejs.js
     - mv ./hybrix-lib.web.js interface/hybrix-lib.web.js
     - mv test.js interface/test.js
-    #- rm package.json
+
+    - mv /tmp/dist.sh ./scripts/npm/dist.sh
+    - mv /tmp/package.json ./package.json
 
     # concatenate all .version files in the package
     - "find . -name \".version\" -print | xargs cat | tr '\n' ' ' | sed 's:} {:,:g' > versions.json"
@@ -182,6 +128,33 @@ test:
     variables:
       - $TEST_ENABLED
 
+dist:
+  stage: release
+  script:
+    - sh ./dist.sh
+  only:
+    refs:
+      - tags
+  artifacts:
+    paths:
+      - ./dist
+
+publish:
+  cache: {}
+  dependencies:
+    - interface
+    - dist
+  stage: publish
+  script:
+    - shopt -s extglob
+    - rm -rf !(package.json|README.md|hybrix-lib.nodejs.js|hybrix-lib.web.js) || true
+    - rm -rf .[^.] .??*
+    - publish
+  only:
+    refs:
+      - tags
+
+
 stop_review:
   stage: cleanup
   variables:
@@ -199,22 +172,6 @@ stop_review:
   artifacts:
     paths:
       - ./
-
-
-publish:
-  cache: {}
-  dependencies:
-    - interface
-    - dist
-  stage: publish
-  script:
-    - shopt -s extglob
-    - rm -rf !(package.json|README.md|hybrix-lib.nodejs.js|hybrix-lib.web.js) || true
-    - rm -rf .[^.] .??*
-    - publish
-  only:
-    refs:
-      - tags
 
 # ---------------------------------------------------------------------------
 
