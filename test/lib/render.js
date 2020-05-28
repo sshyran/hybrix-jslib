@@ -2,6 +2,10 @@ const valid = require('./valid.js');
 
 const TESTS_PER_ASSET = 12;
 
+function stringify(x){
+  return typeof x === 'undefined' ? 'undefined' : JSON.stringify(x);
+}
+
 const renderSymbol = (renderCell, symbol, data, messages, newMessages) => {
 
   const results = [];
@@ -19,7 +23,7 @@ const renderSymbol = (renderCell, symbol, data, messages, newMessages) => {
 };
 
 const renderCellCLI = (symbol,testId, valid, known, result, messages,newMessages) => {
-  const title = JSON.stringify(result).replace(/"/g, '');
+  const title = stringify(result).replace(/"/g, '');
   if(known){
     if(valid){
       if(known.link){
@@ -52,7 +56,7 @@ function issueLink (symbol, type, issue, title) {
 }
 
 const renderCellWeb = (symbol,type,valid,known, data, messages, newMessages) => {
-  const title = JSON.stringify(data).replace(/"/g, '');
+  const title = stringify(data).replace(/"/g, '');
 
   if(known){
     if(valid){
@@ -85,7 +89,9 @@ const renderCellWeb = (symbol,type,valid,known, data, messages, newMessages) => 
 };
 
 const renderCellXML = (symbol,testId, valid, known, result, messages,newMessages) => {
-  const title = JSON.stringify(result).replace(/"/g, '');
+
+
+  const title = stringify(result).replace(/"/g, '');
   let r =  `<testcase id="${symbol+'_'+testId}" name="${symbol+' '+testId}" time="0.001">`
   if (!valid) {
     r+=`<failure message="${title}" type="ERROR"></failure>`
@@ -108,7 +114,7 @@ const renderTableXML = data => {
 }
 
 const renderTableJSON = data => {
-  return JSON.stringify(data);
+  return stringify(data);
 }
 
 const renderTableCLI = data => {
